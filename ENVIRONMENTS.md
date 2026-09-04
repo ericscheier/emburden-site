@@ -40,17 +40,58 @@ with the live site in search results.
 
 ## DNS
 
-- **Production**: `emburden.org` → currently pointing to `ericscheier/emburden`'s
-  `gh-pages` branch (pkgdown site for the emburden R package).
-  To switch to this ecosystem-wide site: change the `emburden.org` A/CNAME
-  records to point at `ericscheier.github.io/emburden-site/`, then remove
-  the CNAME record from `ericscheier/emburden/gh-pages` and enable Pages
-  on this repo pointing at the built output.
-- **Staging**: `staging.emburden.org` as a `CNAME` to
-  `ericscheier.github.io` in the Cloudflare zone for `emburden.org`,
-  set **DNS-only (grey cloud)**. Same rationale as
-  `staging.ericscheier.info`: keep it unproxied so ACME can issue the
-  Pages certificate.
+`emburden.org` is registered at **Namecheap** and uses Namecheap's DNS
+(`dns1.registrar-servers.com` / `dns2.registrar-servers.com`), not
+Cloudflare. Records are edited in **Namecheap → Domain List → Manage →
+Advanced DNS**.
+
+Current state (as of 2026-09-04):
+
+- `emburden.org` (apex) → 4 GitHub Pages A records
+  (`185.199.108.153` `.109.153` `.110.153` `.111.153`) — resolves the
+  pkgdown site served from `ericscheier/emburden`'s `gh-pages` branch.
+- `www.emburden.org` → `CNAME ericscheier.github.io.`
+- `staging.emburden.org` → does not exist yet
+
+**To bring staging up**, add one CNAME record in Namecheap Advanced DNS:
+
+| Type   | Host      | Value                        | TTL       |
+|--------|-----------|------------------------------|-----------|
+| CNAME  | `staging` | `ericscheier.github.io.`     | Automatic |
+
+Then in Pages settings on **ericscheier/emburden-site-staging**,
+under Custom domain, enter `staging.emburden.org` and let GitHub
+issue the ACME certificate (typically 30-60s).
+
+**To flip production to this ecosystem site** (deliberate cutover
+after staging looks good):
+
+1. In `ericscheier/emburden` → Settings → Pages → Custom domain:
+   remove `emburden.org` (releases the domain from that repo).
+2. In `ericscheier/emburden-site` → Settings → Pages → Custom domain:
+   add `emburden.org` (claims it here; GitHub re-issues ACME cert).
+3. No DNS changes required — the apex A records already point at
+   GitHub Pages IPs.
+4. Optionally: relocate the emburden pkgdown site to
+   `pkg.emburden.org` by adding one more CNAME to
+   `ericscheier.github.io.` and reconfiguring `ericscheier/emburden`'s
+   Pages custom domain to `pkg.emburden.org`. Update `_pkgdown.yml`
+   `url:` accordingly.
+
+## What's automated vs manual
+
+Automated (via `gh` in this repo's setup):
+- `STAGING_DEPLOY_KEY` secret installed on `emburden-site`
+- Deploy key with write access installed on `emburden-site-staging`
+- Pages enabled on both repos with the right source config
+
+Manual (needs a human at the Namecheap panel and GitHub Pages UI):
+- The staging CNAME record above
+- Entering `staging.emburden.org` as the Custom Domain in
+  `emburden-site-staging`'s Pages settings
+- The prod cutover steps above, when you're ready to flip
+- Cloudflare is **not** involved for emburden.org (contrast with
+  ericscheier.info which does sit behind Cloudflare)
 
 ## Build stack
 
