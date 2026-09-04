@@ -1,0 +1,123 @@
+---
+title: "The Global Atlas"
+pagetitle: "emburden.org — Atlas"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE,
+                      fig.align="center", out.width="100%",
+                      fig.width=10, fig.height=6, dpi=110)
+suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(sf)})
+DATA_DIR <- "../docs/global_analysis_data"
+source("../R/brand_palette.R"); BR <- emrgi_brand_colors()
+summ <- readRDS(file.path(DATA_DIR, "summary_enriched.rds"))
+world <- tryCatch(readRDS(file.path(DATA_DIR, "world_sf.rds")), error=function(e) NULL)
+```
+
+# The global household energy burden atlas
+
+Every figure below is generated at page-render time from the open-source
+`emburdensynth` pipeline's parquet outputs. All raw code + data at
+[github.com/ericscheier/emburdensynth](https://github.com/ericscheier/emburdensynth).
+
+## Canonical burden — every country in the release
+
+Household energy burden by country, using the 4-tier fallback chain (GCD
+survey → Eurostat HBS → k-nearest-neighbour imputation by GDP within
+region → region mean). Border color encodes data-source tier.
+
+```{r fig-canonical, fig.height=6}
+if (!is.null(world) && "burden_canonical" %in% names(world)) {
+  tier_colors <- c(gcd_2010 = "#2E7D32", eurostat_hbs = "#1565C0",
+                    knn_gdp_region = "#EF6C00", region_mean = "#B71C1C")
+  world$burden_source_ord <- factor(world$burden_source,
+    levels = c("gcd_2010","eurostat_hbs","knn_gdp_region","region_mean"))
+  ggplot(world) +
+    geom_sf(aes(fill = burden_canonical * 100, color = burden_source_ord),
+             size = 0.35) +
+    scale_fill_viridis_c(option = "plasma", direction = -1,
+                          na.value = "grey85",
+                          name = "burden (%)",
+                          labels = function(x) sprintf("%.0f%%", x),
+                          limits = c(0, 20)) +
+    scale_color_manual(values = tier_colors, na.value = "grey60",
+                        name = "source tier") +
+    coord_sf(crs = "+proj=robin", expand = FALSE) +
+    theme_void(base_size = 11) +
+    theme(legend.position = "bottom",
+          plot.title = element_text(size = 15, face = "bold", colour = BR[["gd"]]),
+          plot.background = element_rect(fill = BR[["bg"]], colour = NA),
+          panel.background = element_rect(fill = "#dbe9f4", colour = NA)) +
+    labs(title = "Canonical household energy burden — 215 countries",
+         subtitle = "Fill = burden fraction. Border colour = data-source tier.")
+}
+```
+
+## The climate-justice scatter
+
+Cumulative CO~2~ since 1750 (log-x) versus 2020 household energy burden
+(%). Countries in the upper-left quadrant carry the lowest historical
+responsibility yet the highest current burden.
+
+```{r fig-cj, fig.height=6}
+oc <- readRDS(file.path(DATA_DIR, "owid_co2.rds"))
+lat_cum <- oc |>
+  filter(year >= 2020, is.finite(cumulative_co2_mt), cumulative_co2_mt > 0) |>
+  group_by(iso3) |>
+  summarise(cum_co2 = max(cumulative_co2_mt), pop=last(population), .groups="drop")
+cj <- summ |> filter(!is.na(burden_canonical), !is.na(region_wb)) |>
+  inner_join(lat_cum, by="iso3") |> filter(cum_co2 > 0)
+ggplot(cj, aes(x=cum_co2, y=burden_canonical*100, colour=region_wb, size=pop)) +
+  geom_hline(yintercept=median(cj$burden_canonical*100, na.rm=TRUE),
+              colour=BR[["mut"]], linetype="dashed") +
+  geom_vline(xintercept=median(cj$cum_co2, na.rm=TRUE),
+              colour=BR[["mut"]], linetype="dashed") +
+  geom_point(alpha=0.85) +
+  ggrepel::geom_text_repel(aes(label=iso3), size=2.6,
+                            max.overlaps=25, colour=BR[["ink"]]) +
+  scale_x_log10(labels=scales::comma_format()) +
+  scale_y_continuous(labels=function(x) sprintf("%.0f%%", x)) +
+  scale_size(range=c(1.5, 9), labels=scales::comma_format(), name="Population") +
+  scale_color_manual(values=emburden_emrgi_categorical(7), name="WB region") +
+  labs(x="Cumulative CO2 since 1750 (Mt, log)",
+        y="2020 household energy burden (%)",
+        title="Climate justice: 215 countries",
+        subtitle="Dashed = medians. Upper-left = low historical responsibility, high current burden.") +
+  theme_emburden_emrgi(base_size=10) +
+  theme(legend.box="vertical")
+```
+
+## More in the full technical report
+
+The full 80-page technical report has 39 figures covering:
+
+<div class="card-grid">
+<div class="card">
+<div class="kicker">Layer 0-5</div>
+<h3>Map atlas</h3>
+<p>Cell-level burden, canonical burden, physics-required kWh, energy-limiting share, income, embodied CO<sub>2</sub>, Sub-Saharan Africa focus, South Asia focus.</p>
+</div>
+<div class="card">
+<div class="kicker">Cross-signal</div>
+<h3>Country typology</h3>
+<p>PCA biplot, hierarchical correlation matrix, k-means archetype map, elastic-net regression.</p>
+</div>
+<div class="card">
+<div class="kicker">Deep history</h3>
+<h3>1750 to present</h3>
+<p>NASA GISTEMP temperature anomalies, OWID CO<sub>2</sub> per fuel, WB WDI 1960, UNDP HDI 1990, Ember decarbonization.</p>
+</div>
+<div class="card">
+<div class="kicker">Validation</div>
+<h3>Ground-truth checks</h3>
+<p>Eurostat inability-to-warm, Bland-Altman method agreement, physics-vs-empirical suppression, bootstrap CI width map.</p>
+</div>
+</div>
+
+<p style="text-align:center; margin-top:2em;">
+<a class="btn btn-primary" style="background:var(--gd); border:none; padding:0.8em 1.6em; color:white; text-decoration:none; border-radius:4px; font-family:Montserrat;" href="global_analysis.pdf">Download the full 80-page report (PDF, 7.2 MB) →</a>
+</p>
+
+<footer>
+<p>Data + code: <a href="https://github.com/ericscheier/emburdensynth">github.com/ericscheier/emburdensynth</a></p>
+</footer>

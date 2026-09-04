@@ -1,0 +1,61 @@
+name: Deploy (staging)
+
+# staging.emburden.org. Mirrors the ericscheier.info deploy-staging
+# pattern — GitHub Pages serves one site per repo, so the staging
+# render lives in ericscheier/emburden-site-staging and this job pushes
+# the built output there. Auth is an ed25519 deploy key scoped to
+# that one repo, held as the STAGING_DEPLOY_KEY secret.
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+
+concurrency:
+  group: pages-staging
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.4'
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - name: Install R dependencies
+        run: |
+          Rscript -e 'install.packages(c("rmarkdown","dplyr","ggplot2","sf","scales","viridis","patchwork","tibble","tidyr","readr","knitr","ggrepel","bslib"))'
+
+      - name: Install emburden ecosystem R packages
+        run: |
+          Rscript -e 'remotes::install_github(c(
+            "ericscheier/emburden",
+            "ericscheier/emburdengeo",
+            "ericscheier/emburdendata",
+            "ericscheier/emburdenvis",
+            "ericscheier/emburdenpub",
+            "ericscheier/emburdensynth"
+          ), upgrade = "never")'
+
+      - name: Build site with staging URL baked in
+        run: |
+          Rscript -e 'rmarkdown::render_site(quiet = TRUE)'
+
+      - name: Keep staging out of search results + set CNAME
+        run: |
+          printf 'User-agent: *\nDisallow: /\n' > _build/robots.txt
+          echo 'staging.emburden.org' > _build/CNAME
+
+      - name: Publish to the staging repository
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          deploy_key: ${{ secrets.STAGING_DEPLOY_KEY }}
+          external_repository: ericscheier/emburden-site-staging
+          publish_branch: main
+          publish_dir: ./_build
+          commit_message: "staging: ${{ github.sha }}"

@@ -1,0 +1,94 @@
+---
+title: "Papers in flight"
+pagetitle: "emburden.org — Papers"
+---
+
+# Papers in flight
+
+<div class="card-grid">
+
+<div class="card">
+<div class="kicker">Science — Policy Forum</div>
+<h3>The climate-justice mismatch: quantifying who pays for whose emissions</h3>
+<p><b>Status</b>: draft complete (1,183 words, target 1,500). Cover
+letter drafted. Awaiting ORCID + graphical figure at 300 dpi.</p>
+<p><b>Headline</b>: 67-fold per-capita cumulative CO~2~ disparity
+between 20 least-electrified countries and 20 largest historical
+emitters.</p>
+<p><a href="https://github.com/ericscheier/emburdensynth/tree/global/manuscript/science_policy_forum">See the draft →</a></p>
+</div>
+
+<div class="card">
+<div class="kicker">Joule — Research Article</div>
+<h3>Global synthesis of household energy burden via open spatial microsimulation</h3>
+<p><b>Status</b>: draft rendered with 5 embedded figures (7 pages, Cell
+Press Highlights + reviewer line numbers). Cover letter drafted with
+suggested reviewers.</p>
+<p><b>Contribution</b>: 129 countries × 17,000 cells synthesis; Nh
+aggregation correction; cross-signal PCA + archetype clustering;
+67× mismatch quantification.</p>
+<p><a href="https://github.com/ericscheier/emburdensynth/tree/global/manuscript/joule_submission">See the draft →</a></p>
+</div>
+
+<div class="card">
+<div class="kicker">Nature Energy — Research Article</div>
+<h3>DERs × natural hazards × health outcomes (in scoping)</h3>
+<p><b>Status</b>: 10-section scoping document. Timeline 12 months.
+Requires EM-DAT + GDELT + IHME GBD pulls before analysis can start.</p>
+<p><b>Anticipated headline</b>: distributed energy resources reduce
+excess mortality during heat waves in high-burden populations by
+~2 deaths/100k per 10% DER penetration.</p>
+<p><a href="https://github.com/ericscheier/emburdensynth/tree/global/manuscript/nature_energy_scope">See the scope →</a></p>
+</div>
+
+<div class="card">
+<div class="kicker">JSS — Software Paper</div>
+<h3>The emburden ecosystem</h3>
+<p><b>Status</b>: 9-section skeleton drafted. Target 8,000–10,000
+words. Covers all 13 packages with architecture, design principles,
+and worked global-synthesis application.</p>
+<p><b>Model papers</b>: tidyverse (JOSS 2019), scikit-learn (JMLR 2011),
+sf (R Journal 2018).</p>
+<p><a href="https://github.com/ericscheier/emburdensynth/tree/global/manuscript/ecosystem_umbrella">See the skeleton →</a></p>
+</div>
+
+<div class="card">
+<div class="kicker">JOSS — Package Papers</div>
+<h3>Wave 1: emburden + emburdendata + emburdensynth</h3>
+<p><b>Status</b>: all three JOSS-READY (score ≥75). Submission-ready
+this month once ORCID lands.</p>
+<p><b>Then</b>: emburdenweather, emburdenhealth, emburdengeo (also
+READY). Then medium-score packages after vignette additions.</p>
+</div>
+
+<div class="card">
+<div class="kicker">Scientific Data — Data Descriptor</div>
+<h3>The emburdensynth global cell-level parquet</h3>
+<p><b>Status</b>: not yet drafted. Planned as the data-only companion
+to the Joule methods paper. Would document the 17,028-cell × 50-field
+parquet as a citable dataset.</p>
+</div>
+
+</div>
+
+## Publication strategy
+
+<blockquote>
+Each paper answers a different question. Reviewers at each stage can't
+reject on grounds already peer-reviewed upstream.
+</blockquote>
+
+- **JSS umbrella** establishes tool validity → downstream papers cite it
+- **JOSS individual papers** establish package-level DOIs
+- **Scientific Data** establishes dataset validity as a citable object
+- **Joule** applies the validated tool + data to a global synthesis
+- **Science Policy Forum** condenses the finding into a policy claim
+- **Nature Energy** builds a causal argument on the validated dataset
+
+Timeline: JSS + JOSS Wave 1 submissions this month; Joule + Science
+draft-review this month, submission next; Nature Energy in ~12 months
+after EM-DAT + GDELT pulls complete.
+
+<footer>
+<p><a href="/">← back to home</a> · <a href="code.html">code</a></p>
+</footer>

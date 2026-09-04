@@ -1,0 +1,141 @@
+---
+title: "The 67-fold mismatch"
+pagetitle: "emburden.org"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE,
+                      fig.align="center", out.width="100%",
+                      fig.width=10, fig.height=6, dpi=110)
+suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
+DATA_DIR <- "../docs/global_analysis_data"
+source("../R/brand_palette.R"); BR <- emrgi_brand_colors()
+cj2 <- readRDS(file.path(DATA_DIR, "climate_justice_headline_v2.rds"))
+```
+
+<div class="hero">
+<div class="kicker">Global energy burden atlas</div>
+<h1>The 67-fold mismatch between who pays and who caused it</h1>
+<p class="subtitle">
+Household energy burden — the fraction families pay for energy — has never
+been comparably measured across most of the world. We built the first
+open-code, open-data pipeline that estimates it for 129 countries and
+17,000 grid cells covering 8.2&nbsp;billion people. What we found
+quantifies a moral claim policymakers have accepted for three decades but
+never seen sharpened into a single number.
+</p>
+</div>
+
+<div style="text-align:center;">
+<div class="big-number">
+  <span class="n">67×</span>
+  <span class="l">per-capita cumulative CO<sub>2</sub><br/>disparity at the extremes</span>
+</div>
+<div class="big-number gold">
+  <span class="n">129</span>
+  <span class="l">countries with<br/>cell-level microdata</span>
+</div>
+<div class="big-number green">
+  <span class="n">8.2<span style="font-size:0.6em;">bn</span></span>
+  <span class="l">people covered<br/>by the atlas</span>
+</div>
+<div class="big-number">
+  <span class="n">0.13%</span>
+  <span class="l">of cumulative CO<sub>2</sub><br/>from 20 least-electrified countries</span>
+</div>
+</div>
+
+## What we found
+
+The 20 countries with the lowest household electricity access — South
+Sudan, Chad, Burundi, Central African Republic, DR Congo, Burkina Faso,
+Haiti, and 13 others — hold **498 million people (6.1% of humanity)** and
+are jointly responsible for **0.13% of cumulative global CO~2~ emissions
+since 1750**.
+
+The 20 countries with the largest historical CO~2~ emissions — led by the
+United States, China, Russia, Germany, United Kingdom, and Japan — hold
+**4.8 billion people (58.5% of humanity)** and are responsible for
+**82% of cumulative CO~2~**.
+
+<blockquote>
+On a per-capita cumulative basis, the average resident of the top-20
+historical emitters has emitted <b>67 times more</b> cumulative CO<sub>2</sub>
+than the average resident of the 20 least-electrified countries.
+</blockquote>
+
+The disparity narrows to 5-fold when the comparison uses current household
+energy burden instead of household electricity access. Both framings sit
+on the same moral geometry, but the 67× number is the crispest.
+
+## Why this wasn't visible before
+
+Prior work has measured either half of this ratio, not both. The Global
+Carbon Project has published cumulative-emissions data since 2006 but
+paired it with country totals rather than household burdens. The IEA
+World Energy Outlook models future access-to-energy trajectories but
+focuses on infrastructure gaps rather than expenditure share. The World
+Bank Global Consumption Database (2010, updated 2020) provides
+household-level expenditure but only for ~90 countries and only in
+country-average form, missing the within-country geography where energy
+poverty concentrates.
+
+Two methodological breakthroughs made the present quantification
+possible.
+
+<div class="card-grid">
+<div class="card">
+<div class="kicker">Method 1</div>
+<h3>Spatial synthesis at global scale</h3>
+<p>A five-phase pipeline in <a href="https://github.com/ericscheier/emburdensynth"><code>emburdensynth</code></a> that combines WorldPop rasters, GADM boundaries, and the World Bank Global Consumption Database with simulated-annealing spatial allocation. Extends the U.S. DOE LEAD tool from single-country to global scope.</p>
+<p><a href="methods.html">Read the methods →</a></p>
+</div>
+<div class="card">
+<div class="kicker">Method 2</div>
+<h3>Correct Net Energy Return math</h3>
+<p>Naive weighted-mean-of-ratios aggregation over-estimates household energy burden by a median <b>5.7%</b> and by up to <b>1,400%</b> for hyperinflation cases like Venezuela. <a href="https://github.com/ericscheier/emburden"><code>emburden::neb_func</code></a> implements the mathematically proper NEB = 1/(1 + weighted-mean-Nh) formulation.</p>
+<p><a href="methods.html#aggregation">See the divergence chart →</a></p>
+</div>
+</div>
+
+## Where to go from here
+
+<div class="card-grid">
+<div class="card">
+<div class="kicker">Atlas</div>
+<h3>The global burden atlas</h3>
+<p>39 figures across 215 countries: cell-level maps, cross-signal PCA, climate-justice scatter, country archetypes.</p>
+<p><a href="atlas.html">Browse the atlas →</a></p>
+</div>
+<div class="card">
+<div class="kicker">Data</div>
+<h3>Data provenance</h3>
+<p>15 open sources spanning 1750–2025. World Bank, Ember, OWID, EIA, WHO, FAOSTAT, UNDP, NASA GISS, and more.</p>
+<p><a href="data.html">See the sources →</a></p>
+</div>
+<div class="card">
+<div class="kicker">Papers</div>
+<h3>Papers in flight</h3>
+<p>Joule methods paper. Science Policy Forum on climate-justice quantification. Nature Energy causal-analysis scope.</p>
+<p><a href="papers.html">See the papers →</a></p>
+</div>
+<div class="card">
+<div class="kicker">Code</div>
+<h3>The emburden ecosystem</h3>
+<p>13 R packages, all open-source. 6 already JOSS-ready. Umbrella paper targeting JSS.</p>
+<p><a href="code.html">Explore the code →</a></p>
+</div>
+</div>
+
+<div class="callout">
+<div class="callout-title">Caveats worth naming</div>
+<p>Cumulative CO<sub>2</sub> is territorial-only; consumption-based accounting would attribute a fraction of large emerging-economy emissions to consuming countries via trade, tightening rather than loosening the reported disparity. The direction of the mismatch is robust to methodological choices. The 67-fold magnitude is a lower bound.</p>
+</div>
+
+<footer>
+<p>emburden.org — an open project by <a href="https://emrgi.com">Emrgi</a>.
+Data + code at <a href="https://github.com/ericscheier">github.com/ericscheier</a>.
+Report bugs, ask questions, or contribute: <a href="mailto:hello@emrgi.com">hello@emrgi.com</a>.</p>
+<p><small>Last updated: `r format(Sys.Date(), "%B %d, %Y")` &nbsp;·&nbsp;
+Rendered from Rmd sources at <a href="https://github.com/ericscheier/emburdensynth/tree/global/site">github.com/ericscheier/emburdensynth/site</a></small></p>
+</footer>

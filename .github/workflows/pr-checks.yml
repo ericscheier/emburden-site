@@ -1,0 +1,44 @@
+name: PR checks
+
+# Runs on PRs into staging or master. Mirrors the ericscheier.info
+# pr-checks pattern — the site must build, and internal links must
+# resolve.
+on:
+  pull_request:
+    branches: [staging, master]
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: '4.4'
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - name: Install R dependencies
+        run: |
+          Rscript -e 'install.packages(c("rmarkdown","dplyr","ggplot2","sf","scales","viridis","patchwork","tibble","tidyr","readr","knitr","ggrepel","bslib"))'
+
+      - name: Install emburden ecosystem R packages
+        run: |
+          Rscript -e 'remotes::install_github(c(
+            "ericscheier/emburden",
+            "ericscheier/emburdendata",
+            "ericscheier/emburdensynth"
+          ), upgrade = "never")'
+
+      - name: Build site
+        run: |
+          Rscript -e 'rmarkdown::render_site(quiet = TRUE)'
+
+      - name: Validate internal links + basic HTML sanity
+        run: |
+          # linkchecker keeps PRs from merging broken hrefs
+          sudo apt-get install -y linkchecker
+          linkchecker --check-extern=false --recursion-level=2 _build/index.html || \
+            (echo "❌ link check failed"; exit 1)

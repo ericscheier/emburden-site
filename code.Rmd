@@ -1,0 +1,107 @@
+---
+title: "Code"
+pagetitle: "emburden.org — Code"
+---
+
+# The emburden ecosystem
+
+Thirteen R packages, all open-source under MIT, all hosted at
+[github.com/ericscheier](https://github.com/ericscheier).
+
+## JOSS-readiness overview
+
+| Package | LOC | Tests | Vignettes | JOSS score | Status |
+|---|---|---|---|---|---|
+| **`emburden`** | 4,340 | 218 | 3 | **100** | READY |
+| **`emburdenweather`** | 7,330 | 242 | 3 | **90** | READY |
+| **`emburdengeo`** | 1,077 | 24 | 1 | **80** | READY |
+| **`emburdenhealth`** | 4,521 | 49 | 4 | **80** | READY |
+| **`emburdendata`** | 24,122 | 269 | 2 | **75** | READY |
+| **`emburdensynth`** | 19,148 | 137 | 2 | **75** | READY |
+| `emburdenstats` | 1,943 | 9 | 0 | 50 | needs vignette |
+| `emburdenutil` | 1,681 | 3 | 0 | 45 | needs vignette |
+| `emburdenvis` | 3,732 | 3 | 0 | 45 | needs vignette |
+| `emburdenpub` | 774 | 3 | 0 | 45 | needs vignette |
+| `emburdentest` | 483 | 3 | 0 | 25 | dev-tool |
+| `emburdenplus` | 57 | — | — | 10 | meta-imports |
+| `emburdener` | — | — | — | 0 | pre-DESCRIPTION |
+
+## Install everything
+
+```r
+# One at a time
+remotes::install_github("ericscheier/emburden")
+remotes::install_github("ericscheier/emburdendata")
+remotes::install_github("ericscheier/emburdensynth")
+
+# Or the meta-package (installs all 13):
+remotes::install_github("ericscheier/emburdenplus")
+```
+
+## The pipeline in 5 lines
+
+```r
+library(emburdensynth)
+run_global_pipeline("USA", years = 2023)   # → output/global/USA_synthetic.parquet
+attach_physics_baseline("USA")             # → adds physics_required_kwh
+calculate_energy_insecurity_gap("USA")     # → adds eig_kwh + energy_limiting_flag
+country_unified_metrics("USA")             # → EJ unification via retail prices
+```
+
+## Design principles
+
+<div class="card-grid">
+
+<div class="card">
+<h3>Open data first</h3>
+<p>Every downloader prefers open, direct-download APIs over commercial
+data. Fallback chains ensure graceful degradation when a source is
+temporarily unavailable.</p>
+</div>
+
+<div class="card">
+<h3>Reproducible caching</h3>
+<p>All downloads write to <code>~/.cache/emburdendata/</code> via
+<code>rappdirs</code>. Pipelines are fully reproducible if internet
+is available, fully offline if the cache is populated.</p>
+</div>
+
+<div class="card">
+<h3>Net Energy Return math</h3>
+<p>The <code>emburden::neb_func</code> function embeds the canonical
+aggregation math correcting a documented bias in naive weighted-mean-
+of-ratios.</p>
+</div>
+
+<div class="card">
+<h3>Colorblind-safe visualization</h3>
+<p>Every palette is Color-Universal-Design compliant. See
+<code>emburdenpub::get_burden_palette</code> and
+<code>emburdenvis::theme_emburden_emrgi</code>.</p>
+</div>
+
+<div class="card">
+<h3>Tidyverse + snake_case</h3>
+<p>All column names snake_case. All data-frame handling via
+dplyr/tidyr with the base-R pipe (<code>|&gt;</code>).</p>
+</div>
+
+<div class="card">
+<h3>Testing scaffolding</h3>
+<p><code>emburdentest</code> provides synthetic-data generators + test
+utilities that let any downstream package be unit-tested against
+reproducible fixtures.</p>
+</div>
+
+</div>
+
+## Contribute
+
+- **Bug reports + feature requests**: GitHub Issues on the relevant
+  package repository
+- **Pull requests**: welcome; please open an Issue first to discuss
+- **Ecosystem-wide questions**: [hello@emrgi.com](mailto:hello@emrgi.com)
+
+<footer>
+<p><a href="/">← back to home</a> · <a href="papers.html">papers</a> · <a href="atlas.html">atlas</a></p>
+</footer>

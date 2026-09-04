@@ -1,0 +1,125 @@
+---
+title: "Methods"
+pagetitle: "emburden.org — Methods"
+---
+
+# How the pipeline works
+
+The `emburdensynth` pipeline turns open data into cell-level household
+energy expenditure estimates in five phases. Each phase is implemented
+as a single exported function; each can be run independently for
+debugging.
+
+## The five phases
+
+<div class="card-grid">
+<div class="card">
+<div class="kicker">Phase 1</div>
+<h3><code>impute_physical_characteristics()</code></h3>
+<p>Probabilistic mapping from NREL ResStock building physical
+attributes onto ACS PUMS demographic households. Produces per-household
+dwelling area, vintage, heating fuel, insulation profile.</p>
+</div>
+<div class="card">
+<div class="kicker">Phase 2</div>
+<h3><code>calibrate_expenditures()</code></h3>
+<p>Quantile mapping via RECS empirical CDF stratified by income bracket
+and building type. Assigns utility-expenditure quantiles to each
+household.</p>
+</div>
+<div class="card">
+<div class="kicker">Phase 3</div>
+<h3><code>optimize_spatial_allocation()</code></h3>
+<p>Multi-level simulated annealing across ~2,300 PUMAs / GADM level-2
+units, matching cell-level marginals to national totals. Runs in
+parallel via <code>furrr</code>.</p>
+</div>
+<div class="card">
+<div class="kicker">Phase 4</div>
+<h3><code>reverse_engineer_consumption()</code></h3>
+<p>Piecewise inverse-tariff root-finding via <code>uniroot</code>.
+Converts household dollar expenditure to physical kWh consumption using
+per-country utility rate structures from URDB.</p>
+</div>
+<div class="card">
+<div class="kicker">Phase 5</div>
+<h3><code>generate_load_profiles()</code></h3>
+<p>Load-profile morphing to 8,760 hourly bins, weighted by end-use and
+season using NREL EULP baselines. Output: <code>l1</code>–<code>l8760</code>
+kWh/hour columns per household in parquet.</p>
+</div>
+<div class="card">
+<div class="kicker">Post</div>
+<h3><code>calculate_energy_insecurity_gap()</code></h3>
+<p>Joins the physics baseline (degree-day derived required kWh) with
+the pipeline's estimated consumption. Flags cells where estimated &lt;
+0.9 × physics-required.</p>
+</div>
+</div>
+
+## <a name="aggregation"></a>Net Energy Return aggregation
+
+Aggregating household-level burden to country-level requires a
+well-formed weighted mean. The naive choice —
+<code>weighted.mean(spending/income, weights)</code> — is biased. The
+mathematically correct formulation, derived from the Net-Energy-Return
+framework in the `emburden` package, computes `Nh = (G-S)/Se` per cell
+(where `Se` is energy spending), takes the weighted mean of `Nh`, and
+inverts as:
+
+<pre><code>NEB = 1 / (1 + weighted_mean(Nh))</code></pre>
+
+<div class="callout">
+<div class="callout-title">Why this matters</div>
+<p>Across the 128 countries covered in our release, naive aggregation
+over-estimates country burden by a median <b>5.72%</b>. The bias is
+small for stable economies but becomes very large under hyperinflation.
+For Venezuela, where cell-level energy spending/income ratios span
+several orders of magnitude, the naive-vs-proper divergence reaches
+<b>1,413%</b>. This result establishes that any prior cross-country
+comparison of household energy burden using weighted-mean-of-ratios
+has been systematically biased in a direction that inflates estimates
+in the world's most economically volatile settings.</p>
+</div>
+
+## The physics baseline
+
+Cell-level physics-required kWh is derived from:
+
+- **HDD × UA × area / COP_heat** — heating demand
+- **CDD × UA × area / COP_cool** — cooling demand
+- **1,800 kWh/yr baseload** — appliances, lighting, hot water
+
+with country-specific HDD and CDD from World Bank Climate Change
+Knowledge Portal and a global-average building envelope (60 m²,
+COP 2.5 for cooling, 2.8 for heating). Per-country building-stock
+corrections are on the roadmap.
+
+## Uncertainty quantification
+
+Bootstrap 90% confidence intervals via 500 Beta-perturbation replicates
+on GCD sector shares (`n_eff = 100`) plus boundary-jitter sensitivity
+across GADM level-2 boundaries. Cell-level CI width is aggregated to
+country-mean CI width via variance decomposition.
+
+## Cross-signal integration
+
+Country-level burden is joined to 11 external signals for the PCA +
+k-means archetype analysis:
+
+- WB WDI 1960–2024 (7 indicators including electricity access)
+- Ember 2000–2025 (aggregate + 9-fuel generation mix)
+- OWID Energy 1900–2025 (per-capita electricity + primary energy)
+- OWID CO~2~ 1750–2024 (per-capita + cumulative + by-fuel)
+- EIA International 1980–2023 (222 countries)
+- WHO PM~2.5~ + WB clean-fuel access
+- FAOSTAT undernourishment 2000–2023
+- UNDP HDI 1990–2022
+- NASA GISTEMP 1880–2025
+- WB Worldwide Governance Indicators 1996–2022
+
+See [data provenance](data.html) for full URLs + retrieval dates.
+
+<footer>
+<p><a href="/">← back to home</a> · <a href="atlas.html">the atlas</a> · <a href="data.html">data provenance</a></p>
+</footer>

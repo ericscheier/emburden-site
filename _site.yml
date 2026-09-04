@@ -1,0 +1,43 @@
+name: "emburden"
+output_dir: "_build"
+navbar:
+  title: "emburden.org"
+  type: default
+  left:
+    - text: "Home"
+      href: "index.html"
+    - text: "The Atlas"
+      href: "atlas.html"
+    - text: "Methods"
+      href: "methods.html"
+    - text: "Data"
+      href: "data.html"
+    - text: "Papers"
+      href: "papers.html"
+    - text: "Code"
+      href: "code.html"
+  right:
+    - text: "R package (pkgdown)"
+      href: "https://ericscheier.github.io/emburden/"
+    - text: "GitHub"
+      href: "https://github.com/ericscheier"
+    - text: "Full report (PDF)"
+      href: "global_analysis.pdf"
+output:
+  html_document:
+    theme:
+      version: 5
+      bootswatch: flatly
+      primary: "#228b22"
+      base_font: {google: "Inter"}
+      heading_font: {google: "Montserrat"}
+      code_font: {google: "JetBrains Mono"}
+    highlight: tango
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    fig_caption: true
+    self_contained: true
+    include:
+      in_header: styles/head_extras.html
+    css: styles/emburden.css
