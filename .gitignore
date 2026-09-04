@@ -1,5 +1,7 @@
-_build/
 *.log
 .Rhistory
 .RData
 .Rproj.user/
+*.Rmd.bak
+_ln_R
+_ln_docs

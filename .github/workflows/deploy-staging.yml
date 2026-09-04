@@ -1,10 +1,10 @@
 name: Deploy (staging)
 
-# staging.emburden.org. Mirrors the ericscheier.info deploy-staging
-# pattern — GitHub Pages serves one site per repo, so the staging
-# render lives in ericscheier/emburden-site-staging and this job pushes
-# the built output there. Auth is an ed25519 deploy key scoped to
-# that one repo, held as the STAGING_DEPLOY_KEY secret.
+# staging.emburden.org. Pre-built _build/ is pushed from here to the
+# staging companion repo (ericscheier/emburden-site-staging) via an
+# ed25519 deploy key held as STAGING_DEPLOY_KEY. Follows the
+# ericscheier.info staging-in-separate-repo pattern.
+
 on:
   push:
     branches: [staging]
@@ -20,31 +20,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-r@v2
-        with:
-          r-version: '4.4'
-          use-public-rspm: true
-
-      - uses: r-lib/actions/setup-pandoc@v2
-
-      - name: Install R dependencies
+      - name: Ensure _build exists
         run: |
-          Rscript -e 'install.packages(c("rmarkdown","dplyr","ggplot2","sf","scales","viridis","patchwork","tibble","tidyr","readr","knitr","ggrepel","bslib"))'
-
-      - name: Install emburden ecosystem R packages
-        run: |
-          Rscript -e 'remotes::install_github(c(
-            "ericscheier/emburden",
-            "ericscheier/emburdengeo",
-            "ericscheier/emburdendata",
-            "ericscheier/emburdenvis",
-            "ericscheier/emburdenpub",
-            "ericscheier/emburdensynth"
-          ), upgrade = "never")'
-
-      - name: Build site with staging URL baked in
-        run: |
-          Rscript -e 'rmarkdown::render_site(quiet = TRUE)'
+          if [ ! -d _build ]; then
+            echo "❌ _build/ not present — run rmarkdown::render_site() before pushing to staging"
+            exit 1
+          fi
 
       - name: Keep staging out of search results + set CNAME
         run: |
