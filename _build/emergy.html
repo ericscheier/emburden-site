@@ -617,6 +617,62 @@ where transaction costs eat their expenditure.
 </div>
 </div>
 </div>
+<div
+id="bringing-it-together-the-household-emergy-insecurity-index-heii"
+class="section level2">
+<h2>Bringing it together — the Household Emergy Insecurity Index
+(HEII)</h2>
+<p>The three findings above each look at one axis. <strong>Emergy’s real
+power is that it lets us combine physical adequacy and economic burden
+into a single number</strong> — because both convert to the same
+currency (sej):</p>
+<div class="callout">
+<div class="callout-title">
+The unified formulation
+</div>
+<pre>
+physical_gap_sej = max(0, required_empower  − delivered_empower)
+economic_gap_sej = max(0, paid_empower      − affordable_empower)
+
+heii_sej      = physical_gap_sej + economic_gap_sej          (sej/yr)
+heii_norm     = heii_sej / income_empower                    (fraction)
+heii_esi      = (delivered/required) / (paid/affordable)     (Odum-canonical)
+heii_product  = adequacy × (1 − unaffordability)             (∈ [0, 1])
+</pre>
+</div>
+<p>All three unified forms are computed by <a
+href="https://github.com/ericscheier/emburdensynth/blob/global/R/emergy.R"><code>household_emergy_insecurity()</code></a>
+in the emburden R module. The “affordable” threshold uses the national
+em/$ rate at a 10% burden anchor by default; other conventions (6%,
+manual, national) are one-argument switches.</p>
+<div id="what-the-heii-world-reveals" class="section level3">
+<h3>What the HEII world reveals</h3>
+<p>Across the <strong>63 countries</strong> with complete kWh + spend +
+income + fuel-mix + GDP data, HEII_norm ranges 0 to 105. The five most
+insecure are <code>AFG, TCD, NER, BDI, SLE</code> — all Sub-Saharan
+Africa or Afghanistan, all bearing BOTH physical rationing (delivered
+kWh far below the physics baseline) AND economic overreach (energy
+expenditure exceeding 10% of income emergy). The five most secure —
+<code>AZE, BRA, CPV, ETH, GAB</code> — are petro-states +
+subsidised-tariff economies where households are both fully served and
+pay below the affordability threshold.</p>
+<div class="callout">
+<div class="callout-title">
+Backward-compatible with the existing insecurity score
+</div>
+<p>
+The Round-19 <code>country_unified_metrics()</code> function (EJ-native)
+computed <code>insecurity_score = max(0, 1 −
+actual_ej/required_ej)</code> — physical adequacy only, no economic
+term. HEII is additive to that: it retains physical adequacy AND
+introduces the economic axis in the same currency. Both are preserved in
+the cache; <code>unified_comparison()</code> joins them for
+cross-checking. See Layer M.7 in the <a href="global_analysis.pdf">tech
+report</a> for the sign-agreement diagnostic.
+</p>
+</div>
+</div>
+</div>
 <div id="the-math-short-version" class="section level2">
 <h2>The math (short version)</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(emburdensynth)</span>
