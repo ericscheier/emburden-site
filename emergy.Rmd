@@ -321,6 +321,58 @@ if (!is.null(bs)) {
 }
 ```
 
+## Bundle F — trade adjustment (imports/exports)
+
+Production transformity is a domestic-generation concept. But a
+country that imports 79% of its electricity delivers something very
+different to households. Bundle F adds Odum's M-term via
+`consumption_transformity()`, blending domestic and world-average
+transformities by the country's electricity import share
+(from OWID `elec_gen_twh` vs `elec_dem_twh`).
+
+```{r fig-trade-site, fig.height=5.5, fig.width=9, fig.cap="Production vs consumption transformity. Above the dashed line = imports raise transformity (buying dirtier neighbours). Below = imports lower it (buying cleaner neighbours). Balanced countries sit on the line."}
+ts <- tryCatch(readRDS(file.path(DATA_DIR, "emergy_trade_sensitivity.rds")),
+                error = function(e) NULL)
+if (!is.null(ts)) {
+  d <- ts$trade |>
+    filter(is.finite(production_tr), is.finite(consumption_tr),
+           net_trade_status %in% c("importer", "exporter"))
+  ggplot(d, aes(x = production_tr, y = consumption_tr,
+                 colour = net_trade_status,
+                 size = pmax(import_frac, export_frac) + 0.01)) +
+    geom_abline(intercept = 0, slope = 1,
+                 colour = BR[["mut"]], linetype = "dashed") +
+    geom_point(alpha = 0.75) +
+    ggrepel::geom_text_repel(
+      data = d |> arrange(desc(abs(tr_shift_cons_minus_prod))) |> head(12),
+      aes(label = iso3), size = 3, max.overlaps = 30,
+      colour = BR[["ink"]]) +
+    scale_x_continuous(labels = function(x) sprintf("%.0fk", x/1000)) +
+    scale_y_continuous(labels = function(x) sprintf("%.0fk", x/1000)) +
+    scale_size(range = c(1, 5), guide = "none") +
+    scale_color_manual(values = c(importer = BR[["charge"]],
+                                    exporter = BR[["gd"]]),
+                        name = NULL) +
+    labs(x = "Production transformity", y = "Consumption transformity") +
+    theme_minimal(base_size = 10) +
+    theme(legend.position = "bottom")
+}
+```
+
+```{r trade-narrative, results="asis"}
+if (!is.null(ts)) {
+  up <- ts$trade |> arrange(desc(tr_shift_cons_minus_prod)) |> head(1)
+  n_imp <- sum(ts$trade$net_trade_status == "importer", na.rm = TRUE)
+  n_exp <- sum(ts$trade$net_trade_status == "exporter", na.rm = TRUE)
+  n_bal <- sum(ts$trade$net_trade_status == "balanced", na.rm = TRUE)
+  cat(sprintf(
+"Across %d countries with trade data: **%d net importers, %d net exporters, %d balanced**. Biggest trade adjustment: **%s** (%d%% import share) — its consumption transformity is %.0f%% higher than its production transformity because the imported mix carries far more embodied emergy than its own generation. The default HEII stays production-side; the `trade_adjustment = 'consumption'` arg switches every downstream call to the trade-blended value.\n",
+    nrow(ts$trade), n_imp, n_exp, n_bal, up$iso3,
+    round(100 * up$import_frac),
+    100 * (up$consumption_tr - up$production_tr) / up$production_tr))
+}
+```
+
 <div class="callout">
 <div class="callout-title">Backward-compatible with the existing insecurity score</div>
 <p>The Round-19 <code>country_unified_metrics()</code> function

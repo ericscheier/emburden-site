@@ -804,6 +804,32 @@ are honest — the baseline choice is a literature question, not a bug.
 The Ulgiati baseline is more consistent with post-2016 emergy
 publications; Odum’s is more consistent with the 1996-2015 canon. Use
 whichever matches your comparison target — the code supports both.</p>
+</div>
+<div id="bundle-f-trade-adjustment-importsexports"
+class="section level2">
+<h2>Bundle F — trade adjustment (imports/exports)</h2>
+<p>Production transformity is a domestic-generation concept. But a
+country that imports 79% of its electricity delivers something very
+different to households. Bundle F adds Odum’s M-term via
+<code>consumption_transformity()</code>, blending domestic and
+world-average transformities by the country’s electricity import share
+(from OWID <code>elec_gen_twh</code> vs <code>elec_dem_twh</code>).</p>
+<div class="figure" style="text-align: center">
+<img src="emergy_files/figure-html/fig-trade-site-1.png" alt="Production vs consumption transformity. Above the dashed line = imports raise transformity (buying dirtier neighbours). Below = imports lower it (buying cleaner neighbours). Balanced countries sit on the line." width="100%" />
+<p class="caption">
+Production vs consumption transformity. Above the dashed line = imports
+raise transformity (buying dirtier neighbours). Below = imports lower it
+(buying cleaner neighbours). Balanced countries sit on the line.
+</p>
+</div>
+<p>Across 213 countries with trade data: <strong>59 net importers, 30
+net exporters, 123 balanced</strong>. Biggest trade adjustment:
+<strong>LUX</strong> (77% import share) — its consumption transformity
+is 108% higher than its production transformity because the imported mix
+carries far more embodied emergy than its own generation. The default
+HEII stays production-side; the
+<code>trade_adjustment = 'consumption'</code> arg switches every
+downstream call to the trade-blended value.</p>
 <div class="callout">
 <div class="callout-title">
 Backward-compatible with the existing insecurity score
