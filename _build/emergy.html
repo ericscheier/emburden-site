@@ -779,6 +779,31 @@ P10 income + Pareto-heavy top decile. This is a <em>lower bound</em> —
 in reality poor households also consume less kWh, so their
 <code>delivered_empower</code> is smaller and the true HEII gap
 larger.</p>
+</div>
+<div id="bundle-e-the-odum-vs-ulgiati-baseline-choice"
+class="section level2">
+<h2>Bundle E — the Odum-vs-Ulgiati baseline choice</h2>
+<p>The transformity values themselves are model choices. Everything on
+this page defaults to Odum’s 1996 baseline for continuity with the
+literature, but the same code accepts the <strong>Ulgiati 2020</strong>
+revision (Global Emergy Baseline 12.0e24 sej/yr, Sciubba &amp; Ulgiati
+2005 nuclear at 500,000 sej/J, Amaral 2016 wind at 2,500 and PV at 4,600
+including panel embodied emergy). Every public function now accepts a
+<code>baseline = c("odum1996", "ulgiati2020")</code> argument.</p>
+<div class="figure" style="text-align: center">
+<img src="emergy_files/figure-html/fig-baseline-site-1.png" alt="Country transformity under both baselines. Points above the dashed y=x line move UP under Ulgiati (nuclear-heavy). Points below move DOWN (oil-only islands, GEB rescale)." width="100%" />
+<p class="caption">
+Country transformity under both baselines. Points above the dashed y=x
+line move UP under Ulgiati (nuclear-heavy). Points below move DOWN
+(oil-only islands, GEB rescale).
+</p>
+</div>
+<p>Biggest ranking shift up under Ulgiati: <strong>ESP</strong> (rank
+185 → 19). Biggest shift down: <strong>BHS</strong> (rank 16 → 35). Both
+are honest — the baseline choice is a literature question, not a bug.
+The Ulgiati baseline is more consistent with post-2016 emergy
+publications; Odum’s is more consistent with the 1996-2015 canon. Use
+whichever matches your comparison target — the code supports both.</p>
 <div class="callout">
 <div class="callout-title">
 Backward-compatible with the existing insecurity score

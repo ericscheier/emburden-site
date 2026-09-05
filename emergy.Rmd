@@ -277,6 +277,50 @@ if (nrow(em_c[is.finite(em_c$heii_ratio_p10_p90), ]) > 0L) {
 }
 ```
 
+## Bundle E — the Odum-vs-Ulgiati baseline choice
+
+The transformity values themselves are model choices. Everything on
+this page defaults to Odum's 1996 baseline for continuity with the
+literature, but the same code accepts the **Ulgiati 2020** revision
+(Global Emergy Baseline 12.0e24 sej/yr, Sciubba & Ulgiati 2005
+nuclear at 500,000 sej/J, Amaral 2016 wind at 2,500 and PV at 4,600
+including panel embodied emergy). Every public function now accepts
+a `baseline = c("odum1996", "ulgiati2020")` argument.
+
+```{r fig-baseline-site, fig.height=5.5, fig.width=9, fig.cap="Country transformity under both baselines. Points above the dashed y=x line move UP under Ulgiati (nuclear-heavy). Points below move DOWN (oil-only islands, GEB rescale)."}
+bs <- tryCatch(readRDS(file.path(DATA_DIR, "emergy_baseline_sensitivity.rds")),
+                error = function(e) NULL)
+if (!is.null(bs)) {
+  d <- bs$transformity |>
+    filter(is.finite(transformity_odum), is.finite(transformity_ulg))
+  ggplot(d, aes(x = transformity_odum, y = transformity_ulg)) +
+    geom_abline(intercept = 0, slope = 1,
+                 colour = BR[["mut"]], linetype = "dashed") +
+    geom_point(alpha = 0.55, colour = BR[["gd"]], size = 2.2) +
+    ggrepel::geom_text_repel(
+      data = d |> arrange(desc(abs(rank_delta))) |> head(12),
+      aes(label = iso3), size = 3, max.overlaps = 30,
+      colour = BR[["ink"]]) +
+    scale_x_continuous(labels = function(x) sprintf("%.0fk", x/1000)) +
+    scale_y_continuous(labels = function(x) sprintf("%.0fk", x/1000)) +
+    labs(x = "Odum 1996 baseline",
+         y = "Ulgiati 2020 baseline",
+         title = "213 countries, two transformity baselines") +
+    theme_minimal(base_size = 10)
+}
+```
+
+```{r baseline-narrative, results="asis"}
+if (!is.null(bs)) {
+  gain <- bs$transformity |> arrange(rank_delta) |> head(1)
+  loss <- bs$transformity |> arrange(desc(rank_delta)) |> head(1)
+  cat(sprintf(
+"Biggest ranking shift up under Ulgiati: **%s** (rank %d → %d). Biggest shift down: **%s** (rank %d → %d). Both are honest — the baseline choice is a literature question, not a bug. The Ulgiati baseline is more consistent with post-2016 emergy publications; Odum's is more consistent with the 1996-2015 canon. Use whichever matches your comparison target — the code supports both.\n",
+    gain$iso3, gain$rank_odum, gain$rank_ulg,
+    loss$iso3, loss$rank_odum, loss$rank_ulg))
+}
+```
+
 <div class="callout">
 <div class="callout-title">Backward-compatible with the existing insecurity score</div>
 <p>The Round-19 <code>country_unified_metrics()</code> function
