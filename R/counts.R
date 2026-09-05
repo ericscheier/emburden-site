@@ -4,20 +4,36 @@
 
 #' Number of unique ISO3 codes in a cached RDS
 #' @param rds Filename in `docs/global_analysis_data/`, e.g. "cell_grid_wide.rds"
-#' @param col Column name holding ISO3 codes (default "iso3")
+#' @param col Column name holding ISO3 codes (default "iso3"; may also be
+#'   "code" for WGI-tidy wide table)
+#' @param sub When the RDS is a list, name of the sub-frame to inspect
+#'   (e.g. `sub = "wide"` for wgi_tidy)
 #' @param data_dir Cache directory (default resolves to emburdensynth's cache)
-iso3_count <- function(rds, col = "iso3", data_dir = NULL) {
+iso3_count <- function(rds, col = "iso3", sub = NULL, data_dir = NULL) {
   if (is.null(data_dir)) data_dir <- .resolve_data_dir()
   p <- file.path(data_dir, rds)
   if (!file.exists(p)) return(NA_integer_)
   d <- readRDS(p)
+  if (!is.null(sub) && is.list(d) && !is.data.frame(d)) d <- d[[sub]]
   # Handle list-of-df returns (some caches wrap multiple frames)
   if (is.list(d) && !is.data.frame(d)) {
+    # Prefer requested col; fall back to any known iso column
     hit <- Filter(function(x) is.data.frame(x) && col %in% names(x), d)
-    if (length(hit) == 0L) return(NA_integer_)
-    d <- hit[[1]]
+    if (length(hit) == 0L) {
+      alt <- Filter(function(x) is.data.frame(x) &&
+                     any(c("iso3","code","country_iso3","iso_a3") %in% names(x)),
+                    d)
+      if (length(alt) == 0L) return(NA_integer_)
+      d <- alt[[1]]
+      col <- intersect(c("iso3","code","country_iso3","iso_a3"), names(d))[1]
+    } else d <- hit[[1]]
   }
-  if (!col %in% names(d)) return(NA_integer_)
+  if (!col %in% names(d)) {
+    # Try alternates before giving up
+    alt <- intersect(c("iso3","code","country_iso3","iso_a3"), names(d))
+    if (length(alt) == 0L) return(NA_integer_)
+    col <- alt[1]
+  }
   length(unique(d[[col]]))
 }
 

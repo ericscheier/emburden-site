@@ -3,31 +3,82 @@ title: "Data provenance"
 pagetitle: "emburden.org — Data"
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+source("R/counts.R")
+DATA_DIR <- "../docs/global_analysis_data"
+# Small convenience: build a coverage row from a cache filename.
+row_of <- function(source, rds, script, note = NULL, sub = NULL,
+                    col_iso = "iso3", extras = NULL) {
+  n <- iso3_count(rds, col = col_iso, data_dir = DATA_DIR)
+  yr <- if (rds == "nasa_giss.rds") {
+    # NASA has global rather than iso3 rows; peek global$year range
+    g <- tryCatch(readRDS(file.path(DATA_DIR, rds))$global, error=function(e) NULL)
+    if (!is.null(g) && "year" %in% names(g))
+      sprintf("%d–%d", min(g$year), max(g$year)) else "?–?"
+  } else if (rds == "esmap_mtf.rds") {
+    "2018–2020 (manifest)"
+  } else year_range(rds, sub = sub, data_dir = DATA_DIR)
+  n_str <- if (is.na(n)) "—" else format(n, big.mark=",")
+  extras_str <- if (is.null(extras)) "" else paste0(" × ", extras)
+  sprintf("| **%s** | %s countries × %s%s | `%s` |",
+          source, n_str, yr, extras_str, script)
+}
+# For the WHO air pull, WHO PM2.5 vs Clean-fuel share a single RDS with two
+# sub-frames; pull each by name
+who_iso <- function(sub) {
+  d <- tryCatch(readRDS(file.path(DATA_DIR, "who_air.rds"))[[sub]],
+                 error = function(e) NULL)
+  if (is.null(d) || !"iso3" %in% names(d)) return(NA_integer_)
+  length(unique(d$iso3))
+}
+who_years <- function(sub) {
+  d <- tryCatch(readRDS(file.path(DATA_DIR, "who_air.rds"))[[sub]],
+                 error = function(e) NULL)
+  if (is.null(d) || !"year" %in% names(d)) return("?–?")
+  sprintf("%d–%d", min(d$year, na.rm=TRUE), max(d$year, na.rm=TRUE))
+}
+n_wb_wdi_ind <- length(readRDS(file.path(DATA_DIR, "wb_wdi_1960.rds")))
+n_ember_fuels <- length(unique(readRDS(file.path(DATA_DIR, "ember_by_fuel.rds"))$fuel))
+n_wgi_dims <- length(readRDS(file.path(DATA_DIR, "wgi_tidy.rds"))$long)
+n_hbs_quintiles <- 5L   # QU1..QU5 fixed in Eurostat schema
+n_owid_energy_cols <- ncol(readRDS(file.path(DATA_DIR, "owid_energy.rds")))
+esmap <- tryCatch(readRDS(file.path(DATA_DIR, "esmap_mtf.rds")),
+                   error = function(e) NULL)
+n_esmap_covered <- if (!is.null(esmap) && !is.null(esmap$covered_iso3))
+  length(esmap$covered_iso3) else NA_integer_
+```
+
 # Data provenance
 
 Every number on this site is traceable back to a specific data source,
 a specific script that pulls it, and a specific cache file. Every pull
 is reproducible with the code at [github.com/ericscheier/emburdensynth](https://github.com/ericscheier/emburdensynth).
 
+The coverage table below is **built at render time from the cache
+files themselves** — the numbers you see are the current counts in
+each RDS, not frozen literals from when this page was first written.
+
 | Source | Coverage | Retrieval script |
 |---|---|---|
-| **WB World Development Indicators** | 217 countries × 1960–2024 × 7 indicators | `build_wb_wdi_1960.R` |
-| **WB Gini historical** | 171 countries × 1970–2024 | `build_temporal_deep_history.R` |
-| **WB Global Consumption Database 2010** | 92 countries × 11 sectors | (pre-pipeline) |
-| **WB Clean-fuel access** | 189 countries × 2000–2023 | `build_who_air_pollution.R` |
-| **WB Worldwide Governance Indicators** | 214 countries × 1996–2022 × 6 dimensions | `fix_wgi_v2.R` |
-| **Eurostat HBS (5 quintiles)** | 34 countries × 1988–2020 | `build_eurostat_quintile_spread.R` |
+`r row_of("WB WDI (indicators)", "wb_wdi_1960.rds", "build_wb_wdi_1960.R", extras = sprintf("%d indicators", n_wb_wdi_ind), sub = "urban_pop_pct")`
+`r row_of("WB Gini historical", "temporal_deep_history.rds", "build_temporal_deep_history.R", sub = "gini")`
+| **WB GCD 2010** | 92 countries × 11 sectors | (pre-pipeline) |
+`r row_of("WB Clean-fuel access", "who_air.rds", "build_who_air_pollution.R", sub = "clean")` <!-- sub-frame -->
+`r row_of("WGI (governance)", "wgi_tidy.rds", "fix_wgi_v2.R", extras = sprintf("%d dimensions", n_wgi_dims), sub = "wide", col_iso = "code")`
+`r row_of("Eurostat HBS", "eurostat_quintile_spread.rds", "build_eurostat_quintile_spread.R", extras = sprintf("%d quintiles", n_hbs_quintiles))`
 | **Eurostat energy poverty** | ~30 countries × 2010–2023 | (cached prior) |
-| **Ember Electricity Data** | 213 countries × 2000–2025 × 9 fuel categories | `build_ember_by_fuel.R` |
-| **OWID Energy** | 220 countries × **1900–2025** × 130 variables | `build_owid_energy.R` |
-| **OWID CO~2~** | 218 countries × **1750–2024** × per-capita + cumulative + by-fuel | `build_owid_co2.R` |
-| **EIA International** | 222 countries × 1980–2023 | `build_eia_international.R` |
-| **WHO PM~2.5~** | 200 countries × 1990–2023 | `build_who_air_pollution.R` |
-| **FAOSTAT food security** | 183 countries × 2000–2023 | `build_fao_food_security.R` |
-| **UNDP HDI** | 204 countries × 1990–2022 | `build_undp_hdi.R` |
+`r row_of("Ember Electricity Data", "ember_by_fuel.rds", "build_ember_by_fuel.R", extras = sprintf("%d fuel categories", n_ember_fuels))`
+`r row_of("OWID Energy", "owid_energy.rds", "build_owid_energy.R", extras = sprintf("%d variables", n_owid_energy_cols))`
+`r row_of("OWID CO2", "owid_co2.rds", "build_owid_co2.R", extras = "per-capita + cumulative + by-fuel")`
+`r row_of("EIA International", "eia_international.rds", "build_eia_international.R", sub = "elec_total_bkwh")`
+`r row_of("WHO PM2.5", "who_air.rds", "build_who_air_pollution.R", sub = "pm25")`
+`r row_of("FAOSTAT food security", "fao_food.rds", "build_fao_food_security.R")`
+`r row_of("UNDP HDI", "undp_hdi.rds", "build_undp_hdi.R", sub = "hdi")`
 | **NASA GISTEMP v4** | 1880–2025 global + zonal | `build_nasa_giss.R` |
-| **WorldPop 1 km rasters** | 129 countries × 2020 | (pre-pipeline) |
+| **WorldPop 1 km rasters** | `r cell_country_count()` countries × 2020 | (pre-pipeline) |
 | **GADM v4.1 boundaries** | 255 countries × admin-0 | (via `emburdengeo`) |
+| **ESMAP Multi-Tier Framework** | `r if (is.na(n_esmap_covered)) "?" else n_esmap_covered` countries in manifest (surveys click-through XLSX) | `build_esmap_mtf_tiers.R` |
 | **NREL ResStock + RECS + EULP** | US only, adapted globally | `emburdendata::download_*` |
 | **CDC HHI + WONDER + PLACES** | US census tracts | `emburdendata` |
 
@@ -42,7 +93,11 @@ requires:
   RWI)
 - **Utility tariff schedules** to convert dollars into kWh (URDB)
 - **Degree-day climatology** to compute physics-required demand (WB CCKP)
-- **Grid generation mix** to attribute CO~2~ per kWh (Ember)
+- **Grid generation mix** to attribute CO~2~ per kWh (Ember) — and,
+  since Round 20, to attribute *transformity* (sej/J) per kWh through
+  Odum's emergy framework
+- **Access + affordability + QoS surveys** (WB electricity access,
+  WHO clean-fuel, ESMAP MTF tiers) to complete the burden picture
 
 Each source has its own vintage, coverage, and gaps; the pipeline
 fills gaps with kNN imputation and documents the source-tier at every
@@ -61,13 +116,18 @@ cell.
   [`docs/references.bib`](https://github.com/ericscheier/emburdensynth/blob/global/docs/references.bib)
   (19 dataset entries, auto-generated)
 
-## Two pulls we could not automate
+## Three pulls we could not fully automate
 
 - **Yale Environmental Performance Index (EPI)** — no direct-download
   URL published; requires a web form. Not blocking.
 - **EM-DAT (CRED disaster database)** — requires free CRED registration
   before bulk XLSX download. See
   [manual setup guide](https://github.com/ericscheier/emburdensynth/blob/global/docs/emdat_manual_setup.md).
+- **ESMAP MTF tier surveys** — click-through XLSX from the WB Microdata
+  Library; the manifest (`r if (is.na(n_esmap_covered)) "?" else n_esmap_covered` covered
+  countries) is auto-cached but tier-share workbooks require a manual
+  download per country. See
+  [manual setup guide](https://github.com/ericscheier/emburdensynth/blob/global/docs/esmap_mtf_manual_setup.md).
 
 Everything else is fully scripted.
 

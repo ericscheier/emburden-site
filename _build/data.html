@@ -363,6 +363,10 @@ div.tocify {
 source, a specific script that pulls it, and a specific cache file.
 Every pull is reproducible with the code at <a
 href="https://github.com/ericscheier/emburdensynth">github.com/ericscheier/emburdensynth</a>.</p>
+<p>The coverage table below is <strong>built at render time from the
+cache files themselves</strong> — the numbers you see are the current
+counts in each RDS, not frozen literals from when this page was first
+written.</p>
 <table>
 <colgroup>
 <col width="33%" />
@@ -378,8 +382,8 @@ href="https://github.com/ericscheier/emburdensynth">github.com/ericscheier/embur
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong>WB World Development Indicators</strong></td>
-<td>217 countries × 1960–2024 × 7 indicators</td>
+<td><strong>WB WDI (indicators)</strong></td>
+<td>179 countries × 1960–2024 × 7 indicators</td>
 <td><code>build_wb_wdi_1960.R</code></td>
 </tr>
 <tr class="even">
@@ -388,23 +392,23 @@ href="https://github.com/ericscheier/emburdensynth">github.com/ericscheier/embur
 <td><code>build_temporal_deep_history.R</code></td>
 </tr>
 <tr class="odd">
-<td><strong>WB Global Consumption Database 2010</strong></td>
+<td><strong>WB GCD 2010</strong></td>
 <td>92 countries × 11 sectors</td>
 <td>(pre-pipeline)</td>
 </tr>
 <tr class="even">
 <td><strong>WB Clean-fuel access</strong></td>
-<td>189 countries × 2000–2023</td>
+<td>200 countries × 2000–2023</td>
 <td><code>build_who_air_pollution.R</code></td>
 </tr>
 <tr class="odd">
-<td><strong>WB Worldwide Governance Indicators</strong></td>
+<td><strong>WGI (governance)</strong></td>
 <td>214 countries × 1996–2022 × 6 dimensions</td>
 <td><code>fix_wgi_v2.R</code></td>
 </tr>
 <tr class="even">
-<td><strong>Eurostat HBS (5 quintiles)</strong></td>
-<td>34 countries × 1988–2020</td>
+<td><strong>Eurostat HBS</strong></td>
+<td>34 countries × 1988–2020 × 5 quintiles</td>
 <td><code>build_eurostat_quintile_spread.R</code></td>
 </tr>
 <tr class="odd">
@@ -419,13 +423,12 @@ href="https://github.com/ericscheier/emburdensynth">github.com/ericscheier/embur
 </tr>
 <tr class="odd">
 <td><strong>OWID Energy</strong></td>
-<td>220 countries × <strong>1900–2025</strong> × 130 variables</td>
+<td>220 countries × 1900–2025 × 11 variables</td>
 <td><code>build_owid_energy.R</code></td>
 </tr>
 <tr class="even">
-<td><strong>OWID CO<sub>2</sub></strong></td>
-<td>218 countries × <strong>1750–2024</strong> × per-capita + cumulative
-+ by-fuel</td>
+<td><strong>OWID CO2</strong></td>
+<td>218 countries × 1750–2024 × per-capita + cumulative + by-fuel</td>
 <td><code>build_owid_co2.R</code></td>
 </tr>
 <tr class="odd">
@@ -434,7 +437,7 @@ href="https://github.com/ericscheier/emburdensynth">github.com/ericscheier/embur
 <td><code>build_eia_international.R</code></td>
 </tr>
 <tr class="even">
-<td><strong>WHO PM<sub>2.5</sub></strong></td>
+<td><strong>WHO PM2.5</strong></td>
 <td>200 countries × 1990–2023</td>
 <td><code>build_who_air_pollution.R</code></td>
 </tr>
@@ -464,11 +467,16 @@ href="https://github.com/ericscheier/emburdensynth">github.com/ericscheier/embur
 <td>(via <code>emburdengeo</code>)</td>
 </tr>
 <tr class="even">
+<td><strong>ESMAP Multi-Tier Framework</strong></td>
+<td>28 countries in manifest (surveys click-through XLSX)</td>
+<td><code>build_esmap_mtf_tiers.R</code></td>
+</tr>
+<tr class="odd">
 <td><strong>NREL ResStock + RECS + EULP</strong></td>
 <td>US only, adapted globally</td>
 <td><code>emburdendata::download_*</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>CDC HHI + WONDER + PLACES</strong></td>
 <td>US census tracts</td>
 <td><code>emburdendata</code></td>
@@ -489,7 +497,11 @@ kWh (URDB)</li>
 <li><strong>Degree-day climatology</strong> to compute physics-required
 demand (WB CCKP)</li>
 <li><strong>Grid generation mix</strong> to attribute CO<sub>2</sub> per
-kWh (Ember)</li>
+kWh (Ember) — and, since Round 20, to attribute <em>transformity</em>
+(sej/J) per kWh through Odum’s emergy framework</li>
+<li><strong>Access + affordability + QoS surveys</strong> (WB
+electricity access, WHO clean-fuel, ESMAP MTF tiers) to complete the
+burden picture</li>
 </ul>
 <p>Each source has its own vintage, coverage, and gaps; the pipeline
 fills gaps with kNN imputation and documents the source-tier at every
@@ -511,14 +523,21 @@ href="https://github.com/ericscheier/emburdensynth/blob/global/docs/references.b
 (19 dataset entries, auto-generated)</li>
 </ul>
 </div>
-<div id="two-pulls-we-could-not-automate" class="section level2">
-<h2>Two pulls we could not automate</h2>
+<div id="three-pulls-we-could-not-fully-automate"
+class="section level2">
+<h2>Three pulls we could not fully automate</h2>
 <ul>
 <li><strong>Yale Environmental Performance Index (EPI)</strong> — no
 direct-download URL published; requires a web form. Not blocking.</li>
 <li><strong>EM-DAT (CRED disaster database)</strong> — requires free
 CRED registration before bulk XLSX download. See <a
 href="https://github.com/ericscheier/emburdensynth/blob/global/docs/emdat_manual_setup.md">manual
+setup guide</a>.</li>
+<li><strong>ESMAP MTF tier surveys</strong> — click-through XLSX from
+the WB Microdata Library; the manifest (28 covered countries) is
+auto-cached but tier-share workbooks require a manual download per
+country. See <a
+href="https://github.com/ericscheier/emburdensynth/blob/global/docs/esmap_mtf_manual_setup.md">manual
 setup guide</a>.</li>
 </ul>
 <p>Everything else is fully scripted.</p>

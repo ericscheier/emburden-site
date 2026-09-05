@@ -3,6 +3,17 @@ title: "Methods"
 pagetitle: "emburden.org — Methods"
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+source("R/counts.R")
+DATA_DIR <- "../docs/global_analysis_data"
+nd <- readRDS(file.path(DATA_DIR, "neb_divergence.rds"))
+n_bias_countries <- nrow(nd)
+med_bias_pct <- median(nd$rel_bias_pct, na.rm = TRUE)
+max_bias_pct <- max(nd$rel_bias_pct, na.rm = TRUE)
+max_bias_iso <- nd$iso3[which.max(nd$rel_bias_pct)]
+```
+
 # How the pipeline works
 
 The `emburdensynth` pipeline turns open data into cell-level household
@@ -71,15 +82,17 @@ inverts as:
 
 <div class="callout">
 <div class="callout-title">Why this matters</div>
-<p>Across the 128 countries covered in our release, naive aggregation
-over-estimates country burden by a median <b>5.72%</b>. The bias is
-small for stable economies but becomes very large under hyperinflation.
-For Venezuela, where cell-level energy spending/income ratios span
+<p>Across the `r n_bias_countries` countries covered in our release, naive
+aggregation over-estimates country burden by a median
+<b>`r sprintf("%.2f%%", med_bias_pct)`</b>. The bias is small for stable
+economies but becomes very large under hyperinflation. For
+`r max_bias_iso`, where cell-level energy spending/income ratios span
 several orders of magnitude, the naive-vs-proper divergence reaches
-<b>1,413%</b>. This result establishes that any prior cross-country
-comparison of household energy burden using weighted-mean-of-ratios
-has been systematically biased in a direction that inflates estimates
-in the world's most economically volatile settings.</p>
+<b>`r sprintf("%.0f%%", max_bias_pct)`</b>. This result establishes that
+any prior cross-country comparison of household energy burden using
+weighted-mean-of-ratios has been systematically biased in a direction
+that inflates estimates in the world's most economically volatile
+settings.</p>
 </div>
 
 ## The physics baseline
