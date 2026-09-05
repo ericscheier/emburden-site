@@ -366,10 +366,67 @@ if (!is.null(ts)) {
   n_exp <- sum(ts$trade$net_trade_status == "exporter", na.rm = TRUE)
   n_bal <- sum(ts$trade$net_trade_status == "balanced", na.rm = TRUE)
   cat(sprintf(
-"Across %d countries with trade data: **%d net importers, %d net exporters, %d balanced**. Biggest trade adjustment: **%s** (%d%% import share) — its consumption transformity is %.0f%% higher than its production transformity because the imported mix carries far more embodied emergy than its own generation. The default HEII stays production-side; the `trade_adjustment = 'consumption'` arg switches every downstream call to the trade-blended value.\n",
+"Across %d countries with trade data: **%d net importers, %d net exporters, %d balanced**. Biggest trade adjustment: **%s** (%d%% import share) — its consumption transformity is %.0f%% higher than its production transformity because the imported mix carries far more embodied emergy than its own generation. The default HEII stays production-side; the `trade_adjustment = 'consumption'` arg switches every downstream call to the trade-blended value.\n\n**Honest caveat**: the world-average partner-mix approximation is first-order. Real bilateral trade matrices (e.g. Luxembourg's FR/DE/BE partners have transformity very different from the world mean) require an IEA/BP/EXIOBASE MRIO ingestion — flagged as Asana T78. The existing EEIO stack in emburdensynth Phase 6 uses EXIOBASE's economic multipliers (CO2e/M€ for 11 sectors × 2 regions) but does NOT carry bilateral electricity flows, so it can't currently fill this gap without a fresh MRIO download.",
     nrow(ts$trade), n_imp, n_exp, n_bal, up$iso3,
     round(100 * up$import_frac),
     100 * (up$consumption_tr - up$production_tr) / up$production_tr))
+}
+```
+
+## Bundle J — empirical transformities from primary-fuel consumption
+
+The `electric_efficiency` column in Bundle A used **canonical** per-fuel
+efficiencies (coal 0.35, gas 0.50, oil 0.38). Real fleets don't match.
+Polish coal plants average lower; Algerian gas plants much lower;
+modern Dutch CCGT close to canonical. Bundle J computes per-country
+**empirical** efficiencies from EI Statistical Review's primary-fuel
+consumption divided by Ember's actual electricity generation for that
+fuel. Formula per fossil, country-year:
+$\eta_{empirical} = \frac{share_{Ember} \cdot elec\_gen\_TWh_{OWID}}{primary\_consumption\_TWh_{EI}}$
+
+Nuclear + renewables stay at canonical (EI reports substitution-basis
+TWh for them — dividing would recover the assumed conversion, not a
+real measurement). Falls back to canonical when EI is missing.
+
+```{r fig-empirical-site, fig.height=5.5, fig.width=9, fig.cap="Theoretical (canonical efficiency) vs empirical (per-country fossil efficiency) grid transformity. Nearly every point sits ABOVE the y=x line — the canonical model systematically under-counts real emergy per kWh because real coal + gas fleets have lower thermal efficiency than the global average."}
+es <- tryCatch(readRDS(file.path(DATA_DIR, "emergy_empirical_sensitivity.rds")),
+                error = function(e) NULL)
+if (!is.null(es)) {
+  d <- es$empirical |>
+    filter(is.finite(transformity_theoretical),
+           is.finite(transformity_empirical),
+           n_empirical_fuels > 0)
+  ggplot(d, aes(x = transformity_theoretical, y = transformity_empirical,
+                 size = n_empirical_fuels)) +
+    geom_abline(intercept = 0, slope = 1,
+                 colour = BR[["mut"]], linetype = "dashed") +
+    geom_point(alpha = 0.6, colour = BR[["gd"]]) +
+    ggrepel::geom_text_repel(
+      data = d |> arrange(desc(abs(tr_ratio_emp_over_th - 1))) |> head(12),
+      aes(label = iso3), size = 3, max.overlaps = 30,
+      colour = BR[["ink"]]) +
+    scale_x_continuous(labels = function(x) sprintf("%.0fk", x/1000)) +
+    scale_y_continuous(labels = function(x) sprintf("%.0fk", x/1000)) +
+    scale_size(range = c(2, 5), name = "# empirical fuels") +
+    labs(x = "Theoretical (canonical efficiency)",
+         y = "Empirical (per-country fossil efficiency)",
+         title = sprintf("Empirical vs theoretical — %d countries", nrow(d))) +
+    theme_minimal(base_size = 10) +
+    theme(legend.position = "bottom")
+}
+```
+
+```{r empirical-narrative, results="asis"}
+if (!is.null(es)) {
+  d <- es$empirical |> filter(is.finite(tr_ratio_emp_over_th),
+                                n_empirical_fuels > 0)
+  up <- d |> arrange(desc(tr_ratio_emp_over_th)) |> head(1)
+  n_above <- sum(d$tr_ratio_emp_over_th > 1.10, na.rm = TRUE)
+  n <- nrow(d)
+  cat(sprintf(
+"Of the **%d countries** with EI Statistical Review coverage: **%d (%.0f%%) show empirical transformity at least 10%% above canonical** — their real fleets are less efficient than the global average, so the true emergy per delivered kWh is higher than Bundles A–F reported. Biggest under-count: **%s** at %.1fx (theoretical %.0fk → empirical %.0fk sej/J). This is not a bug in Bundle A — it's the honest cost of using canonical efficiencies. Countries with EI data now have an option: `empirical_grid_transformity()` for their reality vs `grid_transformity()` for the canonical model.",
+    n, n_above, 100 * n_above / n, up$iso3, up$tr_ratio_emp_over_th,
+    up$transformity_theoretical / 1000, up$transformity_empirical / 1000))
 }
 ```
 
