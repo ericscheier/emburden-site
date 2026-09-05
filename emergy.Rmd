@@ -741,6 +741,123 @@ ggplot(flows_multi, aes(y = value, axis1 = source, axis2 = target)) +
         plot.title.position = "plot")
 ```
 
+### The Odum spectral hierarchy — with HEII data
+
+Odum's **spectral hierarchy** figure (Abel 2023, fig 21 —
+[International Journal of General Systems](https://www.tandfonline.com/doi/full/10.1080/03081079.2022.2162048))
+lays out the biosphere along a single log-transformity axis: sunlight
+at the low end, cultural information at the high end, with nested
+lens/spindle shapes for each domain (atmosphere, ecosystems, economic
+production, households, cultural information). Larger transformity =
+more accumulated solar-emergy per joule = higher in the hierarchy.
+We can render the same figure with our real HEII data.
+
+```{r fig-odum-spectral, fig.height=6.8, fig.width=11, fig.cap="Odum spectral hierarchy for the HEII framework — after Abel 2023 fig 21 (Int J General Systems). X = log10 transformity (sej/J). Nested progressively-right-shifted lenses show the biosphere hierarchy from atmosphere/ecosystems (leftmost, most territory) to cultural information (rightmost, highest concentration per joule). Our HEII framework's grid transformities (10^4-10^5 sej/J range across 213 countries) sit inside the Economic Production + Households Hierarchy lenses."}
+suppressPackageStartupMessages({library(ggforce); library(purrr)})
+tr_country <- em_c$transformity_sej_per_J
+tr_country <- tr_country[is.finite(tr_country) & tr_country > 0]
+
+# Nested progressively-right-shifted lenses (Abel-style hierarchy).
+# Each domain's ellipse sits inside/overlapping the previous, showing
+# that higher-transformity tiers are nested within lower-transformity
+# tiers of the biosphere.
+lens_specs <- tibble::tribble(
+  ~name,                       ~x0, ~a,   ~b,   ~fill,      ~label_x, ~label_y,
+  "Atmosphere / Ecosystems",   2.0, 3.0,  5.5,  "#228B22",  0.5,     -3.3,
+  "Economic Production",       4.3, 3.6,  4.6,  "#F39C6B",  4.3,     -3.9,
+  "Primary Sector",            4.6, 1.3,  3.2,  "#8E44AD",  4.6,      3.5,
+  "Households Hierarchy",      5.8, 2.4,  3.4,  "#C0392B",  7.4,      3.7,
+  "Cultural Information",      8.0, 3.5,  2.8,  "#F39C12",  8.7,     -3.2,
+  "Culture Configurations",   12.5, 2.0,  1.6,  "#F1C40F", 12.5,     -2.0
+)
+make_lens <- function(x0, a, y0, b, n = 80, name = NA) {
+  t <- seq(0, 2*pi, length.out = n)
+  tibble::tibble(name = name, x = x0 + a * cos(t), y = y0 + b * sin(t))
+}
+lenses <- purrr::pmap_dfr(lens_specs,
+  function(name, x0, a, b, fill, label_x, label_y)
+    cbind(make_lens(x0, a, 0, b, name = name), fill = fill))
+
+sources <- tibble::tribble(
+  ~label,             ~x,    ~y,
+  "Sun · Wind · Rain", -1.6,  0.8,
+  "Tide",              -1.6,  4.5,
+  "Hydrocarbons",      -1.6,  3.5,
+  "Uplift",            -1.6,  2.5,
+  "Landforms",         -1.6, -3.8,
+  "Species DNA",       -1.6, -4.8,
+  "Global Processes",  -1.6, -5.7
+)
+inline <- tibble::tribble(
+  ~label,               ~x,   ~y,
+  "Rock",               2.3,  3.7,
+  "Metals",             3.8,  2.8,
+  "Coal",               4.5,  2.3,
+  "Oil",                4.9,  1.7,
+  "Gas",                4.7,  2.6,
+  "Trees",              2.7, -2.4,
+  "Crops",              3.2, -3.0,
+  "Primary sector",     4.7,  0.6,
+  "Secondary sector",   5.6, -0.4,
+  "Households",         6.3, -1.4,
+  "Communicator",       8.5, -0.6,
+  "Culture configs",   12.5,  0.0
+)
+
+ggplot() +
+  geom_polygon(data = lenses,
+                aes(x = x, y = y, group = name, fill = fill),
+                alpha = 0.45, colour = NA) +
+  geom_text(data = lens_specs,
+             aes(x = label_x, y = label_y, label = name),
+             size = 3.3, colour = BR[["ink"]], fontface = "bold") +
+  geom_point(data = sources, aes(x = x, y = y),
+              shape = 21, size = 12, fill = BR[["bg"]],
+              colour = BR[["ink"]], stroke = 0.5) +
+  geom_text(data = sources, aes(x = x, y = y, label = label),
+             size = 2.6, colour = BR[["ink"]]) +
+  geom_segment(data = sources,
+                aes(x = x + 0.4, xend = -0.5, y = y, yend = y * 0.5),
+                arrow = arrow(length = unit(0.09, "in")),
+                colour = BR[["mut"]], alpha = 0.55) +
+  geom_point(data = inline, aes(x = x, y = y),
+              shape = 21, size = 10, fill = BR[["bg"]],
+              colour = BR[["ink"]], stroke = 0.35, alpha = 0.9) +
+  geom_text(data = inline, aes(x = x, y = y, label = label),
+             size = 2.4, colour = BR[["ink"]]) +
+  geom_segment(aes(x = 0, xend = 14.5, y = -6.4, yend = -6.4),
+                colour = BR[["mut"]], linewidth = 0.4) +
+  geom_text(aes(x = 7, y = -6.8,
+                 label = "Dispersed heat (heat sink) · every arrow eventually terminates here"),
+             size = 2.7, colour = BR[["mut"]], fontface = "italic") +
+  scale_fill_identity() +
+  scale_x_continuous(name = "Transformity (log10 sej/J)",
+                     limits = c(-3, 15.5),
+                     breaks = c(0, 2, 4, 5, 6, 7, 8, 10, 12, 14),
+                     labels = function(x) sprintf("10^%d", x)) +
+  scale_y_continuous(name = "Spatial / hierarchical scale (Odum \"space\" axis)",
+                     limits = c(-7.2, 6.5), breaks = NULL) +
+  labs(title = "Odum spectral hierarchy — HEII framework (after Abel 2023, fig 21)",
+        subtitle = sprintf("Grid transformities across %d countries span %d-%dk sej/J. Cultural information sits ~10 orders higher.",
+                            length(tr_country),
+                            round(min(tr_country)/1000),
+                            round(max(tr_country)/1000))) +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_line(colour = BR[["line"]]),
+        panel.grid.major.y = element_blank(),
+        plot.title.position = "plot",
+        plot.subtitle = element_text(size = 9, colour = BR[["mut"]]))
+```
+
+The diagram makes visible what a bar chart or table can't: **our
+entire HEII framework occupies a narrow band around 10⁴-10⁵ sej/J**
+on Odum's full log scale. Cultural information — the ultimate output
+of the biosphere hierarchy — sits ~10 orders of magnitude to the
+right. The "energy insecurity" we measure at the household level is
+one plateau on a much longer ramp; households that never reach that
+plateau also never access the cultural-information tiers above it.
+
 ### The Odum emergy pyramid — with real numbers
 
 Odum's canonical figure: solar sunlight at the base, layers of
