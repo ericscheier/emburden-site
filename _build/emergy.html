@@ -649,14 +649,81 @@ manual, national) are one-argument switches.</p>
 <div id="what-the-heii-world-reveals" class="section level3">
 <h3>What the HEII world reveals</h3>
 <p>Across the <strong>63 countries</strong> with complete kWh + spend +
-income + fuel-mix + GDP data, HEII_norm ranges 0 to 105. The five most
-insecure are <code>AFG, TCD, NER, BDI, SLE</code> — all Sub-Saharan
+income + fuel-mix + GDP data, HEII_norm ranges 0 to 86. The five most
+insecure are <code>AFG, TCD, NER, BDI, MDG</code> — all Sub-Saharan
 Africa or Afghanistan, all bearing BOTH physical rationing (delivered
 kWh far below the physics baseline) AND economic overreach (energy
 expenditure exceeding 10% of income emergy). The five most secure —
 <code>AZE, BRA, CPV, ETH, GAB</code> — are petro-states +
 subsidised-tariff economies where households are both fully served and
 pay below the affordability threshold.</p>
+</div>
+<div id="bundle-b-biomass-cooking-counted-2026-09"
+class="section level3">
+<h3>Bundle B — biomass cooking counted (2026-09)</h3>
+<p>Pre-Bundle-B, HEII was <strong>grid-electricity only</strong>. That
+misrepresented ~2.4B people who cook primarily with biomass — the WHO
+Household Energy Database says 33 of our HEII countries have &gt;50% of
+households using non-clean cooking fuels. Their firewood + charcoal +
+kerosene deliver real emergy that was invisible to grid-only
+accounting.</p>
+<p><code>household_emergy_insecurity()</code> now accepts an
+<code>hh_fuels</code> argument that credits direct-combustion fuels via
+<code>household_fuel_transformity_table()</code> (wood 25k sej/J,
+charcoal 45k, kerosene 54k, LPG 48k, piped-gas 48k, dung 20k). The
+builder script weights an 8 GJ/yr wood-cookstove household by each
+country’s WHO <code>clean_fuel_access_pct</code> residual. Effect on the
+ranking:</p>
+<p>Top 5 biomass-cooking countries — HEII_norm change when biomass is
+counted:</p>
+<table>
+<thead>
+<tr class="header">
+<th>iso3</th>
+<th align="right">biomass share</th>
+<th align="right">HEII (grid only)</th>
+<th align="right">HEII (with biomass)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>BDI</td>
+<td align="right">100%</td>
+<td align="right">30.9</td>
+<td align="right">18.0</td>
+</tr>
+<tr class="even">
+<td>LBR</td>
+<td align="right">99%</td>
+<td align="right">7.3</td>
+<td align="right">5.1</td>
+</tr>
+<tr class="odd">
+<td>SLE</td>
+<td align="right">99%</td>
+<td align="right">24.5</td>
+<td align="right">10.3</td>
+</tr>
+<tr class="even">
+<td>GIN</td>
+<td align="right">99%</td>
+<td align="right">1.2</td>
+<td align="right">0.5</td>
+</tr>
+<tr class="odd">
+<td>MLI</td>
+<td align="right">99%</td>
+<td align="right">6.1</td>
+<td align="right">5.2</td>
+</tr>
+</tbody>
+</table>
+<p>The interpretation is important: these households are still
+physically rationed on the electricity side (they can’t run a fridge or
+an efficient stove), but their emergy delivery is not zero. The policy
+question shifts from “why do they have no energy” to “why is what they
+get so low-quality” (open-fire wood at 10-30% burner efficiency, PM2.5
+exposure, deforestation externalities not priced).</p>
 <div class="callout">
 <div class="callout-title">
 Backward-compatible with the existing insecurity score

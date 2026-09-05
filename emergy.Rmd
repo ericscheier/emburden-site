@@ -163,6 +163,44 @@ cat(sprintf("Across the **%d countries** with complete kWh + spend + income + fu
   paste(top5, collapse=", "), paste(bot5, collapse=", ")))
 ```
 
+### Bundle B — biomass cooking counted (2026-09)
+
+Pre-Bundle-B, HEII was **grid-electricity only**. That
+misrepresented ~2.4B people who cook primarily with biomass — the WHO
+Household Energy Database says `r sum(heii$biomass_share > 0.5, na.rm = TRUE)`
+of our HEII countries have >50% of households using non-clean cooking
+fuels. Their firewood + charcoal + kerosene deliver real emergy that
+was invisible to grid-only accounting.
+
+`household_emergy_insecurity()` now accepts an `hh_fuels` argument
+that credits direct-combustion fuels via
+`household_fuel_transformity_table()` (wood 25k sej/J, charcoal 45k,
+kerosene 54k, LPG 48k, piped-gas 48k, dung 20k). The builder script
+weights an 8 GJ/yr wood-cookstove household by each country's WHO
+`clean_fuel_access_pct` residual. Effect on the ranking:
+
+```{r heii-biomass-shift, results="asis"}
+if ("heii_norm_grid_only" %in% names(heii)) {
+  shift <- heii[order(-heii$biomass_share), c("iso3", "biomass_share",
+                                                "heii_norm_grid_only",
+                                                "heii_norm")][1:5, ]
+  cat("Top 5 biomass-cooking countries — HEII_norm change when biomass is counted:\n\n")
+  cat("| iso3 | biomass share | HEII (grid only) | HEII (with biomass) |\n")
+  cat("|---|---:|---:|---:|\n")
+  for (i in seq_len(nrow(shift)))
+    cat(sprintf("| %s | %.0f%% | %.1f | %.1f |\n",
+                shift$iso3[i], 100 * shift$biomass_share[i],
+                shift$heii_norm_grid_only[i], shift$heii_norm[i]))
+}
+```
+
+The interpretation is important: these households are still
+physically rationed on the electricity side (they can't run a fridge
+or an efficient stove), but their emergy delivery is not zero. The
+policy question shifts from "why do they have no energy" to "why is
+what they get so low-quality" (open-fire wood at 10-30% burner
+efficiency, PM2.5 exposure, deforestation externalities not priced).
+
 <div class="callout">
 <div class="callout-title">Backward-compatible with the existing insecurity score</div>
 <p>The Round-19 <code>country_unified_metrics()</code> function
