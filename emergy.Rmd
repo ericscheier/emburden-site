@@ -365,11 +365,50 @@ if (!is.null(ts)) {
   n_imp <- sum(ts$trade$net_trade_status == "importer", na.rm = TRUE)
   n_exp <- sum(ts$trade$net_trade_status == "exporter", na.rm = TRUE)
   n_bal <- sum(ts$trade$net_trade_status == "balanced", na.rm = TRUE)
+  n_curated <- sum(ts$trade$partner_source == "curated", na.rm = TRUE)
   cat(sprintf(
-"Across %d countries with trade data: **%d net importers, %d net exporters, %d balanced**. Biggest trade adjustment: **%s** (%d%% import share) — its consumption transformity is %.0f%% higher than its production transformity because the imported mix carries far more embodied emergy than its own generation. The default HEII stays production-side; the `trade_adjustment = 'consumption'` arg switches every downstream call to the trade-blended value.\n\n**Honest caveat**: the world-average partner-mix approximation is first-order. Real bilateral trade matrices (e.g. Luxembourg's FR/DE/BE partners have transformity very different from the world mean) require an IEA/BP/EXIOBASE MRIO ingestion — flagged as Asana T78. The existing EEIO stack in emburdensynth Phase 6 uses EXIOBASE's economic multipliers (CO2e/M€ for 11 sectors × 2 regions) but does NOT carry bilateral electricity flows, so it can't currently fill this gap without a fresh MRIO download.",
+"Across %d countries with trade data: **%d net importers, %d net exporters, %d balanced**. Biggest trade adjustment: **%s** (%d%% import share) — its consumption transformity is %.0f%% higher than its production transformity because the imported mix carries far more embodied emergy than its own generation. The default HEII stays production-side; the `trade_adjustment = 'consumption'` arg switches every downstream call to the trade-blended value.\n\n**Bundle L update — curated bilateral partners now default** (2026-09-05): the plain world-average approximation is replaced by real partner-mix data from ENTSO-E, IEA, and CIA World Factbook for **%d importer countries** (curated CSV at `inst/extdata/bilateral_electricity_partners.csv`, ~150 rows). Countries not in the CSV still fall back to world-average. Real MRIO ingestion (EXIOBASE 3, ~2-4 GB per year, academic registration) is deferred to Asana T78 for full country coverage.",
     nrow(ts$trade), n_imp, n_exp, n_bal, up$iso3,
     round(100 * up$import_frac),
-    100 * (up$consumption_tr - up$production_tr) / up$production_tr))
+    100 * (up$consumption_tr - up$production_tr) / up$production_tr,
+    n_curated))
+}
+```
+
+### Bundle L — how much curated partners move things
+
+```{r fig-curated-vs-world, fig.height=5, fig.width=9, fig.cap="Consumption transformity: curated bilateral partner-mix (Bundle L) vs Bundle F's world-average approximation. Positive = curated is HIGHER (partners dirtier than world mean); negative = LOWER (partners cleaner). Points labelled where the shift exceeds ~3000 sej/J."}
+if (!is.null(ts)) {
+  d <- ts$trade |>
+    filter(partner_source == "curated",
+           is.finite(tr_shift_curated_minus_world)) |>
+    mutate(shift_k = tr_shift_curated_minus_world / 1000)
+  ggplot(d, aes(x = reorder(iso3, shift_k), y = shift_k,
+                 fill = shift_k > 0)) +
+    geom_col(alpha = 0.9) +
+    scale_fill_manual(values = c(`FALSE` = BR[["gd"]], `TRUE` = BR[["charge"]]),
+                       labels = c(`FALSE` = "Curated LOWER",
+                                    `TRUE`  = "Curated HIGHER"),
+                       name = NULL) +
+    labs(x = NULL, y = "Curated consumption_tr − world-avg (thousands of sej/J)",
+         title = "Bundle L: curated partner-mix shifts vs Bundle F world-average") +
+    coord_flip() +
+    theme_minimal(base_size = 10) +
+    theme(legend.position = "bottom")
+}
+```
+
+```{r bundle-l-narrative, results="asis"}
+if (!is.null(ts)) {
+  d <- ts$trade |> filter(partner_source == "curated",
+                            is.finite(tr_shift_curated_minus_world))
+  top_neg <- d |> arrange(tr_shift_curated_minus_world) |> head(1)
+  top_pos <- d |> arrange(desc(tr_shift_curated_minus_world)) |> head(1)
+  cat(sprintf(
+"Biggest DOWNWARD shift under curated partners: **%s** (world-avg %.0fk → curated %.0fk sej/J, %d%% import share). Its actual partners are much cleaner than the world mean. Biggest UPWARD shift: **%s** (world-avg %.0fk → curated %.0fk sej/J). This is the honest cost of assuming a global mean when the real neighbours differ. Where the two methods AGREE (small `|shift|`), Bundle F's approximation was already fine.\n",
+    top_neg$iso3, top_neg$consumption_tr_world/1000, top_neg$consumption_tr/1000,
+    round(100 * top_neg$import_frac),
+    top_pos$iso3, top_pos$consumption_tr_world/1000, top_pos$consumption_tr/1000))
 }
 ```
 
