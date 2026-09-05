@@ -201,6 +201,41 @@ policy question shifts from "why do they have no energy" to "why is
 what they get so low-quality" (open-fire wood at 10-30% burner
 efficiency, PM2.5 exposure, deforestation externalities not priced).
 
+## Time is now on the record — Bundle C
+
+The library-layer functions have always accepted a `year` argument,
+but the compiled cache used to be a snapshot at each country's
+latest Ember year. `scripts/build_emergy_panel.R` (Bundle C) now
+produces `emergy_metrics_panel.rds` — a `(iso3, year)` grid
+covering **2000-2025** across ~213 countries. Trajectories over 25
+years are readable directly:
+
+```{r fig-transformity-trajectory, fig.height=4.8, fig.width=9, fig.cap="Grid transformity 2000-2024 for a selection of large economies. Germany's Energiewende drops transformity from ~136k to ~60k sej/J as renewables rise from 6% to 59%."}
+panel_p <- tryCatch(readRDS(file.path(DATA_DIR, "emergy_metrics_panel.rds")),
+                     error = function(e) NULL)
+if (!is.null(panel_p)) {
+  focus <- c("DEU", "USA", "CHN", "IND", "GBR", "FRA", "BRA", "JPN")
+  pp <- panel_p$panel |>
+    filter(iso3 %in% focus, year >= 2000, year <= 2024,
+           is.finite(transformity_sej_per_J))
+  ggplot(pp, aes(x = year, y = transformity_sej_per_J,
+                  colour = iso3, group = iso3)) +
+    geom_line(linewidth = 1.1) + geom_point(size = 1.3) +
+    scale_y_continuous(labels = function(x) sprintf("%.0fk", x/1000)) +
+    labs(x = NULL, y = "Grid transformity (sej/J, electricity-basis)",
+         title = "Transformity 2000-2024 — 8 major economies") +
+    theme_minimal(base_size = 11)
+}
+```
+
+**What today's panel covers**: transformity, %R, ESI, empower per
+capita, em/USD for every (country, year) with Ember coverage
+(2000-2025). **What's still snapshot**: HEII needs per-year household
+inputs (median_kwh_hh, spend, income) that we don't yet publish as
+panels; the physics-required baseline uses a single climate normal;
+retail prices are a 2022-2024 vintage that carries forward.
+Follow-up work — see [`FUTURE_WORK.md`](https://github.com/ericscheier/emburdensynth/blob/global/FUTURE_WORK.md).
+
 <div class="callout">
 <div class="callout-title">Backward-compatible with the existing insecurity score</div>
 <p>The Round-19 <code>country_unified_metrics()</code> function

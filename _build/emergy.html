@@ -724,6 +724,33 @@ an efficient stove), but their emergy delivery is not zero. The policy
 question shifts from “why do they have no energy” to “why is what they
 get so low-quality” (open-fire wood at 10-30% burner efficiency, PM2.5
 exposure, deforestation externalities not priced).</p>
+</div>
+</div>
+<div id="time-is-now-on-the-record-bundle-c" class="section level2">
+<h2>Time is now on the record — Bundle C</h2>
+<p>The library-layer functions have always accepted a <code>year</code>
+argument, but the compiled cache used to be a snapshot at each country’s
+latest Ember year. <code>scripts/build_emergy_panel.R</code> (Bundle C)
+now produces <code>emergy_metrics_panel.rds</code> — a
+<code>(iso3, year)</code> grid covering <strong>2000-2025</strong>
+across ~213 countries. Trajectories over 25 years are readable
+directly:</p>
+<div class="figure" style="text-align: center">
+<img src="emergy_files/figure-html/fig-transformity-trajectory-1.png" alt="Grid transformity 2000-2024 for a selection of large economies. Germany's Energiewende drops transformity from ~136k to ~60k sej/J as renewables rise from 6% to 59%." width="100%" />
+<p class="caption">
+Grid transformity 2000-2024 for a selection of large economies.
+Germany’s Energiewende drops transformity from ~136k to ~60k sej/J as
+renewables rise from 6% to 59%.
+</p>
+</div>
+<p><strong>What today’s panel covers</strong>: transformity, %R, ESI,
+empower per capita, em/USD for every (country, year) with Ember coverage
+(2000-2025). <strong>What’s still snapshot</strong>: HEII needs per-year
+household inputs (median_kwh_hh, spend, income) that we don’t yet
+publish as panels; the physics-required baseline uses a single climate
+normal; retail prices are a 2022-2024 vintage that carries forward.
+Follow-up work — see <a
+href="https://github.com/ericscheier/emburdensynth/blob/global/FUTURE_WORK.md"><code>FUTURE_WORK.md</code></a>.</p>
 <div class="callout">
 <div class="callout-title">
 Backward-compatible with the existing insecurity score
@@ -738,7 +765,6 @@ the cache; <code>unified_comparison()</code> joins them for
 cross-checking. See Layer M.7 in the <a href="global_analysis.pdf">tech
 report</a> for the sign-agreement diagnostic.
 </p>
-</div>
 </div>
 </div>
 <div id="the-math-short-version" class="section level2">
