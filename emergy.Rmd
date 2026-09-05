@@ -31,7 +31,9 @@ investment depending on the fuel that generated it.
 <div class="callout">
 <div class="callout-title">Why care about a second currency</div>
 <p>Two grids that deliver identical kWh per capita can differ
-<b>15-fold</b> in the emergy they concentrate into each joule. That
+<b>5-fold or more</b> in the electricity-basis emergy they concentrate
+into each joule (Bundle-A-corrected range: `r sprintf("%.1fx", max(em_c$transformity_sej_per_J, na.rm=TRUE) / min(em_c$transformity_sej_per_J, na.rm=TRUE))` across
+`r nrow(em_c[!is.na(em_c$transformity_sej_per_J), ])` countries). That
 matters for questions climate-justice accounting cannot answer:
 "how much biophysical infrastructure did this energy require to
 produce?" and "how sustainably is a country converting environmental
@@ -63,20 +65,29 @@ emergy locked in.
 
 ## What our data reveals across `r nrow(em_c)` countries
 
-**Grid transformity ranges 15× across the world's fuel mixes.** From
-`emergy_metrics.rds`:
+```{r tr-range, results="asis"}
+em_c_ok <- em_c[!is.na(em_c$transformity_sej_per_J), ]
+tr_max <- max(em_c_ok$transformity_sej_per_J)
+tr_min <- min(em_c_ok$transformity_sej_per_J)
+tr_ratio <- tr_max / tr_min
+top5 <- em_c_ok[order(-em_c_ok$transformity_sej_per_J), ][1:5, ]
+bot5 <- em_c_ok[order( em_c_ok$transformity_sej_per_J), ][1:5, ]
+fmt_k <- function(x) sprintf("%.0fk", x / 1000)
+cat(sprintf(
+"**Grid transformity ranges %.1fx across the world's fuel mixes** (%.0f-%.0f sej/J, on a per-J-electricity-delivered basis after Bundle-A efficiency correction). From `emergy_metrics.rds`:\n\n",
+tr_ratio, tr_min, tr_max))
+cat("- **Top-5 highest transformity** (nuclear-heavy grids): ",
+    paste(sprintf("%s ~%s", top5$iso3, fmt_k(top5$transformity_sej_per_J)),
+          collapse = ", "), " sej/J\n", sep = "")
+cat("- **Bottom-5 lowest transformity** (wind + solar-dominant grids): ",
+    paste(sprintf("%s ~%s", bot5$iso3, fmt_k(bot5$transformity_sej_per_J)),
+          collapse = ", "), " sej/J\n", sep = "")
+```
 
-- **Top-5 highest transformity**: nuclear-heavy grids
-  (France ~150k, Slovakia ~145k, Ukraine ~140k, Slovenia ~125k,
-  Czech Republic ~115k sej/J)
-- **Bottom-5 lowest transformity**: wind + biomass-heavy grids
-  (Denmark ~10k, Germany ~15k, Luxembourg ~13k, Lithuania ~18k,
-  Estonia ~20k sej/J)
-
-The **key insight** for household energy policy: a Danish
-kilowatt-hour and a French kilowatt-hour are physically identical but
-Odum-different by an order of magnitude. Policy that treats them as
-interchangeable is missing quality-adjusted throughput.
+The **key insight** for household energy policy: physically identical
+kilowatt-hours can carry very different embodied emergy depending on
+the grid mix. Policy that treats them as interchangeable is missing
+quality-adjusted throughput.
 
 ## Three findings unique to the emergy lens
 
@@ -170,10 +181,12 @@ diagnostic.</p>
 ```r
 library(emburdensynth)
 
-# Transformity of the fuel mix in a country-year
-grid_transformity("NOR", 2020)                   # ~74k sej/J (hydro-heavy)
-grid_transformity("FRA", 2020)                   # ~150k sej/J (nuclear-heavy)
-grid_transformity("DNK", 2020)                   # ~10k sej/J (wind-heavy)
+# Transformity of the fuel mix in a country-year (electricity-basis,
+# post-Bundle-A: fossil transformities divided by their electric efficiency)
+grid_transformity("NOR", 2023)   # hydro-heavy — moderate (~73k sej/J)
+grid_transformity("FRA", 2023)   # nuclear-heavy — highest tier (~150k)
+grid_transformity("DNK", 2023)   # wind + biomass — biomass lifts it (~33k)
+grid_transformity("POL", 2023)   # coal-heavy — high (~88k, was ~35k pre-Bundle-A)
 
 # Household empower — sej/yr delivered per household
 household_empower("USA", 2020, kwh_per_year = 11000)  # sej per year

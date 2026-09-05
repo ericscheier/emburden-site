@@ -472,8 +472,9 @@ the fuel that generated it.</p>
 Why care about a second currency
 </div>
 <p>
-Two grids that deliver identical kWh per capita can differ
-<b>15-fold</b> in the emergy they concentrate into each joule. That
+Two grids that deliver identical kWh per capita can differ <b>5-fold or
+more</b> in the electricity-basis emergy they concentrate into each
+joule (Bundle-A-corrected range: 5.6x across 213 countries). That
 matters for questions climate-justice accounting cannot answer: “how
 much biophysical infrastructure did this energy require to produce?” and
 “how sustainably is a country converting environmental subsidy into
@@ -550,19 +551,19 @@ joules with far less prior emergy locked in.</p>
 <div id="what-our-data-reveals-across-213-countries"
 class="section level2">
 <h2>What our data reveals across 213 countries</h2>
-<p><strong>Grid transformity ranges 15× across the world’s fuel
-mixes.</strong> From <code>emergy_metrics.rds</code>:</p>
+<p><strong>Grid transformity ranges 5.6x across the world’s fuel
+mixes</strong> (29005-162072 sej/J, on a per-J-electricity-delivered
+basis after Bundle-A efficiency correction). From
+<code>emergy_metrics.rds</code>:</p>
 <ul>
-<li><strong>Top-5 highest transformity</strong>: nuclear-heavy grids
-(France ~150k, Slovakia ~145k, Ukraine ~140k, Slovenia ~125k, Czech
-Republic ~115k sej/J)</li>
-<li><strong>Bottom-5 lowest transformity</strong>: wind + biomass-heavy
-grids (Denmark ~10k, Germany ~15k, Luxembourg ~13k, Lithuania ~18k,
-Estonia ~20k sej/J)</li>
+<li><strong>Top-5 highest transformity</strong> (nuclear-heavy grids):
+SVK ~162k, FRA ~154k, UKR ~151k, COM ~142k, ESH ~142k sej/J</li>
+<li><strong>Bottom-5 lowest transformity</strong> (wind + solar-dominant
+grids): DNK ~29k, LTU ~38k, LUX ~39k, URY ~48k, PRT ~51k sej/J</li>
 </ul>
-<p>The <strong>key insight</strong> for household energy policy: a
-Danish kilowatt-hour and a French kilowatt-hour are physically identical
-but Odum-different by an order of magnitude. Policy that treats them as
+<p>The <strong>key insight</strong> for household energy policy:
+physically identical kilowatt-hours can carry very different embodied
+emergy depending on the grid mix. Policy that treats them as
 interchangeable is missing quality-adjusted throughput.</p>
 </div>
 <div id="three-findings-unique-to-the-emergy-lens"
@@ -677,19 +678,21 @@ report</a> for the sign-agreement diagnostic.
 <h2>The math (short version)</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(emburdensynth)</span>
 <span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># Transformity of the fuel mix in a country-year</span></span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">grid_transformity</span>(<span class="st">&quot;NOR&quot;</span>, <span class="dv">2020</span>)                   <span class="co"># ~74k sej/J (hydro-heavy)</span></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">grid_transformity</span>(<span class="st">&quot;FRA&quot;</span>, <span class="dv">2020</span>)                   <span class="co"># ~150k sej/J (nuclear-heavy)</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">grid_transformity</span>(<span class="st">&quot;DNK&quot;</span>, <span class="dv">2020</span>)                   <span class="co"># ~10k sej/J (wind-heavy)</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co"># Household empower — sej/yr delivered per household</span></span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">household_empower</span>(<span class="st">&quot;USA&quot;</span>, <span class="dv">2020</span>, <span class="at">kwh_per_year =</span> <span class="dv">11000</span>)  <span class="co"># sej per year</span></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co"># Emergy Sustainability Index (Odum)</span></span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="fu">household_ESI</span>(<span class="st">&quot;NOR&quot;</span>, <span class="dv">2020</span>)  <span class="co"># named vec: R_pct, NR_pct, ELR, EYR, ESI</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co"># National empower / GDP</span></span>
-<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="fu">emergy_per_money</span>(<span class="st">&quot;FRA&quot;</span>, <span class="dv">2020</span>)                    <span class="co"># sej per $</span></span></code></pre></div>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># Transformity of the fuel mix in a country-year (electricity-basis,</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># post-Bundle-A: fossil transformities divided by their electric efficiency)</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">grid_transformity</span>(<span class="st">&quot;NOR&quot;</span>, <span class="dv">2023</span>)   <span class="co"># hydro-heavy — moderate (~73k sej/J)</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">grid_transformity</span>(<span class="st">&quot;FRA&quot;</span>, <span class="dv">2023</span>)   <span class="co"># nuclear-heavy — highest tier (~150k)</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="fu">grid_transformity</span>(<span class="st">&quot;DNK&quot;</span>, <span class="dv">2023</span>)   <span class="co"># wind + biomass — biomass lifts it (~33k)</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="fu">grid_transformity</span>(<span class="st">&quot;POL&quot;</span>, <span class="dv">2023</span>)   <span class="co"># coal-heavy — high (~88k, was ~35k pre-Bundle-A)</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co"># Household empower — sej/yr delivered per household</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="fu">household_empower</span>(<span class="st">&quot;USA&quot;</span>, <span class="dv">2020</span>, <span class="at">kwh_per_year =</span> <span class="dv">11000</span>)  <span class="co"># sej per year</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co"># Emergy Sustainability Index (Odum)</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="fu">household_ESI</span>(<span class="st">&quot;NOR&quot;</span>, <span class="dv">2020</span>)  <span class="co"># named vec: R_pct, NR_pct, ELR, EYR, ESI</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co"># National empower / GDP</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="fu">emergy_per_money</span>(<span class="st">&quot;FRA&quot;</span>, <span class="dv">2020</span>)                    <span class="co"># sej per $</span></span></code></pre></div>
 <p>All functions ship in the <a
 href="https://github.com/ericscheier/emburdensynth/blob/global/R/emergy.R"><code>emburden</code>
 R package</a>. The full metric table for 213 countries is at <a
