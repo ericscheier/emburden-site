@@ -741,6 +741,221 @@ ggplot(flows_multi, aes(y = value, axis1 = source, axis2 = target)) +
         plot.title.position = "plot")
 ```
 
+### The Odum energy systems language — HEII framework as a circuit
+
+Odum's other canonical diagram type — the **energy systems language**
+(ESL) — draws the HEII framework as a circuit with distinctive
+symbols: circles for sources, bullet-nosed hexagons for producers,
+hexagons for consumers, a bullet-tank for storage, diamonds for
+interactions, dashed lines for money flows (reversed direction from
+energy), and triangle heat-sink terminators.
+
+```{r fig-odum-systems, fig.height=9.5, fig.width=17, fig.cap="HEII framework in Odum energy systems language. Sources feed producers (bullet-nosed hexagons); producers converge on the grid tank; grid delivers electricity to the household aggregate's 4 end-uses (heat/cool/cook/base); household services feed cultural information which feeds the 11 GCD downstream sectors. Physical gap (red diamond) sits between grid + household — the shortfall in delivered vs required emergy. Economic gap (orange diamond) sits after household — the over-payment relative to affordable. Money flows dashed gold from household → utility → fuel supplier along the bottom band. Heat sinks (dotted triangles) terminate every transformation at the ground line. All labels sync to real medians across 63 HEII countries."}
+suppressPackageStartupMessages({library(purrr)})
+# Inline Odum ESL symbol helpers (matches emburdensynth::odum_*)
+odum_circle <- function(cx, cy, r, id, n = 60) {
+  t <- seq(0, 2*pi, length.out = n)
+  tibble::tibble(x = cx + r*cos(t), y = cy + r*sin(t), id = id)
+}
+odum_producer <- function(cx, cy, w, h, id) {
+  nose <- h * 0.6
+  tibble::tibble(
+    x = c(cx-w/2, cx+w/2-nose, cx+w/2, cx+w/2-nose, cx-w/2, cx-w/2),
+    y = c(cy-h/2, cy-h/2,      cy,     cy+h/2,      cy+h/2, cy-h/2),
+    id = id)
+}
+odum_consumer <- function(cx, cy, w, h, id) {
+  side <- w * 0.28
+  tibble::tibble(
+    x = c(cx-w/2, cx-w/2+side, cx+w/2-side, cx+w/2, cx+w/2-side, cx-w/2+side, cx-w/2),
+    y = c(cy,     cy-h/2,      cy-h/2,      cy,     cy+h/2,      cy+h/2,      cy),
+    id = id)
+}
+odum_storage <- function(cx, cy, w, h, id, n = 20) {
+  r <- h/2
+  t <- seq(-pi/2, pi/2, length.out = n)
+  right_arc_x <- (cx + w/2 - r) + r*cos(t)
+  right_arc_y <- cy + r*sin(t)
+  tibble::tibble(
+    x = c(cx-w/2, right_arc_x, cx-w/2, cx-w/2),
+    y = c(cy-h/2, right_arc_y, cy+h/2, cy-h/2), id = id)
+}
+odum_interaction <- function(cx, cy, s, id) {
+  tibble::tibble(
+    x = c(cx, cx+s/2, cx, cx-s/2, cx),
+    y = c(cy+s/2, cy, cy-s/2, cy, cy+s/2), id = id)
+}
+odum_heat_sink <- function(cx, cy, s, id) {
+  tibble::tibble(
+    x = c(cx-s/2, cx+s/2, cx, cx-s/2),
+    y = c(cy, cy, cy-s, cy), id = id)
+}
+# Real HEII data medians
+h <- em_c |> filter(!is.na(heii_norm))
+med_tr        <- median(h$transformity_sej_per_J, na.rm = TRUE)
+med_kwh       <- median(h$median_kwh_hh,          na.rm = TRUE)
+med_spend     <- median(h$median_hh_exp_usd,      na.rm = TRUE)
+med_em_dol    <- median(h$em_per_usd,             na.rm = TRUE)
+med_gdp       <- median(h$gdp_pc_usd,             na.rm = TRUE)
+med_phys_gap  <- median(h$physical_gap_sej,       na.rm = TRUE)
+med_econ_gap  <- median(h$economic_gap_sej[h$economic_gap_sej > 0], na.rm = TRUE)
+med_biomass   <- median(h$biomass_share,          na.rm = TRUE)
+# Layout
+X_SRC <- 1; X_PROD <- 5; X_GRID <- 9; X_PGAP <- 12; X_HH <- 15
+X_EGAP <- 18; X_CULT <- 20.5; X_SECT <- 23
+Y1 <- 5.5; Y2 <- 2.3; Y3 <- -0.9; Y4 <- -4.1
+Y_MID <- (Y1 + Y4)/2
+Y_MONEY <- Y4 - 4.5; Y_GROUND <- Y_MONEY - 2.0
+# Symbols
+symbols <- bind_rows(
+  odum_circle(X_SRC, Y1, 0.55, "src_sun"),
+  odum_circle(X_SRC, Y2, 0.55, "src_bio"),
+  odum_circle(X_SRC, Y3, 0.55, "src_fossil"),
+  odum_circle(X_SRC, Y4, 0.55, "src_uranium"),
+  odum_producer(X_PROD, Y1, 1.9, 1.2, "prod_renew"),
+  odum_producer(X_PROD, Y2, 1.9, 1.2, "prod_bio"),
+  odum_producer(X_PROD, Y3, 1.9, 1.2, "prod_fossil"),
+  odum_producer(X_PROD, Y4, 1.9, 1.2, "prod_nuclear"),
+  odum_storage(X_GRID, Y_MID, 1.6, 6.5, "grid"),
+  odum_interaction(X_PGAP, Y_MID + 2.5, 1.5, "phys_gap"),
+  odum_consumer(X_HH, Y_MID, 3.6, 11.2, "hh_container"),
+  odum_consumer(X_HH-0.3, Y1, 1.7, 1.1, "hh_heat"),
+  odum_consumer(X_HH-0.3, Y2, 1.7, 1.1, "hh_cool"),
+  odum_consumer(X_HH-0.3, Y3, 1.7, 1.1, "hh_cook"),
+  odum_consumer(X_HH-0.3, Y4, 1.7, 1.1, "hh_base"),
+  odum_interaction(X_EGAP, Y_MID - 2.5, 1.5, "econ_gap"),
+  odum_consumer(X_CULT, Y_MID, 2.2, 3.5, "culture"),
+  odum_consumer(X_SECT,     Y1+0.5, 1.4, 0.7, "sect_food"),
+  odum_consumer(X_SECT+1.7, Y1+0.5, 1.4, 0.7, "sect_housing"),
+  odum_consumer(X_SECT+3.4, Y1+0.5, 1.4, 0.7, "sect_transport"),
+  odum_consumer(X_SECT,     Y1-1.1, 1.4, 0.7, "sect_health"),
+  odum_consumer(X_SECT+1.7, Y1-1.1, 1.4, 0.7, "sect_education"),
+  odum_consumer(X_SECT+3.4, Y1-1.1, 1.4, 0.7, "sect_comm"),
+  odum_consumer(X_SECT,     Y1-2.7, 1.4, 0.7, "sect_clothing"),
+  odum_consumer(X_SECT+1.7, Y1-2.7, 1.4, 0.7, "sect_recreation"),
+  odum_consumer(X_SECT+3.4, Y1-2.7, 1.4, 0.7, "sect_restaurants"),
+  odum_consumer(X_SECT,     Y1-4.3, 1.4, 0.7, "sect_energy"),
+  odum_consumer(X_SECT+1.7, Y1-4.3, 1.4, 0.7, "sect_misc"),
+  odum_consumer(X_SECT+3.4, Y1-4.3, 1.4, 0.7, "sect_other"),
+  odum_heat_sink(X_PROD, Y_GROUND+0.9, 0.5, "hs_prod"),
+  odum_heat_sink(X_GRID, Y_GROUND+0.9, 0.5, "hs_grid"),
+  odum_heat_sink(X_HH,   Y_GROUND+0.9, 0.5, "hs_hh"),
+  odum_heat_sink(X_CULT, Y_GROUND+0.9, 0.5, "hs_cult"))
+fm <- c(src_sun="#F1C40F", src_bio="#228B22", src_fossil="#8A5A16",
+        src_uranium="#0F4D0F", prod_renew="#228B22", prod_bio="#7B4E20",
+        prod_fossil="#8A5A16", prod_nuclear="#0F4D0F", grid="#1F77B4",
+        hh_container=NA, hh_heat="#C0392B", hh_cool="#3498DB",
+        hh_cook="#B5791B", hh_base="#7F7F7F",
+        phys_gap="#C0392B", econ_gap="#F39C12", culture="#8E44AD",
+        sect_food="#e67e22", sect_housing="#9b59b6",
+        sect_transport="#34495e", sect_health="#e74c3c",
+        sect_education="#3498db", sect_comm="#8e44ad",
+        sect_clothing="#16a085", sect_recreation="#f39c12",
+        sect_restaurants="#d35400", sect_energy="#c0392b",
+        sect_misc="#7f8c8d", sect_other="#95a5a6",
+        hs_prod=BR[["mut"]], hs_grid=BR[["mut"]], hs_hh=BR[["mut"]],
+        hs_cult=BR[["mut"]])
+symbols$fill <- fm[symbols$id]
+# Flows
+fe <- tibble::tribble(~x1,~y1,~x2,~y2,
+  X_SRC+0.55,Y1,X_PROD-0.95,Y1,  X_SRC+0.55,Y2,X_PROD-0.95,Y2,
+  X_SRC+0.55,Y3,X_PROD-0.95,Y3,  X_SRC+0.55,Y4,X_PROD-0.95,Y4,
+  X_PROD+0.95,Y1,X_GRID-0.8,Y1,  X_PROD+0.95,Y2,X_GRID-0.8,Y2,
+  X_PROD+0.95,Y3,X_GRID-0.8,Y3,  X_PROD+0.95,Y4,X_GRID-0.8,Y4,
+  X_GRID+0.8,Y_MID+1.5,X_PGAP-0.75,Y_MID+2.5,
+  X_GRID+0.8,Y1,X_HH-1.6,Y1,  X_GRID+0.8,Y2,X_HH-1.6,Y2,
+  X_GRID+0.8,Y3,X_HH-1.6,Y3,  X_GRID+0.8,Y4,X_HH-1.6,Y4,
+  X_HH+1.6,Y1,X_CULT-1.1,Y_MID+1.2, X_HH+1.6,Y2,X_CULT-1.1,Y_MID+0.5,
+  X_HH+1.6,Y3,X_CULT-1.1,Y_MID-0.5, X_HH+1.6,Y4,X_CULT-1.1,Y_MID-1.2,
+  X_CULT+1.1,Y_MID+1.2,X_SECT-0.7,Y1+0.5,
+  X_CULT+1.1,Y_MID+1.2,X_SECT-0.7,Y1-1.1,
+  X_CULT+1.1,Y_MID+1.2,X_SECT-0.7,Y1-2.7,
+  X_CULT+1.1,Y_MID-1.2,X_SECT-0.7,Y1-4.3,
+  X_CULT+1.1,Y_MID+0.5,X_SECT-0.7+1.7,Y1+0.5,
+  X_CULT+1.1,Y_MID-0.5,X_SECT-0.7+1.7,Y1-2.7)
+fg <- tibble::tribble(~x1,~y1,~x2,~y2,
+  X_PGAP+0.75,Y_MID+2.5,X_HH-1.6,Y1+0.4,
+  X_HH+1.6,Y_MID-2.0,X_EGAP-0.75,Y_MID-2.5)
+fm2 <- tibble::tribble(~x1,~y1,~x2,~y2,
+  X_HH-1.6,Y_MONEY+0.3,X_GRID+0.8,Y_MONEY+0.15,
+  X_GRID-0.8,Y_MONEY-0.15,X_PROD+0.95,Y_MONEY-0.3,
+  X_EGAP,Y_MONEY+0.6,X_EGAP,Y_MID-1.9)
+fh <- tibble::tribble(~x1,~y1,~x2,~y2,
+  X_PROD,Y4-0.7,X_PROD,Y_GROUND+1.0,
+  X_GRID,Y_MID-3.4,X_GRID,Y_GROUND+1.0,
+  X_HH,Y_MID-5.7,X_HH,Y_GROUND+1.0,
+  X_CULT,Y_MID-1.8,X_CULT,Y_GROUND+1.0)
+# Labels
+lbl <- tibble::tribble(~x,~y,~label,~size,
+  X_SRC,Y1+0.95,"Sun/Wind/Rain\n1 sej/J",2.4,
+  X_SRC,Y2+0.95,"Biomass\n25k sej/J",2.4,
+  X_SRC,Y3+0.95,"Fossil deposits\n40-54k sej/J",2.4,
+  X_SRC,Y4+0.95,"Uranium\n200k sej/J",2.4,
+  X_PROD,Y1,"Wind/Solar\nHydro",2.35,
+  X_PROD,Y2,"Biomass\ncookstove",2.35,
+  X_PROD,Y3,"Coal/Gas/Oil\nplants",2.35,
+  X_PROD,Y4,"Nuclear",2.35,
+  X_GRID,Y_MID+3.6,"GRID",3.6,
+  X_GRID,Y_MID,sprintf("%dk sej/J\nmedian",round(med_tr/1000)),2.4,
+  X_HH,Y_MID+7.7,"HOUSEHOLD",3.6,
+  X_HH,Y_MID+7.0,sprintf("%d kWh/yr · $%d/yr (GDP-pc $%d)",
+                          round(med_kwh),round(med_spend),round(med_gdp)),2.5,
+  X_HH-0.3,Y1,"Heat",2.3, X_HH-0.3,Y2,"Cool",2.3,
+  X_HH-0.3,Y3,"Cook",2.3, X_HH-0.3,Y4,"Base",2.3,
+  X_PGAP,Y_MID+2.5,"Phys\ngap",2.4,
+  X_PGAP,Y_MID+3.7,sprintf("%.1e\nsej/yr",med_phys_gap),2.0,
+  X_EGAP,Y_MID-2.5,"Econ\ngap",2.4,
+  X_EGAP,Y_MID-3.7,sprintf("%.1e\nsej/yr",
+                            ifelse(is.finite(med_econ_gap),med_econ_gap,0)),2.0,
+  X_CULT,Y_MID+2.2,"Cultural\ninformation",2.7,
+  X_SECT+1.7,Y1+1.7,"DOWNSTREAM SOCIETY (GCD 11 sectors)",3.0,
+  X_SECT,Y1+0.5,"Food",2.2, X_SECT+1.7,Y1+0.5,"Housing",2.2,
+  X_SECT+3.4,Y1+0.5,"Transport",2.2,
+  X_SECT,Y1-1.1,"Health",2.2, X_SECT+1.7,Y1-1.1,"Educ.",2.2,
+  X_SECT+3.4,Y1-1.1,"Comm.",2.2,
+  X_SECT,Y1-2.7,"Clothing",2.2, X_SECT+1.7,Y1-2.7,"Recr.",2.2,
+  X_SECT+3.4,Y1-2.7,"Rest.",2.2,
+  X_SECT,Y1-4.3,"Energy",2.2, X_SECT+1.7,Y1-4.3,"Misc",2.2,
+  X_SECT+3.4,Y1-4.3,"Other",2.2,
+  X_SRC,Y1+2.0,"SOURCES",3.0, X_PROD,Y1+2.0,"PRODUCERS",3.0,
+  (X_HH+X_PROD)/2,Y_MONEY-1.1,
+  sprintf("Money flow (dashed gold, reversed direction) — median $%d/hh/yr → utility → fuel supplier · em/$ = %.2e sej/USD",
+          round(med_spend),med_em_dol),2.6,
+  X_GRID+3,Y_GROUND-0.7,
+  "Dispersed heat (heat sink) — every arrow eventually terminates here",2.5)
+ggplot() +
+  geom_segment(aes(x=-0.5,xend=X_SECT+5,y=Y_GROUND,yend=Y_GROUND),
+                colour=BR[["mut"]],linewidth=0.45) +
+  geom_rect(aes(xmin=X_PROD-1,xmax=X_HH+1.7,
+                 ymin=Y_MONEY-0.5,ymax=Y_MONEY+0.7),
+             fill=BR[["gold"]],alpha=0.06) +
+  geom_segment(data=fe,aes(x=x1,y=y1,xend=x2,yend=y2),
+                arrow=arrow(length=unit(0.08,"in")),
+                colour=BR[["gd"]],linewidth=0.55,alpha=0.9) +
+  geom_segment(data=fg,aes(x=x1,y=y1,xend=x2,yend=y2),
+                arrow=arrow(length=unit(0.09,"in")),
+                colour=BR[["charge"]],linewidth=0.7) +
+  geom_segment(data=fm2,aes(x=x1,y=y1,xend=x2,yend=y2),
+                arrow=arrow(length=unit(0.11,"in")),
+                colour=BR[["gold"]],linewidth=0.75,linetype="dashed") +
+  geom_segment(data=fh,aes(x=x1,y=y1,xend=x2,yend=y2),
+                arrow=arrow(length=unit(0.07,"in")),
+                colour=BR[["mut"]],linewidth=0.35,linetype="dotted") +
+  geom_polygon(data=symbols|>filter(id=="hh_container"),
+                aes(x=x,y=y),fill=NA,colour=BR[["ink"]],
+                linewidth=0.4,linetype="dashed") +
+  geom_polygon(data=symbols|>filter(id!="hh_container"),
+                aes(x=x,y=y,group=id,fill=fill),
+                alpha=0.80,colour=BR[["ink"]],linewidth=0.35) +
+  geom_text(data=lbl,aes(x=x,y=y,label=label,size=size),
+             colour=BR[["ink"]],lineheight=0.85) +
+  scale_fill_identity() + scale_size_identity() +
+  coord_cartesian(xlim=c(-1,X_SECT+5.5),
+                   ylim=c(Y_GROUND-1.5,Y1+3.5)) +
+  theme_void(base_size=10) +
+  theme(plot.title.position="plot")
+```
+
 ### The Odum spectral hierarchy — with HEII data
 
 Odum's **spectral hierarchy** figure (Abel 2023, fig 21 —
