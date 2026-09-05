@@ -201,6 +201,67 @@ policy question shifts from "why do they have no energy" to "why is
 what they get so low-quality" (open-fire wood at 10-30% burner
 efficiency, PM2.5 exposure, deforestation externalities not priced).
 
+## Bundle N — HEII trajectories 2000-2024
+
+Bundle C shipped a transformity/empower/em$ panel. Bundle N extends it
+to **HEII** — the unified physical + economic insecurity metric per
+country per year. `scripts/build_emergy_heii_panel.R` writes
+`emergy_heii_panel.rds` (63 countries × 25 years). The panel uses
+per-year gdp_pc, per-year grid transformity, per-year em/$, per-year
+WHO biomass-cooking share. Household median kWh + spend and physics-
+required stay at the 2022 snapshot (T80/T81/T82 will make those
+per-year too).
+
+```{r fig-heii-trajectory, fig.height=6, fig.width=10.5, fig.cap="HEII_norm trajectories 2000-2024 for a selection of large economies. China: dramatic drop from ~1.0 to ~0.2 as GDP tripled + biomass cooking share fell 60% → 16%. India: 0.52 → 0.30 similar story. Peru + Colombia: LATAM improvements. South Africa: slight WORSENING because GDP stagnated. Afghanistan: high volatility around 15-25."}
+hp <- tryCatch(readRDS(file.path(DATA_DIR, "emergy_heii_panel.rds")),
+                error = function(e) NULL)
+if (!is.null(hp)) {
+  focus <- c("CHN", "IND", "AFG", "ZAF", "PER", "COL", "BRA", "MEX")
+  pp <- hp$panel |> filter(iso3 %in% focus, is.finite(heii_norm))
+  ggplot(pp, aes(x = year, y = heii_norm, colour = iso3, group = iso3)) +
+    geom_line(linewidth = 1.1) +
+    geom_point(size = 1.3) +
+    scale_y_log10() +
+    scale_color_manual(values = unname(BR)[1:8], name = NULL) +
+    labs(x = NULL, y = "HEII_norm (log)",
+         title = "Bundle N — HEII trajectories 2000-2024",
+         subtitle = sprintf("Panel from %d countries x %d years. Log-y so pre-2010 improvement is visible.",
+                             hp$n_countries, length(hp$years))) +
+    theme_minimal(base_size = 11)
+}
+```
+
+```{r heii-trajectory-narrative, results="asis"}
+if (!is.null(hp)) {
+  # Compute per-country trajectory change (log scale ratio)
+  by_iso <- hp$panel |> group_by(iso3) |>
+    filter(year %in% c(min(year), max(year))) |>
+    summarise(y0 = first(year), y1 = last(year),
+              h0 = first(heii_norm), h1 = last(heii_norm),
+              ratio = h1 / h0, .groups = "drop")
+  n_improved <- sum(by_iso$ratio < 0.9, na.rm = TRUE)
+  n_worsened <- sum(by_iso$ratio > 1.1, na.rm = TRUE)
+  best <- by_iso[which.min(by_iso$ratio), ]
+  worst <- by_iso[which.max(by_iso$ratio), ]
+  cat(sprintf(
+"Over 2000-2024: **%d of %d countries improved** their HEII_norm by 10%%+ (median country dropped from %.2f to %.2f). **%d worsened by 10%%+**. Biggest improvement: **%s** (%.2f → %.2f, %.0fx drop). Biggest worsening: **%s** (%.2f → %.2f). China's modernization is the dominant global story — dropped from ~1.0 to ~0.2 while GDP-pc tripled and biomass-cooking share fell from 60%% to 16%%.\n",
+    n_improved, nrow(by_iso),
+    median(by_iso$h0, na.rm=TRUE), median(by_iso$h1, na.rm=TRUE),
+    n_worsened,
+    best$iso3, best$h0, best$h1, 1/best$ratio,
+    worst$iso3, worst$h0, worst$h1))
+}
+```
+
+**What's driving each trajectory**: for a given country, HEII_norm
+changes over time when (a) grid transformity moves (Bundle C
+trajectory), (b) gdp-pc changes the affordability threshold, (c) WHO
+biomass-cooking access shifts the delivered_empower via household
+fuels. Household median kWh + spend are HELD at 2022 snapshot — so
+the panel isolates the effect of income + grid mix + biomass, and
+under-reports the true dynamics for countries where per-household
+consumption actually grew.
+
 ## Time is now on the record — Bundle C
 
 The library-layer functions have always accepted a `year` argument,
