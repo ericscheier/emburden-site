@@ -685,6 +685,173 @@ because emergy is genuinely additive across the two axes — the
 same sej unit on both sides means the ribbon widths can be compared
 directly, which is exactly what the CO₂-per-capita framing loses.
 
+### Bundle O — how the same figure looks across countries
+
+The sankey above is Nigeria. Every one of the 63 HEII countries has
+its own story — some (China, India post-2010) show mostly OK green
+ribbons, some (Afghanistan, Chad) show ribbons dominated by the two
+red HEII gaps. Small-multiples make the country-to-country
+comparison direct.
+
+```{r sankey-multi, fig.height=9.5, fig.width=10.5, fig.cap="Household emergy composition — top 9 HEII countries (highest heii_norm). For each: physical side shows Physics-required → Delivered vs Suppressed; economic side shows Spend → Affordable vs Over-paid. Green = OK flows, red = HEII gaps. AFG, TCD, NER: mostly red on both axes. LATAM (COL, SLV, PER): dominated by economic red — physical is fine, income affordability is the issue."}
+suppressPackageStartupMessages(library(ggalluvial))
+top9 <- em_c |> filter(!is.na(heii_norm)) |>
+  arrange(desc(heii_norm)) |> head(9)
+flows_multi <- purrr::map_dfr(seq_len(nrow(top9)), function(i) {
+  hc <- top9[i, ]
+  delivered_e <- hc$median_kwh_hh * 3.6e6 * hc$transformity_sej_per_J
+  paid_e      <- hc$median_hh_exp_usd * hc$em_per_usd
+  income_e    <- hc$gdp_pc_usd * 3.5 * hc$em_per_usd
+  aff_e       <- income_e * 0.10
+  tibble::tibble(
+    iso3 = hc$iso3,
+    side   = c("Physical", "Physical", "Economic", "Economic"),
+    source = c("Required", "Required", "Spend", "Spend"),
+    target = c("Delivered", "Suppressed", "Affordable", "Over-paid"),
+    value  = c(delivered_e, hc$physical_gap_sej,
+                aff_e, hc$economic_gap_sej),
+    status = c("OK", "Gap", "OK", "Gap"))
+}) |>
+  mutate(
+    iso3   = factor(iso3, levels = top9$iso3),
+    side   = factor(side, levels = c("Physical", "Economic")),
+    source = factor(source, levels = c("Required", "Spend")),
+    target = factor(target, levels = c("Delivered", "Affordable",
+                                          "Suppressed", "Over-paid")))
+ggplot(flows_multi, aes(y = value, axis1 = source, axis2 = target)) +
+  geom_alluvium(aes(fill = status), alpha = 0.80,
+                 curve_type = "sigmoid", width = 0.24) +
+  geom_stratum(width = 0.24, fill = BR[["bg"]],
+                colour = BR[["ink"]], linewidth = 0.30) +
+  geom_text(stat = "stratum", aes(label = after_stat(stratum)),
+             size = 2.4, colour = BR[["ink"]]) +
+  facet_grid(iso3 ~ side, scales = "free_y", switch = "y") +
+  scale_fill_manual(values = c(OK = BR[["gd"]], Gap = BR[["charge"]]),
+                     name = NULL) +
+  scale_x_discrete(limits = c("", ""), expand = c(0.10, 0.10)) +
+  scale_y_continuous(labels = NULL) +
+  labs(x = NULL, y = NULL,
+        title = "Bundle O — top-9 HEII countries side-by-side") +
+  theme_minimal(base_size = 9) +
+  theme(panel.grid = element_blank(),
+        axis.ticks.y = element_blank(),
+        strip.text = element_text(face = "bold"),
+        strip.text.y.left = element_text(angle = 0),
+        legend.position = "bottom",
+        plot.title.position = "plot")
+```
+
+### The Odum emergy pyramid — with real numbers
+
+Odum's canonical figure: solar sunlight at the base, layers of
+increasing transformity as you go up, each tier concentrating a huge
+volume from the tier below. Each tier's height on the y-axis is its
+transformity (log sej/J); each tier's width is proportional to the
+world's electricity generation from that fuel category. Nuclear at
+the top (200,000 sej/J) delivers ~10% of world electricity;
+solar-PV at the bottom (3,400 sej/J) delivers a similar share but
+concentrates 60× less emergy per joule.
+
+```{r fig-odum-pyramid, fig.height=6, fig.width=9, fig.cap="Odum's emergy pyramid — with real world electricity generation. Each fuel's transformity (electricity-basis) sets its position on the y-axis; the width of each tier is proportional to that fuel's global generation share. Nuclear + hydro concentrate massive prior emergy into a small joule count; solar + wind sit at the base with little prior investment."}
+# Bundled canonical transformity + efficiency (Bundle A / E defaults)
+tt <- data.frame(
+  fuel = c("Wind","Solar_pv","Bioenergy","Coal","Gas","Oil",
+            "Other Fossil","Other Renewables","Hydro","Nuclear"),
+  transformity_sej_per_J = c(1500,3400,25000,40000,48000,54000,
+                              54000,50000,80000,200000),
+  electric_efficiency = c(1.00,1.00,0.28,0.35,0.50,0.38,
+                           0.38,1.00,1.00,1.00),
+  stringsAsFactors = FALSE)
+tt$tr_electric <- tt$transformity_sej_per_J / tt$electric_efficiency
+# World generation share per fuel (from ember_by_fuel latest year)
+mix <- readRDS(file.path(DATA_DIR, "ember_by_fuel.rds"))
+latest <- mix |> group_by(iso3) |>
+  summarise(year = max(year, na.rm = TRUE), .groups = "drop")
+world_share <- mix |> inner_join(latest, by = c("iso3", "year")) |>
+  inner_join(em_c[, c("iso3", "population")], by = "iso3") |>
+  filter(!is.na(share_pct), share_pct > 0, !is.na(population)) |>
+  mutate(w = population * share_pct / 100) |>
+  group_by(fuel) |>
+  summarise(w = sum(w, na.rm = TRUE), .groups = "drop") |>
+  mutate(w_frac = w / sum(w))
+# Map Ember's "Solar" to Solar_pv in the transformity table
+world_share$fuel[world_share$fuel == "Solar"] <- "Solar_pv"
+pyr <- tt |>
+  left_join(world_share, by = "fuel") |>
+  filter(!is.na(w_frac), w_frac > 0) |>
+  arrange(tr_electric)
+pyr$fuel_pretty <- factor(pyr$fuel, levels = pyr$fuel)
+ggplot(pyr, aes(x = w_frac, y = tr_electric, fill = fuel_pretty)) +
+  geom_col(width = 0.7, alpha = 0.85,
+            colour = BR[["ink"]], linewidth = 0.35) +
+  geom_text(aes(label = sprintf("%s   %.0fk sej/J   %.0f%% of gen",
+                                  fuel, tr_electric/1000,
+                                  100 * w_frac)),
+             size = 3, colour = BR[["ink"]], hjust = -0.05) +
+  scale_y_log10(labels = function(x) sprintf("%.0fk", x/1000),
+                 expand = expansion(mult = c(0.02, 0.10))) +
+  scale_x_continuous(limits = c(0, max(pyr$w_frac) * 2.8),
+                      labels = NULL, expand = c(0, 0)) +
+  scale_fill_manual(values = c(
+      Coal="#7F7F7F", Gas="#B5791B", Oil="#C0392B",
+      `Other Fossil`="#8A5A16", Nuclear="#0F4D0F",
+      Bioenergy="#7B4E20", Hydro="#1F77B4",
+      Wind="#228B22", Solar_pv="#F1C40F",
+      `Other Renewables`="#176B17"), guide = "none") +
+  labs(x = NULL, y = "Transformity (sej/J, log electricity-basis)",
+        title = "Odum's emergy pyramid — real world electricity generation",
+        subtitle = "Bar height = transformity; bar width = share of global electricity (population-weighted).") +
+  theme_minimal(base_size = 11) +
+  theme(panel.grid.major.x = element_blank(),
+        plot.title.position = "plot")
+```
+
+### One cell at a time — the finest resolution
+
+The 17,028 cells in `emergy_metrics.rds$cell` each carry a full
+per-cell emergy story. The cell with the biggest emergy gap (a
+grid-adjacent cell in a rural Sub-Saharan African region with high
+population + low delivery) is a Bundle-O test case:
+
+```{r sankey-cell, fig.height=4, fig.width=9, fig.cap="Highest emergy-gap cell (chosen: largest heii_sej_yr in the cell table). Same 2-axis sankey as the household version, but for a single geographic cell rather than a country median. Cell-level heterogeneity within a country can be as large as country-to-country variation — the sankey exposes the mechanism at the finest resolution the pipeline supports."}
+if (!is.null(em_cell) && "heii_sej_yr" %in% names(em_cell)) {
+  target <- em_cell |> arrange(desc(heii_sej_yr)) |> head(1)
+  cf <- tibble::tibble(
+    side   = c("Physical", "Physical", "Economic", "Economic"),
+    source = c("Required", "Required", "Spend", "Spend"),
+    target = c("Delivered", "Suppressed", "Affordable", "Over-paid"),
+    value  = c(target$empower_sej_yr, target$physical_gap_sej_yr,
+                target$affordable_empower_sej_yr,
+                target$economic_gap_sej_yr),
+    status = c("OK", "Gap", "OK", "Gap")) |>
+    mutate(
+      side   = factor(side, levels = c("Physical", "Economic")),
+      source = factor(source, levels = c("Required", "Spend")),
+      target = factor(target, levels = c("Delivered", "Affordable",
+                                            "Suppressed", "Over-paid")))
+  ggplot(cf, aes(y = value, axis1 = source, axis2 = target)) +
+    geom_alluvium(aes(fill = status), alpha = 0.80,
+                   curve_type = "sigmoid", width = 0.22) +
+    geom_stratum(width = 0.22, fill = BR[["bg"]],
+                  colour = BR[["ink"]], linewidth = 0.35) +
+    geom_text(stat = "stratum", aes(label = after_stat(stratum)),
+               size = 3.2, colour = BR[["ink"]]) +
+    facet_wrap(~ side, scales = "free_y", ncol = 2) +
+    scale_fill_manual(values = c(OK = BR[["gd"]], Gap = BR[["charge"]]),
+                       name = NULL) +
+    scale_x_discrete(limits = c("", ""), expand = c(0.10, 0.10)) +
+    scale_y_continuous(labels = NULL) +
+    labs(x = NULL, y = NULL,
+          title = sprintf("Highest-HEII cell — %s (lon %.1f, lat %.1f)",
+                           target$iso3, target$longitude, target$latitude)) +
+    theme_minimal(base_size = 11) +
+    theme(panel.grid = element_blank(),
+          axis.ticks.y = element_blank(),
+          strip.text = element_text(face = "bold"),
+          legend.position = "bottom")
+}
+```
+
 <div class="callout">
 <div class="callout-title">Backward-compatible with the existing insecurity score</div>
 <p>The Round-19 <code>country_unified_metrics()</code> function
