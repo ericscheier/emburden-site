@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE,
                       fig.width=10, fig.height=6, dpi=110)
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(sf)})
 DATA_DIR <- "../docs/global_analysis_data"
-source("../R/brand_palette.R"); BR <- emrgi_brand_colors()
+source("R/brand_palette.R"); BR <- emrgi_brand_colors()
 summ <- readRDS(file.path(DATA_DIR, "summary_enriched.rds"))
 world <- tryCatch(readRDS(file.path(DATA_DIR, "world_sf.rds")), error=function(e) NULL)
 ```
@@ -48,7 +48,7 @@ if (!is.null(world) && "burden_canonical" %in% names(world)) {
           plot.title = element_text(size = 15, face = "bold", colour = BR[["gd"]]),
           plot.background = element_rect(fill = BR[["bg"]], colour = NA),
           panel.background = element_rect(fill = "#dbe9f4", colour = NA)) +
-    labs(title = "Canonical household energy burden — 215 countries",
+    labs(title = sprintf("Canonical household energy burden — %d countries", sum(!is.na(world$burden_canonical))),
          subtitle = "Fill = burden fraction. Border colour = data-source tier.")
 }
 ```
@@ -81,7 +81,7 @@ ggplot(cj, aes(x=cum_co2, y=burden_canonical*100, colour=region_wb, size=pop)) +
   scale_color_manual(values=emburden_emrgi_categorical(7), name="WB region") +
   labs(x="Cumulative CO2 since 1750 (Mt, log)",
         y="2020 household energy burden (%)",
-        title="Climate justice: 215 countries",
+        title=sprintf("Climate justice: %d countries", nrow(cj)),
         subtitle="Dashed = medians. Upper-left = low historical responsibility, high current burden.") +
   theme_emburden_emrgi(base_size=10) +
   theme(legend.box="vertical")

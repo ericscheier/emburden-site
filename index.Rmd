@@ -1,5 +1,5 @@
 ---
-title: "The 67-fold mismatch"
+title: "Global household energy — three lenses"
 pagetitle: "emburden.org"
 ---
 
@@ -9,127 +9,168 @@ knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE,
                       fig.width=10, fig.height=6, dpi=110)
 suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
 DATA_DIR <- "../docs/global_analysis_data"
-source("../R/brand_palette.R"); BR <- emrgi_brand_colors()
+BR <- c(g = "#228b22", gd = "#176b17", gdd = "#0f4d0f", gold = "#b5791b",
+        ink = "#1d2a1d", mut = "#566656", line = "#d6e4d6", bg = "#f3f8f3",
+        charge = "#c0392b", warn = "#8a5a16")
+source("R/counts.R")
 cj2 <- readRDS(file.path(DATA_DIR, "climate_justice_headline_v2.rds"))
+em  <- readRDS(file.path(DATA_DIR, "emergy_metrics.rds"))
+n_cell_countries    <- cell_country_count()
+n_canonical         <- canonical_burden_countries()
+n_grid_cells        <- n_rows("cell_grid_wide.rds")
+world_pop_bn        <- round(cj2$world_pop / 1e9, 1)
+n_emergy_countries  <- nrow(em$country)
+n_ember_countries   <- iso3_count("ember_by_fuel.rds")
+transformity_ratio  <- round(max(em$country$transformity_sej_per_J, na.rm=TRUE) /
+                              min(em$country$transformity_sej_per_J, na.rm=TRUE), 0)
+ratio_b             <- round(cj2$ratio_b, 0)
+low_acc_co2_share   <- round(sum(cj2$low_acc$cum_co2_mt) /
+                              cj2$world_cum_co2_mt * 100, 2)
+low_acc_pop_m       <- round(sum(cj2$low_acc$pop_owid) / 1e6, 0)
+top_emit_co2_share  <- round(sum(cj2$top20_emit$cum_co2_mt) /
+                              cj2$world_cum_co2_mt * 100, 1)
 ```
 
 <div class="hero">
 <div class="kicker">Global energy burden atlas</div>
-<h1>The 67-fold mismatch between who pays and who caused it</h1>
+<h1>Three lenses on the world's household energy</h1>
 <p class="subtitle">
-Household energy burden — the fraction families pay for energy — has never
-been comparably measured across most of the world. We built the first
-open-code, open-data pipeline that estimates it for 129 countries and
-17,000 grid cells covering 8.2&nbsp;billion people. What we found
-quantifies a moral claim policymakers have accepted for three decades but
-never seen sharpened into a single number.
+Household energy burden has never been comparably measured across most
+of the world. We built the first open-code, open-data pipeline that
+estimates it for `r n_cell_countries` countries and
+`r format(n_grid_cells, big.mark=",")` grid cells covering
+`r world_pop_bn`&nbsp;billion people. Three findings that no single
+prior study surfaces: a <b>quality-of-energy</b> gap Odum's emergy
+framework exposes, an <b>access + affordability + QoS</b> gap that
+single-axis indicators miss, and a <b>climate-justice mismatch</b>
+sharper than any prior estimate.
 </p>
 </div>
 
 <div style="text-align:center;">
 <div class="big-number">
-  <span class="n">67×</span>
-  <span class="l">per-capita cumulative CO<sub>2</sub><br/>disparity at the extremes</span>
+  <span class="n">`r transformity_ratio`×</span>
+  <span class="l">variation in grid<br/>transformity (sej/J)</span>
 </div>
 <div class="big-number gold">
-  <span class="n">129</span>
-  <span class="l">countries with<br/>cell-level microdata</span>
+  <span class="n">`r ratio_b`×</span>
+  <span class="l">per-capita cumulative CO<sub>2</sub><br/>climate-justice disparity</span>
 </div>
 <div class="big-number green">
-  <span class="n">8.2<span style="font-size:0.6em;">bn</span></span>
-  <span class="l">people covered<br/>by the atlas</span>
+  <span class="n">`r n_cell_countries`</span>
+  <span class="l">countries with<br/>cell-level microdata</span>
 </div>
 <div class="big-number">
-  <span class="n">0.13%</span>
-  <span class="l">of cumulative CO<sub>2</sub><br/>from 20 least-electrified countries</span>
+  <span class="n">`r world_pop_bn`<span style="font-size:0.6em;">bn</span></span>
+  <span class="l">people covered<br/>by the atlas</span>
 </div>
 </div>
 
-## What we found
-
-The 20 countries with the lowest household electricity access — South
-Sudan, Chad, Burundi, Central African Republic, DR Congo, Burkina Faso,
-Haiti, and 13 others — hold **498 million people (6.1% of humanity)** and
-are jointly responsible for **0.13% of cumulative global CO~2~ emissions
-since 1750**.
-
-The 20 countries with the largest historical CO~2~ emissions — led by the
-United States, China, Russia, Germany, United Kingdom, and Japan — hold
-**4.8 billion people (58.5% of humanity)** and are responsible for
-**82% of cumulative CO~2~**.
-
-<blockquote>
-On a per-capita cumulative basis, the average resident of the top-20
-historical emitters has emitted <b>67 times more</b> cumulative CO<sub>2</sub>
-than the average resident of the 20 least-electrified countries.
-</blockquote>
-
-The disparity narrows to 5-fold when the comparison uses current household
-energy burden instead of household electricity access. Both framings sit
-on the same moral geometry, but the 67× number is the crispest.
-
-## Why this wasn't visible before
-
-Prior work has measured either half of this ratio, not both. The Global
-Carbon Project has published cumulative-emissions data since 2006 but
-paired it with country totals rather than household burdens. The IEA
-World Energy Outlook models future access-to-energy trajectories but
-focuses on infrastructure gaps rather than expenditure share. The World
-Bank Global Consumption Database (2010, updated 2020) provides
-household-level expenditure but only for ~90 countries and only in
-country-average form, missing the within-country geography where energy
-poverty concentrates.
-
-Two methodological breakthroughs made the present quantification
-possible.
+## Three findings
 
 <div class="card-grid">
+
 <div class="card">
-<div class="kicker">Method 1</div>
-<h3>Spatial synthesis at global scale</h3>
-<p>A five-phase pipeline in <a href="https://github.com/ericscheier/emburdensynth"><code>emburdensynth</code></a> that combines WorldPop rasters, GADM boundaries, and the World Bank Global Consumption Database with simulated-annealing spatial allocation. Extends the U.S. DOE LEAD tool from single-country to global scope.</p>
-<p><a href="methods.html">Read the methods →</a></p>
-</div>
-<div class="card">
-<div class="kicker">Method 2</div>
-<h3>Correct Net Energy Return math</h3>
-<p>Naive weighted-mean-of-ratios aggregation over-estimates household energy burden by a median <b>5.7%</b> and by up to <b>1,400%</b> for hyperinflation cases like Venezuela. <a href="https://github.com/ericscheier/emburden"><code>emburden::neb_func</code></a> implements the mathematically proper NEB = 1/(1 + weighted-mean-Nh) formulation.</p>
-<p><a href="methods.html#aggregation">See the divergence chart →</a></p>
-</div>
+<div class="kicker">Finding 1 — Emergy</div>
+<h3>Grid quality varies `r transformity_ratio`× across `r n_ember_countries` countries</h3>
+<p>Nuclear-heavy grids (France, Slovakia) deliver electricity with
+~15× the emergy per joule of wind-heavy grids (Denmark, Germany).
+Two grids with identical per-capita kWh can carry radically different
+prior-emergy investment — invisible in CO<sub>2</sub> or kWh accounting.
+Odum's framework separates <em>quality</em> from <em>quantity</em>.</p>
+<p><a href="emergy.html">The Odum lens →</a></p>
 </div>
 
-## Where to go from here
+<div class="card">
+<div class="kicker">Finding 2 — Access + QoS</div>
+<h3>"Connected" isn't "served"</h3>
+<p>Global access to electricity is 91%; global access to clean cooking
+fuel is 74%. Ontop of that, quality of service varies enormously —
+outage frequency, voltage sag, tariff affordability. Households in
+low-QoS grids are functionally under-served regardless of the binary
+access statistic.</p>
+<p><a href="access.html">Access, affordability, QoS →</a></p>
+</div>
+
+<div class="card">
+<div class="kicker">Finding 3 — Climate justice</div>
+<h3>The `r ratio_b`× per-capita CO<sub>2</sub> disparity</h3>
+<p>The 20 least-electrified countries hold `r low_acc_pop_m`M people
+(6% of humanity) and `r low_acc_co2_share`% of cumulative CO<sub>2</sub>
+since 1750. The 20 largest historical emitters hold 4.8bn people and
+`r top_emit_co2_share`%. Per-capita cumulative disparity is
+approximately `r ratio_b`-fold.</p>
+<p><a href="atlas.html#climate-justice-scatter">The climate-justice scatter →</a></p>
+</div>
+
+</div>
+
+## Why publish this now
+
+Each finding on its own has been sketched in prior work, but no
+prior study combines all three at cell-level for
+`r n_cell_countries` countries with fully open data + open code. The
+combination reveals patterns that single-lens studies miss:
+
+- **High-transformity + high-burden** — a country like South Africa
+  (coal + nuclear grid, ~90k sej/J, 8% burden) is high-emergy AND
+  high-burden — quality-adjusted energy is still expensive relative
+  to income.
+- **Low-transformity + low-CO~2~ + high-suppression** — wind-heavy
+  small emitters (Portugal, Denmark) have low emergy per joule +
+  low CO~2~ contribution, yet cells within them still show
+  suppression pockets.
+- **Climate-justice + emergy inversion** — the 20 countries most
+  burdened by climate change (SSA + SAR) also receive lowest-
+  transformity energy (biomass + low-access grids), a double
+  penalty invisible when either lens is used alone.
 
 <div class="card-grid">
+
 <div class="card">
 <div class="kicker">Atlas</div>
-<h3>The global burden atlas</h3>
-<p>39 figures across 215 countries: cell-level maps, cross-signal PCA, climate-justice scatter, country archetypes.</p>
+<h3>39 figures across `r n_canonical` countries</h3>
+<p>Cell-level maps, cross-signal PCA, climate-justice scatter,
+country archetypes, emergy panels.</p>
 <p><a href="atlas.html">Browse the atlas →</a></p>
 </div>
+
 <div class="card">
 <div class="kicker">Data</div>
-<h3>Data provenance</h3>
-<p>15 open sources spanning 1750–2025. World Bank, Ember, OWID, EIA, WHO, FAOSTAT, UNDP, NASA GISS, and more.</p>
+<h3>17 open sources, 1750–2025</h3>
+<p>WB, Ember, OWID, EIA, WHO, FAOSTAT, UNDP, NASA GISS, WGI, and more.
+Every number traceable to a script + cache.</p>
 <p><a href="data.html">See the sources →</a></p>
 </div>
+
 <div class="card">
 <div class="kicker">Papers</div>
-<h3>Papers in flight</h3>
-<p>Joule methods paper. Science Policy Forum on climate-justice quantification. Nature Energy causal-analysis scope.</p>
+<h3>Six papers in flight</h3>
+<p>Science Policy Forum, Joule, Nature Energy scope, JSS ecosystem
+umbrella, JOSS Wave 1, Scientific Data descriptor.</p>
 <p><a href="papers.html">See the papers →</a></p>
 </div>
+
 <div class="card">
 <div class="kicker">Code</div>
 <h3>The emburden ecosystem</h3>
-<p>13 R packages, all open-source. 6 already JOSS-ready. Umbrella paper targeting JSS.</p>
+<p>13 R packages + 2 Python packages, all MIT. Includes
+<code>emburden::neb_func</code> (Net Energy Return),
+<code>emburdensynth::grid_transformity</code> (Odum emergy),
+<code>emburdensynth::run_global_pipeline</code>.</p>
 <p><a href="code.html">Explore the code →</a></p>
 </div>
+
 </div>
 
 <div class="callout">
 <div class="callout-title">Caveats worth naming</div>
-<p>Cumulative CO<sub>2</sub> is territorial-only; consumption-based accounting would attribute a fraction of large emerging-economy emissions to consuming countries via trade, tightening rather than loosening the reported disparity. The direction of the mismatch is robust to methodological choices. The 67-fold magnitude is a lower bound.</p>
+<p>The emergy computation inherits the country's grid mix onto every
+cell (no cell-level fuel mix data exists at this scale). Cumulative
+CO<sub>2</sub> is territorial-only (consumption-based would tighten
+rather than loosen the disparity). Physics baseline uses global-average
+building envelope. Full caveats in the <a href="global_analysis.pdf">
+technical report</a>.</p>
 </div>
 
 <footer>
@@ -137,5 +178,6 @@ possible.
 Data + code at <a href="https://github.com/ericscheier">github.com/ericscheier</a>.
 Report bugs, ask questions, or contribute: <a href="mailto:hello@emrgi.com">hello@emrgi.com</a>.</p>
 <p><small>Last updated: `r format(Sys.Date(), "%B %d, %Y")` &nbsp;·&nbsp;
-Rendered from Rmd sources at <a href="https://github.com/ericscheier/emburdensynth/tree/global/site">github.com/ericscheier/emburdensynth/site</a></small></p>
+Rendered dynamically from RDS caches at
+<a href="https://github.com/ericscheier/emburden-site">github.com/ericscheier/emburden-site</a></small></p>
 </footer>

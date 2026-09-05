@@ -312,6 +312,12 @@ div.tocify {
   <a href="index.html">Home</a>
 </li>
 <li>
+  <a href="emergy.html">Emergy</a>
+</li>
+<li>
+  <a href="access.html">Access + QoS</a>
+</li>
+<li>
   <a href="atlas.html">The Atlas</a>
 </li>
 <li>
@@ -346,7 +352,7 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">The 67-fold mismatch</h1>
+<h1 class="title toc-ignore">Global household energy — three lenses</h1>
 
 </div>
 
@@ -356,124 +362,127 @@ div.tocify {
 Global energy burden atlas
 </div>
 <h1>
-The 67-fold mismatch between who pays and who caused it
+Three lenses on the world’s household energy
 </h1>
 <p class="subtitle">
-Household energy burden — the fraction families pay for energy — has
-never been comparably measured across most of the world. We built the
-first open-code, open-data pipeline that estimates it for 129 countries
-and 17,000 grid cells covering 8.2 billion people. What we found
-quantifies a moral claim policymakers have accepted for three decades
-but never seen sharpened into a single number.
+Household energy burden has never been comparably measured across most
+of the world. We built the first open-code, open-data pipeline that
+estimates it for 129 countries and 17,028 grid cells covering
+8.2 billion people. Three findings that no single prior study surfaces:
+a <b>quality-of-energy</b> gap Odum’s emergy framework exposes, an
+<b>access + affordability + QoS</b> gap that single-axis indicators
+miss, and a <b>climate-justice mismatch</b> sharper than any prior
+estimate.
 </p>
 </div>
 <div style="text-align:center;">
 <div class="big-number">
-<p><span class="n">67×</span> <span class="l">per-capita cumulative
-CO<sub>2</sub><br/>disparity at the extremes</span></p>
+<p><span class="n">15×</span> <span class="l">variation in
+grid<br/>transformity (sej/J)</span></p>
 </div>
 <div class="big-number gold">
+<p><span class="n">67×</span> <span class="l">per-capita cumulative
+CO<sub>2</sub><br/>climate-justice disparity</span></p>
+</div>
+<div class="big-number green">
 <p><span class="n">129</span> <span class="l">countries
 with<br/>cell-level microdata</span></p>
 </div>
-<div class="big-number green">
+<div class="big-number">
 <p><span class="n">8.2<span style="font-size:0.6em;">bn</span></span>
 <span class="l">people covered<br/>by the atlas</span></p>
 </div>
-<div class="big-number">
-<p><span class="n">0.13%</span> <span class="l">of cumulative
-CO<sub>2</sub><br/>from 20 least-electrified countries</span></p>
 </div>
-</div>
-<div id="what-we-found" class="section level2">
-<h2>What we found</h2>
-<p>The 20 countries with the lowest household electricity access — South
-Sudan, Chad, Burundi, Central African Republic, DR Congo, Burkina Faso,
-Haiti, and 13 others — hold <strong>498 million people (6.1% of
-humanity)</strong> and are jointly responsible for <strong>0.13% of
-cumulative global CO<sub>2</sub> emissions since 1750</strong>.</p>
-<p>The 20 countries with the largest historical CO<sub>2</sub> emissions
-— led by the United States, China, Russia, Germany, United Kingdom, and
-Japan — hold <strong>4.8 billion people (58.5% of humanity)</strong> and
-are responsible for <strong>82% of cumulative
-CO<sub>2</sub></strong>.</p>
-<blockquote>
-On a per-capita cumulative basis, the average resident of the top-20
-historical emitters has emitted <b>67 times more</b> cumulative
-CO<sub>2</sub> than the average resident of the 20 least-electrified
-countries.
-</blockquote>
-<p>The disparity narrows to 5-fold when the comparison uses current
-household energy burden instead of household electricity access. Both
-framings sit on the same moral geometry, but the 67× number is the
-crispest.</p>
-</div>
-<div id="why-this-wasnt-visible-before" class="section level2">
-<h2>Why this wasn’t visible before</h2>
-<p>Prior work has measured either half of this ratio, not both. The
-Global Carbon Project has published cumulative-emissions data since 2006
-but paired it with country totals rather than household burdens. The IEA
-World Energy Outlook models future access-to-energy trajectories but
-focuses on infrastructure gaps rather than expenditure share. The World
-Bank Global Consumption Database (2010, updated 2020) provides
-household-level expenditure but only for ~90 countries and only in
-country-average form, missing the within-country geography where energy
-poverty concentrates.</p>
-<p>Two methodological breakthroughs made the present quantification
-possible.</p>
+<div id="three-findings" class="section level2">
+<h2>Three findings</h2>
 <div class="card-grid">
 <div class="card">
 <div class="kicker">
-Method 1
+Finding 1 — Emergy
 </div>
 <h3>
-Spatial synthesis at global scale
+Grid quality varies 15× across 213 countries
 </h3>
 <p>
-A five-phase pipeline in
-<a href="https://github.com/ericscheier/emburdensynth"><code>emburdensynth</code></a>
-that combines WorldPop rasters, GADM boundaries, and the World Bank
-Global Consumption Database with simulated-annealing spatial allocation.
-Extends the U.S. DOE LEAD tool from single-country to global scope.
+Nuclear-heavy grids (France, Slovakia) deliver electricity with ~15× the
+emergy per joule of wind-heavy grids (Denmark, Germany). Two grids with
+identical per-capita kWh can carry radically different prior-emergy
+investment — invisible in CO<sub>2</sub> or kWh accounting. Odum’s
+framework separates <em>quality</em> from <em>quantity</em>.
 </p>
 <p>
-<a href="methods.html">Read the methods →</a>
+<a href="emergy.html">The Odum lens →</a>
 </p>
 </div>
 <div class="card">
 <div class="kicker">
-Method 2
+Finding 2 — Access + QoS
 </div>
 <h3>
-Correct Net Energy Return math
+“Connected” isn’t “served”
 </h3>
 <p>
-Naive weighted-mean-of-ratios aggregation over-estimates household
-energy burden by a median <b>5.7%</b> and by up to <b>1,400%</b> for
-hyperinflation cases like Venezuela.
-<a href="https://github.com/ericscheier/emburden"><code>emburden::neb_func</code></a>
-implements the mathematically proper NEB = 1/(1 + weighted-mean-Nh)
-formulation.
+Global access to electricity is 91%; global access to clean cooking fuel
+is 74%. Ontop of that, quality of service varies enormously — outage
+frequency, voltage sag, tariff affordability. Households in low-QoS
+grids are functionally under-served regardless of the binary access
+statistic.
 </p>
 <p>
-<a href="methods.html#aggregation">See the divergence chart →</a>
+<a href="access.html">Access, affordability, QoS →</a>
+</p>
+</div>
+<div class="card">
+<div class="kicker">
+Finding 3 — Climate justice
+</div>
+<h3>
+The 67× per-capita CO<sub>2</sub> disparity
+</h3>
+<p>
+The 20 least-electrified countries hold 498M people (6% of humanity) and
+0.13% of cumulative CO<sub>2</sub> since 1750. The 20 largest historical
+emitters hold 4.8bn people and 82%. Per-capita cumulative disparity is
+approximately 67-fold.
+</p>
+<p>
+<a href="atlas.html#climate-justice-scatter">The climate-justice scatter
+→</a>
 </p>
 </div>
 </div>
 </div>
-<div id="where-to-go-from-here" class="section level2">
-<h2>Where to go from here</h2>
+<div id="why-publish-this-now" class="section level2">
+<h2>Why publish this now</h2>
+<p>Each finding on its own has been sketched in prior work, but no prior
+study combines all three at cell-level for 129 countries with fully open
+data + open code. The combination reveals patterns that single-lens
+studies miss:</p>
+<ul>
+<li><strong>High-transformity + high-burden</strong> — a country like
+South Africa (coal + nuclear grid, ~90k sej/J, 8% burden) is high-emergy
+AND high-burden — quality-adjusted energy is still expensive relative to
+income.</li>
+<li><strong>Low-transformity + low-CO<sub>2</sub> +
+high-suppression</strong> — wind-heavy small emitters (Portugal,
+Denmark) have low emergy per joule + low CO<sub>2</sub> contribution,
+yet cells within them still show suppression pockets.</li>
+<li><strong>Climate-justice + emergy inversion</strong> — the 20
+countries most burdened by climate change (SSA + SAR) also receive
+lowest- transformity energy (biomass + low-access grids), a double
+penalty invisible when either lens is used alone.</li>
+</ul>
 <div class="card-grid">
 <div class="card">
 <div class="kicker">
 Atlas
 </div>
 <h3>
-The global burden atlas
+39 figures across 215 countries
 </h3>
 <p>
-39 figures across 215 countries: cell-level maps, cross-signal PCA,
-climate-justice scatter, country archetypes.
+Cell-level maps, cross-signal PCA, climate-justice scatter, country
+archetypes, emergy panels.
 </p>
 <p>
 <a href="atlas.html">Browse the atlas →</a>
@@ -484,11 +493,11 @@ climate-justice scatter, country archetypes.
 Data
 </div>
 <h3>
-Data provenance
+17 open sources, 1750–2025
 </h3>
 <p>
-15 open sources spanning 1750–2025. World Bank, Ember, OWID, EIA, WHO,
-FAOSTAT, UNDP, NASA GISS, and more.
+WB, Ember, OWID, EIA, WHO, FAOSTAT, UNDP, NASA GISS, WGI, and more.
+Every number traceable to a script + cache.
 </p>
 <p>
 <a href="data.html">See the sources →</a>
@@ -499,11 +508,11 @@ FAOSTAT, UNDP, NASA GISS, and more.
 Papers
 </div>
 <h3>
-Papers in flight
+Six papers in flight
 </h3>
 <p>
-Joule methods paper. Science Policy Forum on climate-justice
-quantification. Nature Energy causal-analysis scope.
+Science Policy Forum, Joule, Nature Energy scope, JSS ecosystem
+umbrella, JOSS Wave 1, Scientific Data descriptor.
 </p>
 <p>
 <a href="papers.html">See the papers →</a>
@@ -517,8 +526,10 @@ Code
 The emburden ecosystem
 </h3>
 <p>
-13 R packages, all open-source. 6 already JOSS-ready. Umbrella paper
-targeting JSS.
+13 R packages + 2 Python packages, all MIT. Includes
+<code>emburden::neb_func</code> (Net Energy Return),
+<code>emburdensynth::grid_transformity</code> (Odum emergy),
+<code>emburdensynth::run_global_pipeline</code>.
 </p>
 <p>
 <a href="code.html">Explore the code →</a>
@@ -530,12 +541,12 @@ targeting JSS.
 Caveats worth naming
 </div>
 <p>
-Cumulative CO<sub>2</sub> is territorial-only; consumption-based
-accounting would attribute a fraction of large emerging-economy
-emissions to consuming countries via trade, tightening rather than
-loosening the reported disparity. The direction of the mismatch is
-robust to methodological choices. The 67-fold magnitude is a lower
-bound.
+The emergy computation inherits the country’s grid mix onto every cell
+(no cell-level fuel mix data exists at this scale). Cumulative
+CO<sub>2</sub> is territorial-only (consumption-based would tighten
+rather than loosen the disparity). Physics baseline uses global-average
+building envelope. Full caveats in the <a href="global_analysis.pdf">
+technical report</a>.
 </p>
 </div>
 <footer>
@@ -547,8 +558,9 @@ Report bugs, ask questions, or contribute:
 <a href="mailto:hello@emrgi.com">hello@emrgi.com</a>.
 </p>
 <p>
-<small>Last updated: September 04, 2026  ·  Rendered from Rmd sources at
-<a href="https://github.com/ericscheier/emburdensynth/tree/global/site">github.com/ericscheier/emburdensynth/site</a></small>
+<small>Last updated: September 04, 2026  ·  Rendered dynamically from
+RDS caches at
+<a href="https://github.com/ericscheier/emburden-site">github.com/ericscheier/emburden-site</a></small>
 </p>
 </footer>
 </div>

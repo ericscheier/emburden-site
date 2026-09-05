@@ -11,7 +11,7 @@
 
 
 
-<title>emburden.org — Code</title>
+<title>emburden.org — Emergy</title>
 
 <script src="site_libs/header-attrs-2.30/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -453,232 +453,224 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Code</h1>
+<h1 class="title toc-ignore">Emergy — Odum’s quality-of-energy lens</h1>
 
 </div>
 
 
-<div id="the-emburden-ecosystem" class="section level1">
-<h1>The emburden ecosystem</h1>
-<p>Thirteen R packages, all open-source under MIT, all hosted at <a
-href="https://github.com/ericscheier">github.com/ericscheier</a>.</p>
-<div id="joss-readiness-overview" class="section level2">
-<h2>JOSS-readiness overview</h2>
+<div id="emergy-a-different-currency-for-energy-analysis"
+class="section level1">
+<h1>Emergy — a different currency for energy analysis</h1>
+<p>Climate-justice accounting uses <strong>CO<sub>2</sub>
+emissions</strong> as the currency. Odum’s emergy framework uses
+<strong>solar-energy equivalent embodied per joule delivered</strong>
+(measured in solar emjoules, sej). Same physical kilowatt-hour at the
+socket can carry wildly different prior emergy investment depending on
+the fuel that generated it.</p>
+<div class="callout">
+<div class="callout-title">
+Why care about a second currency
+</div>
+<p>
+Two grids that deliver identical kWh per capita can differ
+<b>15-fold</b> in the emergy they concentrate into each joule. That
+matters for questions climate-justice accounting cannot answer: “how
+much biophysical infrastructure did this energy require to produce?” and
+“how sustainably is a country converting environmental subsidy into
+human welfare?”
+</p>
+</div>
+<div id="the-transformity-spectrum" class="section level2">
+<h2>The transformity spectrum</h2>
+<p>Every fuel carries a canonical <strong>transformity</strong> — the
+sej required per joule of the output. Odum 1996’s table + Brown &amp;
+Ulgiati 2004’s revised baseline give us:</p>
 <table>
+<colgroup>
+<col width="30%" />
+<col width="40%" />
+<col width="30%" />
+</colgroup>
 <thead>
 <tr class="header">
-<th>Package</th>
-<th>LOC</th>
-<th>Tests</th>
-<th>Vignettes</th>
-<th>JOSS score</th>
-<th>Status</th>
+<th>Fuel</th>
+<th align="right">Transformity (sej/J)</th>
+<th>Where in the emergy hierarchy</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><strong><code>emburden</code></strong></td>
-<td>4,340</td>
-<td>218</td>
-<td>3</td>
-<td><strong>100</strong></td>
-<td>READY</td>
+<td>Wind (kinetic)</td>
+<td align="right">1,500</td>
+<td>Low — little prior emergy invested per J</td>
 </tr>
 <tr class="even">
-<td><strong><code>emburdenweather</code></strong></td>
-<td>7,330</td>
-<td>242</td>
-<td>3</td>
-<td><strong>90</strong></td>
-<td>READY</td>
+<td>Solar-PV (electricity)</td>
+<td align="right">3,400</td>
+<td>Low — panels themselves are direct-solar</td>
 </tr>
 <tr class="odd">
-<td><strong><code>emburdengeo</code></strong></td>
-<td>1,077</td>
-<td>24</td>
-<td>1</td>
-<td><strong>80</strong></td>
-<td>READY</td>
+<td>Bioenergy (wood, dung)</td>
+<td align="right">25,000</td>
+<td>Medium — biosphere × sunlight × years</td>
 </tr>
 <tr class="even">
-<td><strong><code>emburdenhealth</code></strong></td>
-<td>4,521</td>
-<td>49</td>
-<td>4</td>
-<td><strong>80</strong></td>
-<td>READY</td>
+<td>Coal (heat)</td>
+<td align="right">40,000</td>
+<td>Medium — plants × millions of years × geologic pressure</td>
 </tr>
 <tr class="odd">
-<td><strong><code>emburdendata</code></strong></td>
-<td>24,122</td>
-<td>269</td>
-<td>2</td>
-<td><strong>75</strong></td>
-<td>READY</td>
+<td>Natural gas (heat)</td>
+<td align="right">48,000</td>
+<td>Medium</td>
 </tr>
 <tr class="even">
-<td><strong><code>emburdensynth</code></strong></td>
-<td>19,148</td>
-<td>137</td>
-<td>2</td>
-<td><strong>75</strong></td>
-<td>READY</td>
+<td>Oil (heat)</td>
+<td align="right">54,000</td>
+<td>Medium-high</td>
 </tr>
 <tr class="odd">
-<td><code>emburdenstats</code></td>
-<td>1,943</td>
-<td>9</td>
-<td>0</td>
-<td>50</td>
-<td>needs vignette</td>
+<td>Hydro (electricity)</td>
+<td align="right">80,000</td>
+<td>High — watershed × millennia + concentrator dam</td>
 </tr>
 <tr class="even">
-<td><code>emburdenutil</code></td>
-<td>1,681</td>
-<td>3</td>
-<td>0</td>
-<td>45</td>
-<td>needs vignette</td>
-</tr>
-<tr class="odd">
-<td><code>emburdenvis</code></td>
-<td>3,732</td>
-<td>3</td>
-<td>0</td>
-<td>45</td>
-<td>needs vignette</td>
-</tr>
-<tr class="even">
-<td><code>emburdenpub</code></td>
-<td>774</td>
-<td>3</td>
-<td>0</td>
-<td>45</td>
-<td>needs vignette</td>
-</tr>
-<tr class="odd">
-<td><code>emburdentest</code></td>
-<td>483</td>
-<td>3</td>
-<td>0</td>
-<td>25</td>
-<td>dev-tool</td>
-</tr>
-<tr class="even">
-<td><code>emburdenplus</code></td>
-<td>57</td>
-<td>—</td>
-<td>—</td>
-<td>10</td>
-<td>meta-imports</td>
-</tr>
-<tr class="odd">
-<td><code>emburdener</code></td>
-<td>—</td>
-<td>—</td>
-<td>—</td>
-<td>0</td>
-<td>pre-DESCRIPTION</td>
+<td>Nuclear (electricity)</td>
+<td align="right">200,000</td>
+<td>Highest — fuel cycle + massive infrastructure</td>
 </tr>
 </tbody>
 </table>
+<p>Notice something climate-accounting hides: <strong>hydro and nuclear
+are both “clean” in CO<sub>2</sub> terms but sit at the highest
+transformity tier.</strong> They represent massive prior-emergy
+investment concentrated into each joule. Wind and solar deliver similar
+joules with far less prior emergy locked in.</p>
 </div>
-<div id="install-everything" class="section level2">
-<h2>Install everything</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># One at a time</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;ericscheier/emburden&quot;</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;ericscheier/emburdendata&quot;</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;ericscheier/emburdensynth&quot;</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co"># Or the meta-package (installs all 13):</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>remotes<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;ericscheier/emburdenplus&quot;</span>)</span></code></pre></div>
+<div id="what-our-data-reveals-across-213-countries"
+class="section level2">
+<h2>What our data reveals across 213 countries</h2>
+<p><strong>Grid transformity ranges 15× across the world’s fuel
+mixes.</strong> From <code>emergy_metrics.rds</code>:</p>
+<ul>
+<li><strong>Top-5 highest transformity</strong>: nuclear-heavy grids
+(France ~150k, Slovakia ~145k, Ukraine ~140k, Slovenia ~125k, Czech
+Republic ~115k sej/J)</li>
+<li><strong>Bottom-5 lowest transformity</strong>: wind + biomass-heavy
+grids (Denmark ~10k, Germany ~15k, Luxembourg ~13k, Lithuania ~18k,
+Estonia ~20k sej/J)</li>
+</ul>
+<p>The <strong>key insight</strong> for household energy policy: a
+Danish kilowatt-hour and a French kilowatt-hour are physically identical
+but Odum-different by an order of magnitude. Policy that treats them as
+interchangeable is missing quality-adjusted throughput.</p>
 </div>
-<div id="the-pipeline-in-5-lines" class="section level2">
-<h2>The pipeline in 5 lines</h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(emburdensynth)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">run_global_pipeline</span>(<span class="st">&quot;USA&quot;</span>, <span class="at">years =</span> <span class="dv">2023</span>)   <span class="co"># → output/global/USA_synthetic.parquet</span></span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">attach_physics_baseline</span>(<span class="st">&quot;USA&quot;</span>)             <span class="co"># → adds physics_required_kwh</span></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="fu">calculate_energy_insecurity_gap</span>(<span class="st">&quot;USA&quot;</span>)     <span class="co"># → adds eig_kwh + energy_limiting_flag</span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="fu">country_unified_metrics</span>(<span class="st">&quot;USA&quot;</span>)             <span class="co"># → EJ unification via retail prices</span></span></code></pre></div>
-</div>
-<div id="design-principles" class="section level2">
-<h2>Design principles</h2>
+<div id="three-findings-unique-to-the-emergy-lens"
+class="section level2">
+<h2>Three findings unique to the emergy lens</h2>
 <div class="card-grid">
 <div class="card">
+<div class="kicker">
+Finding 1
+</div>
 <h3>
-Open data first
+Renewable ≠ low emergy
 </h3>
 <p>
-Every downloader prefers open, direct-download APIs over commercial
-data. Fallback chains ensure graceful degradation when a source is
-temporarily unavailable.
+Hydro-heavy grids (Norway, Paraguay, Ethiopia) carry <b>high</b>
+transformity because dam infrastructure + watershed × millennia
+concentrate huge emergy per J. Wind-heavy grids (Denmark) carry
+<b>low</b> transformity — they harvest kinetic energy without a large
+prior emergy investment. The “renewable” label conflates two Odum
+categories. Emergy separates them.
 </p>
 </div>
 <div class="card">
+<div class="kicker">
+Finding 2
+</div>
 <h3>
-Reproducible caching
+Empower per capita is a biophysical standard-of-living metric
 </h3>
 <p>
-All downloads write to <code>~/.cache/emburdendata/</code> via
-<code>rappdirs</code>. Pipelines are fully reproducible if internet is
-available, fully offline if the cache is populated.
+Country empower / population — sej/person/yr — correlates only weakly
+with GDP per capita. Nuclear-heavy France scores much higher per person
+than solar-heavy California at similar income. Suggests GDP misses a
+real dimension of energy-based welfare.
 </p>
 </div>
 <div class="card">
-<h3>
-Net Energy Return math
-</h3>
-<p>
-The <code>emburden::neb_func</code> function embeds the canonical
-aggregation math correcting a documented bias in naive weighted-mean-
-of-ratios.
-</p>
+<div class="kicker">
+Finding 3
 </div>
-<div class="card">
 <h3>
-Colorblind-safe visualization
+Household emergy-per-dollar arbitrage exposes hidden subsidies
 </h3>
 <p>
-Every palette is Color-Universal-Design compliant. See
-<code>emburdenpub::get_burden_palette</code> and
-<code>emburdenvis::theme_emburden_emrgi</code>.
-</p>
-</div>
-<div class="card">
-<h3>
-Tidyverse + snake_case
-</h3>
-<p>
-All column names snake_case. All data-frame handling via dplyr/tidyr
-with the base-R pipe (<code>|&gt;</code>).
-</p>
-</div>
-<div class="card">
-<h3>
-Testing scaffolding
-</h3>
-<p>
-<code>emburdentest</code> provides synthetic-data generators + test
-utilities that let any downstream package be unit-tested against
-reproducible fixtures.
+When a household’s sej-per-dollar exceeds the national average, they’re
+receiving a subsidised bargain on high-emergy energy — typical in
+nuclear-heavy grids with residential tariffs subsidised below marginal
+cost. When it’s <em>below</em>, they’re paying a premium for low-emergy
+energy — typical in biomass + diesel-dependent low-access economies
+where transaction costs eat their expenditure.
 </p>
 </div>
 </div>
 </div>
-<div id="contribute" class="section level2">
-<h2>Contribute</h2>
-<ul>
-<li><strong>Bug reports + feature requests</strong>: GitHub Issues on
-the relevant package repository</li>
-<li><strong>Pull requests</strong>: welcome; please open an Issue first
-to discuss</li>
-<li><strong>Ecosystem-wide questions</strong>: <a
-href="mailto:hello@emrgi.com">hello@emrgi.com</a></li>
-</ul>
+<div id="the-math-short-version" class="section level2">
+<h2>The math (short version)</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(emburdensynth)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co"># Transformity of the fuel mix in a country-year</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="fu">grid_transformity</span>(<span class="st">&quot;NOR&quot;</span>, <span class="dv">2020</span>)                   <span class="co"># ~74k sej/J (hydro-heavy)</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">grid_transformity</span>(<span class="st">&quot;FRA&quot;</span>, <span class="dv">2020</span>)                   <span class="co"># ~150k sej/J (nuclear-heavy)</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">grid_transformity</span>(<span class="st">&quot;DNK&quot;</span>, <span class="dv">2020</span>)                   <span class="co"># ~10k sej/J (wind-heavy)</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co"># Household empower — sej/yr delivered per household</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="fu">household_empower</span>(<span class="st">&quot;USA&quot;</span>, <span class="dv">2020</span>, <span class="at">kwh_per_year =</span> <span class="dv">11000</span>)  <span class="co"># sej per year</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co"># Emergy Sustainability Index (Odum)</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="fu">household_ESI</span>(<span class="st">&quot;NOR&quot;</span>, <span class="dv">2020</span>)  <span class="co"># named vec: R_pct, NR_pct, ELR, EYR, ESI</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co"># National empower / GDP</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="fu">emergy_per_money</span>(<span class="st">&quot;FRA&quot;</span>, <span class="dv">2020</span>)                    <span class="co"># sej per $</span></span></code></pre></div>
+<p>All functions ship in the <a
+href="https://github.com/ericscheier/emburdensynth/blob/global/R/emergy.R"><code>emburden</code>
+R package</a>. The full metric table for 213 countries is at <a
+href="https://github.com/ericscheier/emburdensynth/tree/glob_ln_docs/global_analysis_data"><code>docs/global_analysis_data/emergy_metrics.rds</code></a>.</p>
+<div class="callout warning">
+<div class="callout-title">
+Additive, not replacement
+</div>
+<p>
+Emergy accounting does not supersede CO<sub>2</sub> accounting. They
+answer different questions. The climate-justice mismatch (67× per-capita
+cumulative CO<sub>2</sub> disparity) still stands as a headline for who
+pays what. Emergy adds a quality axis: <em>what kind</em> of energy they
+pay for.
+</p>
+</div>
+</div>
+<div id="the-six-panels" class="section level2">
+<h2>The six panels</h2>
+<p>The <a href="global_analysis.pdf">technical report</a> (Layer M, pp
+82–91) shows six emergy figures:</p>
+<ol style="list-style-type: decimal">
+<li>Grid transformity world map (sej/J)</li>
+<li>Country empower per capita world map (sej/person/yr)</li>
+<li>ESI vs GDP-pc scatter (weak correlation)</li>
+<li>Household em/USD arbitrage scatter</li>
+<li>Cell-level %R world map (17,028 cells)</li>
+<li>Cell-level emergy insecurity gap (sej/yr)</li>
+</ol>
+<p>See also: <a href="atlas.html">The Atlas</a> · <a
+href="methods.html">Methods</a> · <a href="data.html">Data
+provenance</a> · <a href="papers.html">Papers</a> · <a
+href="code.html">Code</a></p>
 <footer>
 <p>
-<a href="/">← back to home</a> · <a href="papers.html">papers</a> ·
-<a href="atlas.html">atlas</a>
+<a href="/">← back to home</a> · <a href="access.html">access +
+affordability + QoS →</a>
 </p>
 </footer>
 </div>

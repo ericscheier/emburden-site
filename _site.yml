@@ -6,6 +6,10 @@ navbar:
   left:
     - text: "Home"
       href: "index.html"
+    - text: "Emergy"
+      href: "emergy.html"
+    - text: "Access + QoS"
+      href: "access.html"
     - text: "The Atlas"
       href: "atlas.html"
     - text: "Methods"

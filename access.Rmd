@@ -1,0 +1,135 @@
+---
+title: "Access, affordability, and quality of service"
+pagetitle: "emburden.org — Access + Affordability + QoS"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE,
+                      fig.align="center", out.width="100%",
+                      fig.width=10, fig.height=6, dpi=110)
+suppressPackageStartupMessages({library(dplyr); library(ggplot2)})
+DATA_DIR <- "../docs/global_analysis_data"
+BR <- c(g = "#228b22", gd = "#176b17", gdd = "#0f4d0f", gold = "#b5791b",
+        ink = "#1d2a1d", mut = "#566656", line = "#d6e4d6", bg = "#f3f8f3",
+        charge = "#c0392b", warn = "#8a5a16")
+source("R/counts.R")
+summ <- readRDS(file.path(DATA_DIR, "summary_enriched.rds"))
+wa <- readRDS(file.path(DATA_DIR, "who_air.rds"))
+elec <- tryCatch(readRDS(file.path(DATA_DIR, "wb_elec_access_ts.rds")), error=function(e) NULL)
+```
+
+# Access, affordability, and quality of service
+
+Being "connected to the grid" is not the same as having reliable,
+clean, affordable energy. Energy insecurity concentrates where three
+axes intersect:
+
+1. **Access** — is a working connection physically available?
+2. **Affordability** — can the household pay the tariff without
+   forgoing food, medicine, education?
+3. **Quality of service (QoS)** — when the household pays, does
+   power actually arrive, at usable voltage, without frequent
+   interruption?
+
+<div class="callout">
+<div class="callout-title">Why QoS is the missing axis</div>
+<p>Most policy dashboards report "% population with electricity access"
+as a binary. But a household in a low-QoS grid — 40 outages a month,
+brown-outs during peak load, chronic voltage sag — is not really
+served. ESMAP's Multi-Tier Framework tries to correct this with a
+0-5 scale on capacity / availability / reliability / quality /
+affordability / safety, but coverage is still sparse (~26 countries
+today).</p>
+</div>
+
+## What our data shows
+
+### Access — the easy half
+
+WB's `EG.ELC.ACCS.ZS` (electricity access %) covers
+`r iso3_count("wb_elec_access_ts.rds")` countries × `r year_range("wb_elec_access_ts.rds")`.
+The 20 least-electrified countries hold `r round(sum(readRDS(file.path(DATA_DIR, "climate_justice_headline_v2.rds"))$low_acc$pop_owid) / 1e6)` million people
+(**6.1% of humanity**). All 20 are in Sub-Saharan Africa or on
+low-income islands (Haiti, PNG).
+
+### Clean-fuel access — the cooking half
+
+WHO / WB clean-fuel-for-cooking (`EG.CFT.ACCS.ZS`) is the sibling
+metric for the other half of household energy. Where electricity
+access has climbed from 76% (2000) → 91% (2023) globally, clean-fuel
+access has climbed only 51% → 74%. Roughly **2 billion people still
+cook with biomass, kerosene, or coal**. Coverage in our cache:
+`r wa$clean |> pull(iso3) |> unique() |> length()` countries ×
+`r range(wa$clean$year)[1]`–`r range(wa$clean$year)[2]`.
+
+### Affordability — the harder axis
+
+Retail electricity prices vary >20× across countries in
+`summary_enriched.rds` (`r sum(!is.na(summ$retail_price))` countries
+with data). Compressed household budgets in low-income economies mean
+even "affordable" tariffs per kWh consume double-digit shares of
+income.
+
+### Quality of service — the frontier
+
+We have three partial signals:
+
+- **PM~2.5~ exposure** (WHO) — an indirect indicator: high PM~2.5~
+  correlates with biomass indoor combustion and low-quality
+  electrification. Coverage: `r iso3_count("who_air.rds", data_dir = DATA_DIR)` countries.
+- **EAGLE-I outages** (US Oak Ridge) — SAIDI/SAIFI-equivalent
+  per-county × per-15-minute outage records. US only.
+- **ESMAP Multi-Tier Framework** — 6 QoS dimensions, 0-5 tiers.
+  ~26 countries with data. Cache pull pending (`scripts/build_esmap_mtf_tiers.R`).
+
+## The intersectional problem
+
+<blockquote>
+Access without affordability is a bill that sinks the household.
+Access without QoS is a connection that doesn't work when needed.
+Access with all three is what "energy insecurity" is really about.
+</blockquote>
+
+Our synthesis lets us build the three-way intersection:
+**"connected + affordable + reliable" vs "connected + expensive +
+unreliable"** — the latter is where energy insecurity concentrates,
+and it's invisible to any single-axis measure.
+
+## The distribution of unmet quality
+
+Where these three axes fail together tends to be highly correlated
+with:
+
+- **Cell-level suppression flags** — our physics baseline shows
+  that in `r iso3_count("cell_grid_wide.rds")` covered countries,
+  `r round(mean(readRDS(file.path(DATA_DIR, "cell_grid_wide.rds"))$suppression_share, na.rm=TRUE) * 100, 1)`% of cells
+  fall below 90% of physics-required kWh
+- **PM~2.5~ hotspots** — sub-national concentration matches suppressed
+  cells in South Asia + SSA
+- **Non-clean cooking** — the 74% global clean-fuel access still leaves
+  roughly 2 billion people with combustion-based cooking
+
+## Toward a unified QoS index
+
+Once the ESMAP MTF pull lands, we'll combine:
+- ESMAP tier × 6 dimensions (0-5 each, 26 countries)
+- WB electricity access % (189 countries)
+- WHO clean-fuel access % (189 countries)
+- PM~2.5~ mean exposure (200 countries)
+- Retail-price affordability index
+- Our synth-based cell-level suppression share
+
+...into a single **Household Service Index** that answers the
+practical question: *"How well-served, actually, are the households
+in this cell?"*
+
+## See also
+
+- [The Atlas](atlas.html) — canonical burden map + climate-justice scatter
+- [Emergy](emergy.html) — Odum quality lens on the same data
+- [Methods](methods.html) — how the pipeline works
+- [Papers in flight](papers.html)
+
+<footer>
+<p><a href="/">← back to home</a> · <a href="emergy.html">← emergy</a> · <a href="atlas.html">the atlas →</a></p>
+</footer>

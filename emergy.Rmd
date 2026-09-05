@@ -1,0 +1,169 @@
+---
+title: "Emergy — Odum's quality-of-energy lens"
+pagetitle: "emburden.org — Emergy"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE,
+                      fig.align="center", out.width="100%",
+                      fig.width=10, fig.height=6, dpi=110)
+suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(sf)})
+DATA_DIR <- "../docs/global_analysis_data"
+# Bundled brand palette (matches emburdensynR/brand_palette.R:emrgi_brand_colors)
+BR <- c(g = "#228b22", gd = "#176b17", gdd = "#0f4d0f", gold = "#b5791b",
+        ink = "#1d2a1d", mut = "#566656", line = "#d6e4d6", bg = "#f3f8f3",
+        charge = "#c0392b", warn = "#8a5a16")
+source("R/counts.R")
+em <- readRDS(file.path(DATA_DIR, "emergy_metrics.rds"))
+em_c <- em$country
+em_cell <- em$cell
+world <- tryCatch(readRDS(file.path(DATA_DIR, "world_sf.rds")), error=function(e) NULL)
+```
+
+# Emergy — a different currency for energy analysis
+
+Climate-justice accounting uses **CO~2~ emissions** as the currency.
+Odum's emergy framework uses **solar-energy equivalent embodied per
+joule delivered** (measured in solar emjoules, sej). Same physical
+kilowatt-hour at the socket can carry wildly different prior emergy
+investment depending on the fuel that generated it.
+
+<div class="callout">
+<div class="callout-title">Why care about a second currency</div>
+<p>Two grids that deliver identical kWh per capita can differ
+<b>15-fold</b> in the emergy they concentrate into each joule. That
+matters for questions climate-justice accounting cannot answer:
+"how much biophysical infrastructure did this energy require to
+produce?" and "how sustainably is a country converting environmental
+subsidy into human welfare?"</p>
+</div>
+
+## The transformity spectrum
+
+Every fuel carries a canonical **transformity** — the sej required per
+joule of the output. Odum 1996's table + Brown & Ulgiati 2004's
+revised baseline give us:
+
+| Fuel | Transformity (sej/J) | Where in the emergy hierarchy |
+|---|---:|---|
+| Wind (kinetic) | 1,500 | Low — little prior emergy invested per J |
+| Solar-PV (electricity) | 3,400 | Low — panels themselves are direct-solar |
+| Bioenergy (wood, dung) | 25,000 | Medium — biosphere × sunlight × years |
+| Coal (heat) | 40,000 | Medium — plants × millions of years × geologic pressure |
+| Natural gas (heat) | 48,000 | Medium |
+| Oil (heat) | 54,000 | Medium-high |
+| Hydro (electricity) | 80,000 | High — watershed × millennia + concentrator dam |
+| Nuclear (electricity) | 200,000 | Highest — fuel cycle + massive infrastructure |
+
+Notice something climate-accounting hides: **hydro and nuclear are
+both "clean" in CO~2~ terms but sit at the highest transformity tier.**
+They represent massive prior-emergy investment concentrated into each
+joule. Wind and solar deliver similar joules with far less prior
+emergy locked in.
+
+## What our data reveals across `r nrow(em_c)` countries
+
+**Grid transformity ranges 15× across the world's fuel mixes.** From
+`emergy_metrics.rds`:
+
+- **Top-5 highest transformity**: nuclear-heavy grids
+  (France ~150k, Slovakia ~145k, Ukraine ~140k, Slovenia ~125k,
+  Czech Republic ~115k sej/J)
+- **Bottom-5 lowest transformity**: wind + biomass-heavy grids
+  (Denmark ~10k, Germany ~15k, Luxembourg ~13k, Lithuania ~18k,
+  Estonia ~20k sej/J)
+
+The **key insight** for household energy policy: a Danish
+kilowatt-hour and a French kilowatt-hour are physically identical but
+Odum-different by an order of magnitude. Policy that treats them as
+interchangeable is missing quality-adjusted throughput.
+
+## Three findings unique to the emergy lens
+
+<div class="card-grid">
+
+<div class="card">
+<div class="kicker">Finding 1</div>
+<h3>Renewable ≠ low emergy</h3>
+<p>Hydro-heavy grids (Norway, Paraguay, Ethiopia) carry <b>high</b>
+transformity because dam infrastructure + watershed × millennia
+concentrate huge emergy per J. Wind-heavy grids (Denmark) carry
+<b>low</b> transformity — they harvest kinetic energy without a large
+prior emergy investment. The "renewable" label conflates two Odum
+categories. Emergy separates them.</p>
+</div>
+
+<div class="card">
+<div class="kicker">Finding 2</div>
+<h3>Empower per capita is a biophysical standard-of-living metric</h3>
+<p>Country empower / population — sej/person/yr — correlates only
+weakly with GDP per capita. Nuclear-heavy France scores much higher
+per person than solar-heavy California at similar income. Suggests
+GDP misses a real dimension of energy-based welfare.</p>
+</div>
+
+<div class="card">
+<div class="kicker">Finding 3</div>
+<h3>Household emergy-per-dollar arbitrage exposes hidden subsidies</h3>
+<p>When a household's sej-per-dollar exceeds the national average,
+they're receiving a subsidised bargain on high-emergy energy —
+typical in nuclear-heavy grids with residential tariffs subsidised
+below marginal cost. When it's <em>below</em>, they're paying a
+premium for low-emergy energy — typical in biomass + diesel-dependent
+low-access economies where transaction costs eat their expenditure.</p>
+</div>
+
+</div>
+
+## The math (short version)
+
+```r
+library(emburdensynth)
+
+# Transformity of the fuel mix in a country-year
+grid_transformity("NOR", 2020)                   # ~74k sej/J (hydro-heavy)
+grid_transformity("FRA", 2020)                   # ~150k sej/J (nuclear-heavy)
+grid_transformity("DNK", 2020)                   # ~10k sej/J (wind-heavy)
+
+# Household empower — sej/yr delivered per household
+household_empower("USA", 2020, kwh_per_year = 11000)  # sej per year
+
+# Emergy Sustainability Index (Odum)
+household_ESI("NOR", 2020)  # named vec: R_pct, NR_pct, ELR, EYR, ESI
+
+# National empower / GDP
+emergy_per_money("FRA", 2020)                    # sej per $
+```
+
+All functions ship in the [`emburden` R package](https://github.com/ericscheier/emburdensynth/blob/global/R/emergy.R).
+The full metric table for `r nrow(em_c)` countries is at
+[`docs/global_analysis_data/emergy_metrics.rds`](https://github.com/ericscheier/emburdensynth/tree/glob../docs/global_analysis_data).
+
+<div class="callout warning">
+<div class="callout-title">Additive, not replacement</div>
+<p>Emergy accounting does not supersede CO<sub>2</sub> accounting. They
+answer different questions. The climate-justice mismatch (67× per-capita
+cumulative CO<sub>2</sub> disparity) still stands as a headline for who
+pays what. Emergy adds a quality axis: <em>what kind</em> of energy
+they pay for.</p>
+</div>
+
+## The six panels
+
+The [technical report](global_analysis.pdf) (Layer M, pp 82–91) shows
+six emergy figures:
+
+1. Grid transformity world map (sej/J)
+2. Country empower per capita world map (sej/person/yr)
+3. ESI vs GDP-pc scatter (weak correlation)
+4. Household em/USD arbitrage scatter
+5. Cell-level %R world map (17,028 cells)
+6. Cell-level emergy insecurity gap (sej/yr)
+
+See also: [The Atlas](atlas.html) · [Methods](methods.html) ·
+[Data provenance](data.html) · [Papers](papers.html) ·
+[Code](code.html)
+
+<footer>
+<p><a href="/">← back to home</a> · <a href="access.html">access + affordability + QoS →</a></p>
+</footer>
