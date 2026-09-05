@@ -751,6 +751,34 @@ publish as panels; the physics-required baseline uses a single climate
 normal; retail prices are a 2022-2024 vintage that carries forward.
 Follow-up work — see <a
 href="https://github.com/ericscheier/emburdensynth/blob/global/FUTURE_WORK.md"><code>FUTURE_WORK.md</code></a>.</p>
+</div>
+<div id="bundle-d-within-country-inequality-in-emergy-terms"
+class="section level2">
+<h2>Bundle D — within-country inequality in emergy terms</h2>
+<p><code>choose_country_icdf()</code> in the emburdensynth package
+cascades through three income-distribution sources:
+<strong>WID.world</strong> percentile bands (fine resolution, best
+available), <strong>World Bank</strong> quintile + tail-decile shares
+(medium), and a <strong>Hruschka</strong> log-normal fallback
+(Gini-driven, last resort). Bundle D wires that cascade into HEII: for
+each of the 50 HEII countries, we compute HEII_norm at income P10, P50,
+and P90 — holding delivered kWh + spend + physics-required at the
+country median. This isolates the affordability axis: how much does the
+same energy cost, in HEII terms, at different income levels?</p>
+<div class="figure" style="text-align: center">
+<img src="emergy_files/figure-html/fig-heii-p10p90-site-1.png" alt="HEII inequality ratio HEII_norm(P10)/HEII_norm(P90), top 15 countries." width="100%" />
+<p class="caption">
+HEII inequality ratio HEII_norm(P10)/HEII_norm(P90), top 15 countries.
+</p>
+</div>
+<p>The median country’s HEII_norm(P10)/HEII_norm(P90) ratio is
+<strong>21x</strong> — the poorest decile carries 21x the
+emergy-insecurity burden of the richest, at fixed energy consumption.
+<strong>COL</strong> tops the ranking at 15789x, driven by a very thin
+P10 income + Pareto-heavy top decile. This is a <em>lower bound</em> —
+in reality poor households also consume less kWh, so their
+<code>delivered_empower</code> is smaller and the true HEII gap
+larger.</p>
 <div class="callout">
 <div class="callout-title">
 Backward-compatible with the existing insecurity score

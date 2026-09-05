@@ -236,6 +236,47 @@ panels; the physics-required baseline uses a single climate normal;
 retail prices are a 2022-2024 vintage that carries forward.
 Follow-up work — see [`FUTURE_WORK.md`](https://github.com/ericscheier/emburdensynth/blob/global/FUTURE_WORK.md).
 
+## Bundle D — within-country inequality in emergy terms
+
+`choose_country_icdf()` in the emburdensynth package cascades through
+three income-distribution sources: **WID.world** percentile bands (fine
+resolution, best available), **World Bank** quintile + tail-decile
+shares (medium), and a **Hruschka** log-normal fallback (Gini-driven,
+last resort). Bundle D wires that cascade into HEII: for each of the
+`r sum(!is.na(em_c$heii_ratio_p10_p90))` HEII countries, we compute
+HEII_norm at income P10, P50, and P90 — holding delivered kWh + spend
++ physics-required at the country median. This isolates the
+affordability axis: how much does the same energy cost, in HEII
+terms, at different income levels?
+
+```{r fig-heii-p10p90-site, fig.height=5, fig.width=9, fig.cap="HEII inequality ratio HEII_norm(P10)/HEII_norm(P90), top 15 countries."}
+dec <- em_c |> filter(is.finite(heii_ratio_p10_p90),
+                       heii_ratio_p10_p90 > 0) |>
+  arrange(desc(heii_ratio_p10_p90)) |>
+  head(15) |> mutate(iso3 = factor(iso3, levels = rev(iso3)))
+if (nrow(dec) > 0L) {
+  ggplot(dec, aes(x = heii_ratio_p10_p90, y = iso3, fill = icdf_family)) +
+    geom_col(alpha = 0.9) +
+    scale_x_log10(labels = scales::comma_format(), n.breaks = 6) +
+    labs(x = "HEII_norm(P10) / HEII_norm(P90) — log scale", y = NULL,
+         title = "Top-15 countries by within-country HEII inequality") +
+    theme_minimal(base_size = 10) +
+    theme(legend.position = "bottom") +
+    scale_fill_manual(values = unname(BR)[1:3], name = "ICDF source")
+}
+```
+
+```{r heii-decile-narrative, results="asis"}
+if (nrow(em_c[is.finite(em_c$heii_ratio_p10_p90), ]) > 0L) {
+  d <- em_c[is.finite(em_c$heii_ratio_p10_p90), ]
+  top1 <- d[which.max(d$heii_ratio_p10_p90), ]
+  med <- median(d$heii_ratio_p10_p90)
+  cat(sprintf(
+"The median country's HEII_norm(P10)/HEII_norm(P90) ratio is **%.0fx** — the poorest decile carries %.0fx the emergy-insecurity burden of the richest, at fixed energy consumption. **%s** tops the ranking at %.0fx, driven by a very thin P10 income + Pareto-heavy top decile. This is a *lower bound* — in reality poor households also consume less kWh, so their `delivered_empower` is smaller and the true HEII gap larger.",
+  med, med, top1$iso3, top1$heii_ratio_p10_p90))
+}
+```
+
 <div class="callout">
 <div class="callout-title">Backward-compatible with the existing insecurity score</div>
 <p>The Round-19 <code>country_unified_metrics()</code> function
