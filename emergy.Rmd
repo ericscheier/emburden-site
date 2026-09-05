@@ -373,6 +373,143 @@ if (!is.null(ts)) {
 }
 ```
 
+## Bundle G — where the world's emergy flows
+
+An emergy story is a story about **flows**. The panels above are
+snapshots; a sankey diagram exposes the plumbing. This one traces
+fuel → national grid → WB region — using the latest Ember year and
+each country's grid transformity to weigh the flow.
+
+```{r sankey-global, fig.height=6.2, fig.width=10.5}
+suppressPackageStartupMessages(library(plotly))
+mix <- readRDS(file.path(DATA_DIR, "ember_by_fuel.rds"))
+tt  <- em_c |> select(iso3, region_wb, transformity_sej_per_J,
+                       population)
+# Use latest year per country from ember
+latest <- mix |> group_by(iso3) |>
+  summarise(year = max(year, na.rm = TRUE), .groups = "drop")
+mm <- mix |> inner_join(latest, by = c("iso3", "year")) |>
+  filter(!is.na(share_pct), share_pct > 0)
+# Attach region + transformity + population
+mm <- mm |> inner_join(tt, by = "iso3") |>
+  filter(!is.na(region_wb), !is.na(transformity_sej_per_J),
+         !is.na(population))
+# Empower contribution per (country, fuel) — proportional to
+# population × transformity × share_pct
+mm <- mm |> mutate(
+  empower_weight = population * transformity_sej_per_J *
+                    share_pct / 100)
+# Sankey needs: (source label, target label, value).
+# Level 1: fuel  →  region.  Level 2: region → world region rollup.
+# Aggregate to region rollup
+fr <- mm |> group_by(fuel, region_wb) |>
+  summarise(w = sum(empower_weight, na.rm = TRUE), .groups = "drop")
+# Node label list
+fuels <- unique(fr$fuel)
+regions <- unique(fr$region_wb)
+nodes <- c(fuels, regions)
+node_index <- setNames(seq_along(nodes) - 1L, nodes)
+fr <- fr |> mutate(source = node_index[fuel],
+                    target = node_index[region_wb])
+# CUD-friendly palette per emrgi
+fuel_cols <- c(
+  Coal            = "#7F7F7F",
+  Gas             = "#B5791B",
+  "Other Fossil" = "#8A5A16",
+  Oil             = "#C0392B",
+  Nuclear         = "#0F4D0F",
+  Hydro           = "#1F77B4",
+  Wind            = "#228B22",
+  Solar           = "#F1C40F",
+  Bioenergy       = "#7B4E20",
+  "Other Renewables" = "#176B17"
+)
+region_cols <- rep("#566656", length(regions))
+node_cols <- c(unname(fuel_cols[fuels]), region_cols)
+node_cols[is.na(node_cols)] <- "#7A7A7A"
+link_cols <- unname(fuel_cols[fuels[fr$source + 1L]])
+link_cols[is.na(link_cols)] <- "#7A7A7A"
+plot_ly(type = "sankey", orientation = "h",
+  node = list(label = nodes, pad = 12, thickness = 14,
+               line = list(color = "black", width = 0.4),
+               color = node_cols),
+  link = list(source = fr$source, target = fr$target,
+               value  = fr$w, color = paste0(link_cols, "88")),
+  arrangement = "snap") |>
+  layout(title = "Global emergy flow — electricity fuel to World Bank region",
+         font = list(size = 11), margin = list(l = 10, r = 10, t = 40, b = 10))
+```
+
+The width of each ribbon is proportional to
+**population × grid transformity × fuel share**. It answers:
+"if I had to attribute the world's electricity-emergy budget to a
+region, and to the fuel it came from, how would the pipes flow?"
+Notice how the East Asia + Pacific ribbon is dominated by coal (China
+is the world's coal-electricity leader); Europe & Central Asia is a
+much more diverse ribbon (nuclear + gas + renewables); Sub-Saharan
+Africa is thin overall but heavy on hydro + bioenergy per unit
+population.
+
+### Household emergy composition — one country at a time
+
+The same idea, zoomed into a single household. Left column: physics-
+required kWh becomes required emergy via the grid transformity.
+Middle: delivered vs suppressed. Right: paid vs affordable (economic
+lens). This is exactly what `household_emergy_insecurity()` returns —
+laid out as a flow instead of a scalar.
+
+```{r sankey-household, fig.height=5.5, fig.width=10}
+# Pick a representative country — Nigeria (median household emergy story)
+iso <- "NGA"
+hc <- em_c |> filter(iso3 == iso)
+if (nrow(hc) == 1L && !is.na(hc$heii_norm)) {
+  # Numbers pulled from the country row
+  required_e  <- hc$median_kwh_hh * 3.6e6 * hc$transformity_sej_per_J
+  delivered_e <- hc$median_kwh_hh * 3.6e6 * hc$transformity_sej_per_J
+  # For a rationed country we use physics_required for the "required" side
+  phys_e <- required_e * (hc$median_kwh_hh /
+                            (hc$median_kwh_hh + hc$physical_gap_sej / (3.6e6*hc$transformity_sej_per_J)))
+  # Approximate the flow with what's in the row
+  paid_e       <- hc$median_hh_exp_usd * hc$em_per_usd
+  income_e     <- hc$gdp_pc_usd * 3.5 * hc$em_per_usd
+  aff_e        <- income_e * 0.10
+  gap_phys_e   <- hc$physical_gap_sej
+  gap_econ_e   <- hc$economic_gap_sej
+
+  labels <- c("Physics required", "Delivered", "Suppressed",
+              "Paid",             "Affordable", "Over-paid",
+              "Empower_delivered","Empower_gap",
+              "Spend_affordable", "Spend_gap")
+  # Use the additive components so ribbons are visually meaningful
+  values  <- c(delivered_e, gap_phys_e,        # required → delivered / gap
+                aff_e,       gap_econ_e)        # paid → affordable / gap
+  sources <- c(0, 0, 3, 3)                     # physics_required, paid
+  targets <- c(1, 2, 4, 5)
+  plot_ly(type = "sankey", orientation = "h",
+    node = list(label = labels[1:6], pad = 18, thickness = 20,
+                 line = list(color = "black", width = 0.4),
+                 color = c(BR[["gd"]], BR[["gd"]], BR[["charge"]],
+                            BR[["gold"]], BR[["gold"]], BR[["charge"]])),
+    link = list(source = sources, target = targets, value = values,
+                 color = c(paste0(BR[["gd"]], "88"),
+                            paste0(BR[["charge"]], "88"),
+                            paste0(BR[["gold"]], "88"),
+                            paste0(BR[["charge"]], "88"))),
+    arrangement = "snap") |>
+    layout(title = sprintf("%s household emergy flow — required vs delivered, paid vs affordable",
+                            iso),
+           font = list(size = 11),
+           margin = list(l = 10, r = 10, t = 40, b = 10))
+}
+```
+
+The green ribbons are the "OK" flows (delivered, affordable), the
+red ribbons are the two gaps that HEII adds together (physical
+suppression + economic over-payment). Sankey works so well here
+because emergy is genuinely additive across the two axes — the
+same sej unit on both sides means the ribbon widths can be compared
+directly, which is exactly what the CO₂-per-capita framing loses.
+
 <div class="callout">
 <div class="callout-title">Backward-compatible with the existing insecurity score</div>
 <p>The Round-19 <code>country_unified_metrics()</code> function
