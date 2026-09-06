@@ -1297,6 +1297,54 @@ synthesis). Provenance is exposed in `sector_source`:
 - `"UN Energy Balances (direct)"` — same underlying questionnaire, PDF-parsed
 - `"IEA-matrix + WB-modulator (enriched synthesis)"` — fallback
 
+**IEA licensing (added Q3.7):** IEA WEB is a Non-CC paid product
+(iea.org/terms). Derivations inherit Non-CC restrictions and cannot
+be redistributed. The pipeline handles this by (a) gitignoring
+`docs/global_analysis_data/iea_web.rds`, (b) requiring
+`IEA_LICENCE_ACKNOWLEDGED=true` before `build_iea_web.R` will run,
+(c) letting `build_em_c_extended.R` silently fall back to UN direct
++ enriched synthesis when the IEA rds is absent. The public pipeline
+never redistributes IEA rows; personal-seat holders can populate
+locally without touching the shared repo.
+
+### Bundle Q3.7 — expanded WB WDI columns available in `em_c_extended`
+
+Beyond the 20 WB indicators used in the Q3 figure above,
+`em_c_extended` now also carries (via
+`emburdensynth/scripts/build_wb_se4all.R`):
+
+- **GHG by IPCC AR5 sector** (`wb_ghg_co2_{transport,buildings,industry,power,fugitive,agriculture,waste}_mt`,
+  `wb_ghg_co2_pc`, `wb_ghg_co2_intensity_gdp_pppkd`, `wb_ghg_{ch4,n2o}_total_mt`) —
+  independent cross-check on synthesized sector shares; for
+  low-biomass countries (`biomass_share < 15%`) transport-TFEC-share
+  correlates with transport-CO2-share at r=0.77.
+- **PM2.5 exposure + air-pollution mortality**
+  (`wb_pm25_pop_wt_ugm3`, `wb_pm25_pop_above_who_pct`,
+  `wb_airpol_mortality_per100k`) — closes the loop from biomass-cooking
+  access to actual attributable deaths.
+- **Full electricity mix + rural/urban access split**
+  (`wb_elec_from_{hydro,nuclear,renewable}_pct`,
+  `wb_electricity_access_{rural,urban}_pct`) — completes the
+  fossil/clean partition, allows P10 subsistence sub-sizing by
+  rural-electricity gap.
+- **Energy imports + refreshed intensity**
+  (`wb_energy_imports_net_pct`, `wb_energy_intensity_2021ppp`,
+  `wb_combustible_renew_pct`).
+- **Poverty tiers + inequality** (`wb_poverty_{gini,headcount_215,365,685}_pct`,
+  `wb_multidim_poverty_{headcount,intensity}_pct`) — cross-validates
+  the icdf_family income model behind HEII P10/P90.
+- **Fuel-trade dependency** (`wb_fuel_{imports,exports}_pct_merch`) —
+  price-shock vulnerability indicator.
+- **WB Green Accounting damage**
+  (`wb_adj_{energy_depletion,particulate_damage}_{usd,pct_gni}`) —
+  Bank's externalized-cost analogue of Odum's ESI; ready for
+  side-by-side reporting.
+
+Coverage varies 108-243 countries per indicator; full column list in
+the rds file. New figures using these tiers (PM2.5 health overlay
+onto Q2 spectral, GHG-sector cross-check panel) are planned but not
+yet rendered in this document.
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
