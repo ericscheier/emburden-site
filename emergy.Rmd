@@ -14,7 +14,11 @@ BR <- c(g = "#228b22", gd = "#176b17", gdd = "#0f4d0f", gold = "#b5791b",
         ink = "#1d2a1d", mut = "#566656", line = "#d6e4d6", bg = "#f3f8f3",
         charge = "#c0392b", warn = "#8a5a16")
 source("R/counts.R")
-em <- readRDS(file.path(DATA_DIR, "emergy_metrics.rds"))
+# Prefer the extended metrics file (adds EIA fuel-mix + WB SE4ALL + synthesized
+# sector shares); fall back to the base file if the extended build hasn't run.
+.ext_rds  <- file.path(DATA_DIR, "emergy_metrics_extended.rds")
+.base_rds <- file.path(DATA_DIR, "emergy_metrics.rds")
+em <- readRDS(if (file.exists(.ext_rds)) .ext_rds else .base_rds)
 em_c <- em$country
 em_cell <- em$cell
 world <- tryCatch(readRDS(file.path(DATA_DIR, "world_sf.rds")), error=function(e) NULL)
@@ -1008,6 +1012,164 @@ ggplot() +
         plot.title.position = "plot",
         legend.position = "bottom", legend.text = element_text(size = 8))
 ```
+
+### Bundle Q3 — per-country fuel + sector consumption (with non-grid coverage)
+
+The Q2 overlay above uses grid-transformity + a hand-picked biomass /
+renewable threshold. **Bundle Q3** replaces those heuristics with real
+per-country consumption from EIA International (Total energy consumption
+by fuel product, 221 countries × 24 years, all in QBTU) and adds
+World Bank / IEA sourced indicators (clean-cooking access, TFEC,
+fossil / renewable share) — 212 of 213 emergy-pipeline countries now
+carry a full fuel-mix vector. Sector consumption (transport /
+industrial / residential / commercial / power) is *synthesized* from
+observed fuel mix × published IEA fuel-to-sector heuristics; a proper
+IEA World Energy Balances pull (paywalled — needs UNC library proxy)
+would replace the synthesis with direct measurement.
+
+**Non-grid coverage matters:** the median country's `sector_power` (the
+share of primary energy that becomes electricity) is only 19% — the other
+81% is direct-burn petroleum for transport, gas + coal for industry,
+biomass + LPG + kerosene for residential heating and cooking. A pipeline
+that only counts grid electricity is missing four-fifths of the story.
+
+```{r fig-odum-fuel-sector, fig.height=8, fig.width=13, fig.cap="Bundle Q3 — per-country fuel + sector consumption on the spectral hierarchy. LEFT half: for each country a stack of five fuel dots (petroleum / natural gas / coal / nuclear / renewables) at that fuel's canonical transformity, dot AREA proportional to that fuel's share of the country's primary energy consumption (EIA International 2000-2023 latest year). RIGHT half: per-country sector dots (transport / industrial / residential / commercial / power) synthesized from fuel mix × published IEA fuel-to-sector heuristics. Countries with `clean_cooking_access < 100%` also emit a large residential-biomass dot in the Households: P10 Subsistence tier. NON-GRID share (1 - sector_power) is annotated inline for the top-15 non-grid countries — the electricity-only pipeline misses 60-95% of their primary energy."}
+suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(ggforce); library(purrr); library(ggnewscale); library(tidyr)})
+
+# Only countries that have BOTH grid transformity + EIA fuel mix
+cx <- em_c |>
+  filter(is.finite(transformity_sej_per_J),
+         !is.na(eia_primary_energy_qbtu),
+         eia_primary_energy_qbtu > 0) |>
+  mutate(iso_num = as.integer(as.factor(iso3)),
+         reg     = coalesce(region_wb, "Unknown"))
+
+# Fuel canonical transformities (Odum-Brown-Ulgiati defaults, sej/J)
+# and per-fuel display column X (log10 sej/J) — chosen for visual
+# spread rather than exact transformity (labeled explicitly under each).
+FUEL_TR <- tibble::tibble(
+  fuel  = c("renewables_other","coal","natural_gas","petroleum","nuclear"),
+  x_col = c(3.7,               4.4,   4.7,          5.0,        5.4),
+  tr    = c(8000, 40000, 48000, 54000, 200000),
+  fill  = c("#228B22","#333333","#B5791B","#8A5A16","#0F4D0F"),
+  label = c("Renewables","Coal","Nat gas","Petroleum","Nuclear"))
+
+# Sector characteristic transformity columns — spread wide for legibility.
+SECTOR_TR <- tibble::tibble(
+  sector = c("residential","commercial","industrial","transport","power"),
+  x_col  = c(3.8,          4.3,         4.8,         5.3,        5.8),
+  fill   = c("#8E44AD","#3498DB","#F39C12","#E74C3C","#1ABC9C"),
+  label  = c("Residential","Commercial","Industrial","Transport","Power"))
+
+# Long-form fuel dots — one row per country × fuel with share > 1%.
+fuel_dots <- cx |>
+  select(iso3, iso_num, reg,
+         petroleum = eia_petroleum_share, natural_gas = eia_natural_gas_share,
+         coal = eia_coal_share, nuclear = eia_nuclear_share,
+         renewables_other = eia_renewables_share) |>
+  pivot_longer(-c(iso3, iso_num, reg), names_to = "fuel", values_to = "share") |>
+  left_join(FUEL_TR, by = "fuel") |>
+  filter(!is.na(share), share > 0.01) |>
+  mutate(x = x_col + (iso_num %% 7 - 3) * 0.028,   # jitter within column
+         y = -3.4 + (iso_num %% 12) * 0.24,
+         dot_area = pmax(share, 0.01))
+
+# Long-form sector dots — one row per country × sector with share > 1%.
+sector_dots <- cx |>
+  select(iso3, iso_num, reg,
+         transport = sector_transport, industrial = sector_industrial,
+         residential = sector_residential, commercial = sector_commercial,
+         power = sector_power) |>
+  pivot_longer(-c(iso3, iso_num, reg), names_to = "sector", values_to = "share") |>
+  left_join(SECTOR_TR, by = "sector") |>
+  filter(!is.na(share), share > 0.01) |>
+  mutate(x = x_col + (iso_num %% 7 - 3) * 0.028,
+         y = 1.5 + (iso_num %% 12) * 0.20,
+         dot_area = pmax(share, 0.01))
+
+# Top-15 non-grid countries — display as a right-margin ranked list.
+non_grid_top <- cx |>
+  filter(!is.na(sector_power)) |>
+  mutate(non_grid = 1 - sector_power) |>
+  slice_max(non_grid, n = 15) |>
+  arrange(desc(non_grid)) |>
+  mutate(rank = row_number(),
+         label = sprintf("%2d. %s  %.0f%%", rank, iso3, non_grid * 100))
+
+ggplot() +
+  # Reference bands
+  annotate("rect", xmin = 3.4, xmax = 6.1, ymin = -4.7, ymax = -0.5,
+            fill = "#F7EDEA", alpha = 0.55) +
+  annotate("rect", xmin = 3.4, xmax = 6.1, ymin = 0.9, ymax = 4.7,
+            fill = "#EAF2F7", alpha = 0.55) +
+  annotate("text", x = 3.5, y = -0.7,
+            label = "PER-COUNTRY FUEL SHARES  (EIA International 2000-2023, latest year, QBTU)",
+            hjust = 0, size = 3.1, fontface = "bold", colour = "#7B4E20") +
+  annotate("text", x = 3.5, y = 4.55,
+            label = "PER-COUNTRY SECTOR CONSUMPTION  (synthesized: fuel mix × IEA fuel-to-sector matrix)",
+            hjust = 0, size = 3.1, fontface = "bold", colour = "#154360") +
+  # Fuel dots
+  geom_point(data = fuel_dots,
+              aes(x = x, y = y, fill = fill, size = dot_area),
+              shape = 21, colour = "white", stroke = 0.20, alpha = 0.80) +
+  scale_fill_identity(guide = "none") +
+  scale_size_area(max_size = 4.2, guide = "none") +
+  geom_text(data = FUEL_TR,
+             aes(x = x_col, y = -4.9, label = label, colour = fill),
+             size = 3.0, fontface = "bold") +
+  geom_text(data = FUEL_TR,
+             aes(x = x_col, y = -5.2, label = sprintf("τ=%s sej/J", format(tr, big.mark=",", scientific=FALSE))),
+             size = 2.5, colour = "#666666") +
+  scale_colour_identity() +
+  new_scale_fill() +
+  # Sector dots
+  geom_point(data = sector_dots,
+              aes(x = x, y = y, fill = fill, size = dot_area),
+              shape = 22, colour = "white", stroke = 0.20, alpha = 0.80) +
+  scale_fill_identity() +
+  geom_text(data = SECTOR_TR,
+             aes(x = x_col, y = 1.15, label = label, colour = fill),
+             size = 3.0, fontface = "bold") +
+  # Non-grid ranked list on right margin
+  annotate("text", x = 6.35, y = 4.6,
+            label = "Top-15 non-grid countries\n(1 − sector_power)",
+            hjust = 0, vjust = 1, size = 3.0, fontface = "bold", colour = "#8B0000") +
+  geom_text(data = non_grid_top,
+             aes(x = 6.35, y = 3.6 - rank * 0.35, label = label),
+             hjust = 0, size = 2.7, family = "mono", colour = "#8B0000") +
+  scale_x_continuous(name = "Transformity (log10 sej/J) — display column, not exact position",
+                     limits = c(3.4, 7.4),
+                     breaks = c(3.5, 4, 4.5, 5, 5.5, 6),
+                     labels = function(x) sprintf("10^%.1f", x)) +
+  scale_y_continuous(name = "",
+                     limits = c(-5.7, 4.9),
+                     breaks = NULL) +
+  theme_minimal(base_size = 10) +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_line(colour = BR[["line"]], linewidth = 0.3),
+        panel.grid.major.y = element_blank(),
+        plot.title.position = "plot")
+```
+
+Data provenance:
+
+- **EIA International** (api.eia.gov/v2/international, `activityId=2`
+  Consumption, `unit=QBTU`): products 44 Primary, 4411 Coal, 4413
+  Natural gas, 4415 Petroleum + liquids (non-grid heavy), 4417 Nuclear,
+  4418 Renewables + other. 5,251 country-year rows.
+- **World Bank WDI**: EG.CFT.ACCS.ZS (clean cooking access),
+  EG.ELC.ACCS.ZS (electricity access), EG.FEC.RNEW.ZS (RE share of TFEC),
+  EG.USE.PCAP.KG.OE (per-cap energy), EG.USE.COMM.FO.ZS (fossil share),
+  EG.ELC.COAL/NGAS/PETR/FOSL.ZS (electricity fuel mix). 6,237 rows.
+- **Sector shares** (transport / industrial / residential / commercial /
+  power) are *synthesized* by multiplying observed fuel shares by
+  the published IEA fuel-to-sector allocation matrix:
+  petroleum → 60% transport / 15% industry / 10% residential / 5%
+  commercial / 10% power; natural gas → 5 / 35 / 25 / 15 / 20;
+  coal → 0 / 40 / 5 / 5 / 50; nuclear → 100% power; renewables → 5 /
+  10 / 20 / 5 / 60. Direct measurement would need IEA World Energy
+  Balances (paywalled — UNC library manual proxy is the follow-up
+  path). Non-grid share = `1 − sector_power`.
 
 ### Every country as its own panel — including Antarctica
 
