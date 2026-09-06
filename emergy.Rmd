@@ -873,6 +873,32 @@ hh_dots <- cd_base |>
 
 country_dots <- bind_rows(grid_dots, biomass_dots, renewable_dots)
 
+# COUNTRY SPAN-LINES — connect the dots per country to show what
+# hierarchy range a single country actually occupies.
+#
+# (a) Fuel-span horizontal segments at the grid Y position:
+#     leftmost fuel dot (renewable/biomass, whichever is lowest) → grid dot.
+#     A country's "energy span" — e.g. Ethiopia stretches from 10^3.2 (hydro)
+#     to 10^4.4 (biomass cooking) to 10^5 (grid electricity).
+fuel_spans <- country_dots |>
+  group_by(iso3) |>
+  summarise(x_min = min(x, na.rm = TRUE),
+            x_max = max(x, na.rm = TRUE),
+            y     = mean(y[tier == "Grid"], na.rm = TRUE),
+            reg   = dplyr::first(reg),
+            .groups = "drop") |>
+  filter(x_max - x_min > 0.2)  # only draw if the span is meaningful
+
+# (b) Household inequality vertical connectors: P10 (bottom) to P90 (top)
+#     at each country's mean household x. Length encodes within-country
+#     energy-inequality (long line = big gap between poor + rich households).
+hh_spans <- hh_dots |>
+  group_by(iso3, reg) |>
+  summarise(x   = mean(x, na.rm = TRUE),
+            y_lo = min(y, na.rm = TRUE),
+            y_hi = max(y, na.rm = TRUE),
+            .groups = "drop")
+
 # ESL SYMBOL DATA — one row per symbol, positioned at its transformity
 esl_sources <- tibble::tribble(
   ~x,             ~y,   ~fill,       ~label,          ~lbl_y_off,
@@ -911,6 +937,17 @@ ggplot() +
              aes(x = lbl_x, y = lbl_y, label = name, size = lbl_size),
              colour = BR[["ink"]], fontface = "bold") +
   scale_size_identity() +
+  # Country span-lines (drawn UNDER the dots so points sit on top)
+  # Fuel-span: horizontal segment per country from leftmost to rightmost fuel dot
+  geom_segment(data = fuel_spans,
+                aes(x = x_min, xend = x_max, y = y, yend = y, colour = reg),
+                linewidth = 0.5, alpha = 0.35, lineend = "round") +
+  # Household inequality: vertical connector per country from P10 to P90
+  geom_segment(data = hh_spans,
+                aes(x = x, xend = x, y = y_lo, yend = y_hi, colour = reg),
+                linewidth = 0.4, alpha = 0.35, lineend = "round") +
+  scale_colour_manual(values = region_pal, na.value = "#95a5a6",
+                       guide = "none") +
   # Country dots — grid + biomass + renewable tiers
   geom_point(data = country_dots,
               aes(x = x, y = y, fill = reg, size = pop_size, shape = tier),
@@ -1273,7 +1310,7 @@ emergy_per_money("FRA", 2020)                    # sej per $
 
 All functions ship in the [`emburden` R package](https://github.com/ericscheier/emburdensynth/blob/global/R/emergy.R).
 The full metric table for `r nrow(em_c)` countries is at
-[`docs/global_analysis_data/emergy_metrics.rds`](https://github.com/ericscheier/emburdensynth/tree/master/docs/global_analysis_data).
+[`docs/global_analysis_data/emergy_metrics.rds`](https://github.com/ericscheier/emburdensynth/tree/mast../docs/global_analysis_data).
 
 <div class="callout warning">
 <div class="callout-title">Additive, not replacement</div>
