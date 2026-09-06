@@ -1504,6 +1504,62 @@ Full correlation matrix + coverage-by-source stats live in the
 reproducible profile under
 [`docs/data_profile/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/data_profile).
 
+### Bundle Q3.9 — Where does emergy give alpha vs standard indicators?
+
+Ad-hoc scatter inspection only takes us so far. The
+`emburdenstats::fit_alpha_regression()` module formalises the question:
+regress each emergy target on a set of standard non-emergy controls
+(income, poverty, PM exposure, CO2, energy intensity, electricity +
+cooking access), extract residuals, bootstrap 95% CIs per country,
+rank by |residual|. Positive residual = **emergy sees MORE burden than
+standard controls predict** (hidden emergency); negative = **hidden
+resilience** (standard indicators say worse than emergy does).
+
+```{r fig-q39-alpha-matrix, echo=FALSE, out.width="90%", fig.cap="Bundle Q3.9-A — Alpha matrix. adj-R² of `emergy_target ~ control_set` regressions across three targets and five candidate control sets. Low cells = emergy signal orthogonal to conventional indicators (emergy tells you something new); high cells = collinear (emergy signal derivable from standard controls). heii_norm sits at R²≈0.22 for every control set — around 80% of its variance is orthogonal to standard indicators. biomass_share is more collinear (R²≈0.44-0.54) because it's essentially clean-cooking-access inverted."}
+knitr::include_graphics("figures/heii_q39_alpha_matrix.png")
+```
+
+**The headline finding:** for HEII_norm, the full control set (7
+indicators including income, poverty, PM, CO2, intensity, electricity +
+cooking access) reaches only **adj-R² = 0.22**. About **80% of HEII_norm
+variance is orthogonal to standard indicators** — this is the "emergy
+alpha" the framework is designed to surface.
+
+For `heii_ratio_p10_p90` (within-country energy inequality) the numbers
+are even lower — emissions-only R²=−0.03, income-only R²=0.03, full=0.20.
+Within-country inequality is genuinely independent of country-average
+indicators.
+
+```{r fig-q39-alpha-leaderboard, echo=FALSE, out.width="90%", fig.cap="Bundle Q3.9-B — Alpha leaderboard for HEII_norm. Top-10 positive-alpha countries (red — emergy sees MORE burden than income/poverty/health controls predict) and top-10 negative-alpha countries (blue — hidden resilience). Whiskers = bootstrap 95% CI (n_boot=500). All shown countries have CI not crossing zero (noise-gated)."}
+knitr::include_graphics("figures/heii_q39_alpha_leaderboard_heii.png")
+```
+
+**Positive-alpha countries** (emergy sees worse than standard would
+predict) are dominated by middle-income Latin American and East Asian
+economies — CHN, COL, MDA, PER, GTM, THA, JAM, SLV, IDN, NAM. These are
+countries the World Bank's clean-cooking / PM / poverty indicators would
+class as "doing OK", but where the emergy pipeline picks up meaningful
+household energy insecurity.
+
+**Negative-alpha countries** (standard indicators say worse than emergy
+does) split into two archetypes:
+- **Low-income biomass-adapted societies** — ZMB, ETH, CPV, SWZ. Very
+  low GDP would predict high HEII, but emergy accounting credits the
+  biomass-cooking baseline; households aren't as insecure as poverty
+  metrics suggest.
+- **Petro-states + fossil-heavy middle-income** — IRQ, AZE, GAB, TUR,
+  MAR, LKA. Standard indicators over-flag them; emergy accounting
+  captures the fossil-fuel domestic-availability buffer.
+
+```{r fig-q39-alpha-scatter, echo=FALSE, out.width="90%", fig.cap="Bundle Q3.9-C — Actual-vs-predicted diagnostic for the HEII_norm alpha regression. Points on the y=x line are explained by standard controls; points off diagonal are alpha (colored by residual sign)."}
+knitr::include_graphics("figures/heii_q39_alpha_scatter_heii.png")
+```
+
+Full leaderboard CSV, matrix stats, and REPORT.md at
+[`emburdensynth/docs/emergy_alpha/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/emergy_alpha).
+The runner is `scripts/report_emergy_alpha.R`; the analytics module
+lives in [`emburdenstats::fit_alpha_regression()`](https://github.com/ericscheier/emburdenstats/blob/main/R/emergy_alpha.R).
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
