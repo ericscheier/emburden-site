@@ -752,49 +752,17 @@ put those symbols is **on top of the spectral hierarchy at their real
 log-transformity positions**. That way the "map" (spectral) and the
 "circuit" (ESL) become one figure.
 
-```{r fig-odum-overlay, fig.height=8.5, fig.width=14, fig.cap="HEII framework in Odum ESL overlaid on the Abel-2023 spectral hierarchy. Sources (sun/biomass/fossil/uranium circles) pinned at their raw primary-fuel transformity. Producers (bullet-nosed hexagons) pinned at their electricity-basis transformity (Bundle-A efficiency correction). Grid + Household symbols at the country-median grid transformity. Culture info in the Cultural Information lens; Culture configs at the top of the hierarchy. 213 countries plotted as regional dots at their grid transformity, sized by log(population)."}
+```{r fig-odum-overlay, fig.height=8.5, fig.width=14, fig.cap="HEII framework in Odum ESL overlaid on the Abel-2023 spectral hierarchy. Sources (circles) at raw primary-fuel transformity. Producers (bullet-nosed hexagons) at electricity-basis transformity. Grid (bullet-tank) + Household (hexagon) at country-median. Gap diamonds (interactions). Cultural info + Culture configs in the top-hierarchy lenses. 213 countries as regional dots at their grid transformity, sized by log(population). Powered by emburdensynth::geom_odum_* — the first R grammar-of-graphics library for Odum ESL symbols (Bundle U)."}
 suppressPackageStartupMessages({library(ggforce); library(purrr); library(ggnewscale)})
-# Inline Odum ESL symbol helpers (matches emburdensynth::odum_*)
-odum_circle <- function(cx, cy, r, id, n = 60) {
-  t <- seq(0, 2*pi, length.out = n)
-  tibble::tibble(x = cx + r*cos(t), y = cy + r*sin(t), id = id)
-}
-odum_producer <- function(cx, cy, w, h, id) {
-  nose <- h * 0.6
-  tibble::tibble(
-    x = c(cx-w/2, cx+w/2-nose, cx+w/2, cx+w/2-nose, cx-w/2, cx-w/2),
-    y = c(cy-h/2, cy-h/2,      cy,     cy+h/2,      cy+h/2, cy-h/2),
-    id = id)
-}
-odum_consumer <- function(cx, cy, w, h, id) {
-  side <- w * 0.28
-  tibble::tibble(
-    x = c(cx-w/2, cx-w/2+side, cx+w/2-side, cx+w/2, cx+w/2-side, cx-w/2+side, cx-w/2),
-    y = c(cy,     cy-h/2,      cy-h/2,      cy,     cy+h/2,      cy+h/2,      cy),
-    id = id)
-}
-odum_storage <- function(cx, cy, w, h, id, n = 20) {
-  r <- h/2
-  t <- seq(-pi/2, pi/2, length.out = n)
-  right_arc_x <- (cx + w/2 - r) + r*cos(t)
-  right_arc_y <- cy + r*sin(t)
-  tibble::tibble(
-    x = c(cx-w/2, right_arc_x, cx-w/2, cx-w/2),
-    y = c(cy-h/2, right_arc_y, cy+h/2, cy-h/2), id = id)
-}
-odum_interaction <- function(cx, cy, s, id) {
-  tibble::tibble(
-    x = c(cx, cx+s/2, cx, cx-s/2, cx),
-    y = c(cy+s/2, cy, cy-s/2, cy, cy+s/2), id = id)
-}
-odum_heat_sink <- function(cx, cy, s, id) {
-  tibble::tibble(
-    x = c(cx-s/2, cx+s/2, cx, cx-s/2),
-    y = c(cy, cy, cy-s, cy), id = id)
-}
+# Symbol helpers + ggproto geoms from the emburdensynth source tree
+# (symlinked via _ln_R at render time — see BUILD.md)
+source("_ln_R/odum_symbols.R")
+source("_ln_R/geom_odum.R")
+
 h <- em_c |> filter(!is.na(heii_norm))
 med_tr <- median(h$transformity_sej_per_J, na.rm = TRUE)
-# BASE spectral lenses (Abel fig 21)
+
+# BASE — Abel-2023 spectral lenses
 lens_specs <- tibble::tribble(
   ~name,                       ~x0, ~a,   ~b,   ~fill,      ~lbl_x, ~lbl_y, ~lbl_size,
   "Atmosphere / Ecosystems",   2.0, 3.0,  5.5,  "#228B22",   0.5,   -4.0,   3.6,
@@ -809,6 +777,8 @@ make_lens <- function(x0, a, y0, b, n = 80, name = NA) {
 }
 lenses <- pmap_dfr(lens_specs |> select(name, x0, a, b, fill),
   function(name, x0, a, b, fill) cbind(make_lens(x0, a, 0, b, name = name), fill = fill))
+
+# COUNTRY DOTS — colored by WB region
 region_pal <- c(
   `East Asia & Pacific`         = "#e74c3c",
   `Europe & Central Asia`       = "#3498db",
@@ -824,47 +794,37 @@ country_dots <- em_c |>
          y = -0.3 + (iso_num %% 7) * 0.20,
          reg = dplyr::coalesce(region_wb, "Unknown"),
          pop_size = pmax(log10(pmax(population, 1e5, na.rm = TRUE))-4, 0.1))
-esl_sources <- tibble::tribble(~cx, ~cy, ~id, ~fill, ~label,
-  log10(1),      -2.0, "src_sun",    "#F1C40F", "Sun/Wind/Rain",
-  log10(25000),  -2.6, "src_bio",    "#228B22", "Biomass",
-  log10(48000),  -3.1, "src_fossil", "#8A5A16", "Fossil",
-  log10(200000), -3.1, "src_uran",   "#0F4D0F", "Uranium")
-sym_sources <- pmap_dfr(esl_sources |> select(cx, cy, id, fill),
-  function(cx, cy, id, fill) cbind(odum_circle(cx, cy, 0.22, id, n = 40), fill = fill))
-esl_prod <- tibble::tribble(~cx, ~cy, ~id, ~fill, ~label,
-  log10(1500),        2.4, "prod_wind",    "#228B22", "Wind",
-  log10(3400),        1.9, "prod_pv",      "#F1C40F", "PV",
-  log10(80000),       1.4, "prod_hydro",   "#1F77B4", "Hydro",
-  log10(25000/0.28),  3.0, "prod_bio_e",   "#7B4E20", "Bio-e",
-  log10(40000/0.35),  2.4, "prod_coal",    "#8A5A16", "Coal",
-  log10(48000/0.50),  3.4, "prod_gas",     "#B5791B", "Gas",
-  log10(54000/0.38),  3.9, "prod_oil",     "#C0392B", "Oil",
-  log10(200000),      0.9, "prod_nuclear", "#0F4D0F", "Nuclear")
-sym_prod <- pmap_dfr(esl_prod |> select(cx, cy, id, fill),
-  function(cx, cy, id, fill) cbind(odum_producer(cx, cy, 0.7, 0.45, id), fill = fill))
-esl_grid_x <- log10(med_tr) - 0.20
-esl_hh_x   <- log10(med_tr) + 0.55
-sym_grid   <- odum_storage(esl_grid_x, 0, 0.55, 0.55, "grid");    sym_grid$fill <- "#1F77B4"
-sym_hh     <- odum_consumer(esl_hh_x, 0, 0.55, 0.55, "hh");        sym_hh$fill   <- "#C0392B"
-sym_pgap <- odum_interaction(esl_hh_x + 0.85, 0.9, 0.35, "phys_gap"); sym_pgap$fill <- "#C0392B"
-sym_egap <- odum_interaction(esl_hh_x + 0.85, -0.9, 0.35, "econ_gap"); sym_egap$fill <- "#F39C12"
-sym_cult <- odum_consumer(8.0, 0, 0.8, 0.55, "cult"); sym_cult$fill <- "#8E44AD"
-sym_config <- odum_consumer(12.5, 0, 0.75, 0.5, "config"); sym_config$fill <- "#F1C40F"
-esl_all <- bind_rows(sym_sources, sym_prod, sym_grid, sym_hh,
-                     sym_pgap, sym_egap, sym_cult, sym_config)
-esl_labels <- bind_rows(
-  esl_sources |> mutate(y = cy - 0.40) |>
-    transmute(x = cx, y = y, label = label, size = 2.4),
-  esl_prod |> mutate(y = cy + 0.45) |>
-    transmute(x = cx, y = y, label = label, size = 2.4),
-  tibble::tribble(~x, ~y, ~label, ~size,
-    esl_grid_x, -0.55, "Grid",           2.5,
-    esl_hh_x,   -0.60, "Household",      2.5,
-    esl_hh_x + 0.85,  1.55, "Phys gap",  2.2,
-    esl_hh_x + 0.85, -1.55, "Econ gap",  2.2,
-    8.0,          -0.85, "Cultural info", 2.5,
-    12.5,         -0.60, "Culture\ncfgs", 2.3))
+
+# ESL SYMBOL DATA — one row per symbol, positioned at its transformity
+esl_sources <- tibble::tribble(
+  ~x,             ~y,   ~fill,       ~label,          ~lbl_y_off,
+  log10(1),      -2.0, "#F1C40F", "Sun/Wind/Rain", -0.40,
+  log10(25000),  -2.6, "#228B22", "Biomass",       -0.40,
+  log10(48000),  -3.1, "#8A5A16", "Fossil",        -0.40,
+  log10(200000), -3.1, "#0F4D0F", "Uranium",       -0.40)
+esl_prod <- tibble::tribble(
+  ~x,                        ~y,   ~fill,       ~label,   ~lbl_y_off,
+  log10(1500),               2.4, "#228B22", "Wind",    0.45,
+  log10(3400),               1.9, "#F1C40F", "PV",      0.45,
+  log10(80000),              1.4, "#1F77B4", "Hydro",   0.45,
+  log10(25000/0.28),         3.0, "#7B4E20", "Bio-e",   0.45,
+  log10(40000/0.35),         2.4, "#8A5A16", "Coal",    0.45,
+  log10(48000/0.50),         3.4, "#B5791B", "Gas",     0.45,
+  log10(54000/0.38),         3.9, "#C0392B", "Oil",     0.45,
+  log10(200000),             0.9, "#0F4D0F", "Nuclear", 0.45)
+esl_center <- tibble::tribble(
+  ~x, ~y, ~fill, ~label, ~w, ~h,
+  log10(med_tr) - 0.20,  0,   "#1F77B4", "Grid",           0.55, 0.55,
+  log10(med_tr) + 0.55,  0,   "#C0392B", "Household",      0.55, 0.55,
+  log10(med_tr) + 1.40,  0.9, "#C0392B", "Phys gap",       0.35, 0.35,
+  log10(med_tr) + 1.40, -0.9, "#F39C12", "Econ gap",       0.35, 0.35)
+esl_far <- tibble::tribble(
+  ~x, ~y, ~fill, ~label, ~w, ~h,
+  8.0,  0,  "#8E44AD", "Cultural info",     0.80, 0.55,
+  12.5, 0,  "#F1C40F", "Culture cfgs",      0.75, 0.50)
+
 ggplot() +
+  # Spectral base
   geom_polygon(data = lenses, aes(x = x, y = y, group = name, fill = fill),
                 alpha = 0.30, colour = NA) +
   scale_fill_identity() +
@@ -872,6 +832,7 @@ ggplot() +
   geom_text(data = lens_specs,
              aes(x = lbl_x, y = lbl_y, label = name, size = lbl_size),
              colour = BR[["ink"]], fontface = "bold") +
+  # Country dots
   geom_point(data = country_dots,
               aes(x = x, y = y, fill = reg, size = pop_size),
               shape = 21, colour = "white", stroke = 0.35, alpha = 0.85) +
@@ -879,11 +840,32 @@ ggplot() +
                      name = "WB region", guide = guide_legend(nrow = 2)) +
   scale_size_area(max_size = 3.8, guide = "none") +
   new_scale_fill() +
-  geom_polygon(data = esl_all, aes(x = x, y = y, group = id, fill = fill),
-                alpha = 0.90, colour = BR[["ink"]], linewidth = 0.35) +
+  # ESL SYMBOLS — using proper ggproto geoms (Bundle U)
+  geom_odum_source(data = esl_sources,
+                    aes(x = x, y = y, fill = fill), radius = 0.22) +
+  geom_odum_producer(data = esl_prod,
+                      aes(x = x, y = y, fill = fill),
+                      width = 0.70, height = 0.45) +
+  geom_odum_storage(data = esl_center[1, ],
+                     aes(x = x, y = y, fill = fill),
+                     width = 0.55, height = 0.55) +
+  geom_odum_consumer(data = esl_center[2, ],
+                      aes(x = x, y = y, fill = fill),
+                      width = 0.55, height = 0.55) +
+  geom_odum_interaction(data = esl_center[3:4, ],
+                         aes(x = x, y = y, fill = fill),
+                         width = 0.35, height = 0.35) +
+  geom_odum_consumer(data = esl_far,
+                      aes(x = x, y = y, fill = fill, width = w, height = h)) +
   scale_fill_identity() +
-  geom_text(data = esl_labels, aes(x = x, y = y, label = label, size = size),
-             colour = BR[["ink"]], lineheight = 0.85) +
+  # Labels for ESL symbols
+  geom_text(data = bind_rows(
+    esl_sources |> transmute(x = x, y = y + lbl_y_off, label = label, size = 2.4),
+    esl_prod    |> transmute(x = x, y = y + lbl_y_off, label = label, size = 2.4),
+    esl_center  |> transmute(x = x, y = y - h - 0.15, label = label, size = 2.4),
+    esl_far     |> transmute(x = x, y = y - h - 0.15, label = label, size = 2.4)),
+    aes(x = x, y = y, label = label, size = size),
+    colour = BR[["ink"]], lineheight = 0.85) +
   scale_size_identity() +
   scale_x_continuous(name = "Transformity (log10 sej/J)",
                      limits = c(-2, 15),
@@ -908,19 +890,17 @@ wind at research stations) sits above everyone.
 
 ![](figures/heii_spectral_small_multiples.png)
 
-### Time-series — 60 years of transformity drift
+### Time-series — 125 years of transformity drift
 
-Extended Ember (2000-2025, 213 countries) back to **1965 via EI
+Extended Ember (2000-2025, 213 countries) back to **1900 via OWID Etemad-Luciani/Shift Project + EI
 Statistical Review synthesis** (79 countries, per-fuel primary
 consumption normalized to shares — `scripts/build_fuel_mix_extended.R`
-in emburdensynth). The 60-year animation shows country dots + median
+in emburdensynth). The 125-year animation shows country dots + median
 Grid/HH position sliding as fuel-mix transforms:
 
-![](figures/heii_overlay_extended_1965_2024.gif)
+![](figures/heii_overlay_extended_1900_2024.gif)
 
-Data floor: 1965 is the honest global panel start (BP historical
-series). Pre-1965 per-country per-fuel would require Etemad-Luciani
-or Shift Project ingestion — flagged as a future improvement.
+Data floor: **1900** now (Bundle T). Pre-1965 data via OWID's combined dataset (Etemad-Luciani for oil/gas, Shift Project for coal). Pre-1900 would need Malanima 2020 PDF-table extraction — still open.
 
 ### Prior art: this may be the first R Odum ESL geom library
 
