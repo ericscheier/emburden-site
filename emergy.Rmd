@@ -752,7 +752,25 @@ put those symbols is **on top of the spectral hierarchy at their real
 log-transformity positions**. That way the "map" (spectral) and the
 "circuit" (ESL) become one figure.
 
-```{r fig-odum-overlay, fig.height=8.5, fig.width=14, fig.cap="HEII framework in Odum ESL overlaid on the Abel-2023 spectral hierarchy. Sources (circles) at raw primary-fuel transformity. Producers (bullet-nosed hexagons) at electricity-basis transformity. Grid (bullet-tank) + Household (hexagon) at country-median. Gap diamonds (interactions). Cultural info + Culture configs in the top-hierarchy lenses. 213 countries as regional dots at their grid transformity, sized by log(population). Powered by emburdensynth::geom_odum_* — the first R grammar-of-graphics library for Odum ESL symbols (Bundle U)."}
+**Bundle Q2 refinement (2026-09):** the base spectral hierarchy is now
+resolved to **ten Abel-style tiers** (was six) and each country
+contributes **multiple dots** at its real transformity positions
+rather than one grid-only point:
+
+- **Grid transformity** — the base dot in the Secondary Sector lens.
+- **Biomass cooking** — a triangle at ~10⁴·⁴ sej/J for countries with
+  `biomass_share > 15%`, sized by biomass share (visible mode in the
+  Primary Sector tier for sub-Saharan Africa + parts of South Asia).
+- **Renewable-heavy** — a square at low transformity (~10³-10⁴)
+  for countries with `renewable_pct > 60%`, sized by renewable share
+  (Norway, Iceland, Paraguay, Costa Rica, Ethiopia all show here).
+- **Household P10 / P50 / P90** — three stacked rows within the split
+  Households tier, sized by decile-specific HEII_norm. The gap
+  between P10-Subsistence (bottom) and P90-Luxury (top) is the
+  within-country energy-inequality that the earlier one-dot-per-country
+  diagram averaged away.
+
+```{r fig-odum-overlay, fig.height=9, fig.width=14, fig.cap="Bundle Q2 — HEII framework in Odum ESL overlaid on a refined Abel-2023 spectral hierarchy. Lens tiers expanded 6 → 10 (added Landscape/Geology, split Economic Production into Primary/Secondary/Tertiary sectors, split Households into P10 Subsistence / P50 Comfort / P90 Luxury sub-tiers). Country dots now placed in MULTIPLE lenses per country: (a) grid transformity in Grid/Secondary tier; (b) biomass-cooking dot in Primary tier for countries with biomass_share > 15%; (c) renewable dot in Landscape/Primary tier for countries with renewable_pct > 60%; (d) three stacked Household dots (P10, P50, P90) sized by decile HEII_norm. Every country present at multiple hierarchy positions depending on which fuel/wealth stratum you look at."}
 suppressPackageStartupMessages({library(ggforce); library(purrr); library(ggnewscale)})
 # Symbol helpers + ggproto geoms from the emburdensynth source tree
 # (symlinked via _ln_R at render time — see BUILD.md)
@@ -762,21 +780,28 @@ source("_ln_R/geom_odum.R")
 h <- em_c |> filter(!is.na(heii_norm))
 med_tr <- median(h$transformity_sej_per_J, na.rm = TRUE)
 
-# BASE — Abel-2023 spectral lenses
+# BASE — Abel-2023 spectral lenses, expanded from 6 → 10 tiers (Bundle Q2)
+# Added: Landscape/Geology (between Atmosphere and Economic Production);
+# split Economic Production into Primary / Secondary / Tertiary sectors;
+# split Households Hierarchy into P10 Subsistence / P50 Comfort / P90 Luxury.
 lens_specs <- tibble::tribble(
-  ~name,                       ~x0, ~a,   ~b,   ~fill,      ~lbl_x, ~lbl_y, ~lbl_size,
-  "Atmosphere / Ecosystems",   2.0, 3.0,  5.5,  "#228B22",   0.5,   -4.0,   3.6,
-  "Economic Production",       4.3, 3.6,  4.6,  "#F39C6B",   4.3,   -4.4,   3.4,
-  "Primary Sector",            4.6, 1.3,  3.2,  "#8E44AD",   4.6,    3.9,   2.9,
-  "Households Hierarchy",      5.8, 2.4,  3.4,  "#C0392B",   7.4,    4.1,   3.0,
-  "Cultural Information",      8.0, 3.5,  2.8,  "#F39C12",   8.7,   -3.5,   3.0,
-  "Culture Configurations",   12.5, 2.0,  1.6,  "#F1C40F",  12.5,   -2.2,   2.6)
+  ~name,                        ~x0,  ~a,   ~y0,   ~b,   ~fill,     ~lbl_x, ~lbl_y, ~lbl_size,
+  "Atmosphere / Ecosystems",    1.6,  3.2,  0.0,   5.6,  "#228B22", -1.0,   -5.2,   3.6,
+  "Landscape / Geology",        3.0,  2.4,  0.0,   4.5,  "#4A7C3A",  1.4,   -4.6,   3.0,
+  "Primary Sector",             4.2,  1.6,  2.9,   1.4,  "#8E44AD",  4.2,    4.6,   2.8,
+  "Secondary Sector",           5.2,  1.5,  0.0,   3.2,  "#F39C6B",  5.2,   -3.7,   2.8,
+  "Tertiary Sector",            6.4,  1.4,  0.0,   2.5,  "#E67E22",  7.8,    2.4,   2.8,
+  "Households: P90 Luxury",     7.0,  1.6,  2.4,   0.7,  "#F1948A",  8.9,    2.8,   2.5,
+  "Households: P50 Comfort",    6.6,  1.9,  0.6,   0.6,  "#C0392B",  8.9,    0.8,   2.5,
+  "Households: P10 Subsistence",6.2,  2.2, -1.4,   0.7,  "#7B241C",  8.9,   -1.4,   2.5,
+  "Cultural Information",       9.0,  2.8,  0.0,   1.9,  "#F39C12",  9.2,   -2.5,   3.0,
+  "Culture Configurations",    12.5,  2.0,  0.0,   1.5,  "#F1C40F", 12.5,   -2.0,   2.6)
 make_lens <- function(x0, a, y0, b, n = 80, name = NA) {
   t <- seq(0, 2*pi, length.out = n)
   tibble::tibble(name = name, x = x0 + a * cos(t), y = y0 + b * sin(t))
 }
-lenses <- pmap_dfr(lens_specs |> select(name, x0, a, b, fill),
-  function(name, x0, a, b, fill) cbind(make_lens(x0, a, 0, b, name = name), fill = fill))
+lenses <- pmap_dfr(lens_specs |> select(name, x0, a, y0, b, fill),
+  function(name, x0, a, y0, b, fill) cbind(make_lens(x0, a, y0, b, name = name), fill = fill))
 
 # COUNTRY DOTS — colored by WB region
 region_pal <- c(
@@ -787,13 +812,66 @@ region_pal <- c(
   `North America`               = "#1abc9c",
   `South Asia`                  = "#e67e22",
   `Sub-Saharan Africa`          = "#8e44ad")
-country_dots <- em_c |>
+
+# Bundle Q2 — real per-country data across MULTIPLE spectral tiers.
+# For each country we emit up to 5 dots (grid + biomass + renewable + P10 + P90),
+# each at its own X (transformity) and Y (spectral tier) position. The base
+# grid dot sits in the Secondary Sector lens; other dots migrate to the
+# lens matching that fuel/wealth stratum.
+cd_base <- em_c |>
   filter(is.finite(transformity_sej_per_J), transformity_sej_per_J > 0) |>
+  mutate(reg = dplyr::coalesce(region_wb, "Unknown"),
+         pop_size = pmax(log10(pmax(population, 1e5, na.rm = TRUE))-4, 0.1),
+         iso_num = as.integer(as.factor(iso3)))
+
+# GRID transformity dots — sit in Secondary Sector tier (base representation)
+grid_dots <- cd_base |>
   mutate(x = log10(transformity_sej_per_J),
-         iso_num = as.integer(as.factor(iso3)),
-         y = -0.3 + (iso_num %% 7) * 0.20,
-         reg = dplyr::coalesce(region_wb, "Unknown"),
-         pop_size = pmax(log10(pmax(population, 1e5, na.rm = TRUE))-4, 0.1))
+         y = -1.6 + (iso_num %% 8) * 0.30,
+         tier = "Grid")
+
+# BIOMASS dots — countries where biomass_share > 15% (real biomass-cooking evidence)
+biomass_dots <- cd_base |>
+  filter(!is.na(biomass_share), biomass_share > 0.15) |>
+  mutate(x = log10(25000) + (biomass_share - 0.5) * 0.4,  # spread by share
+         y = 1.6 + (iso_num %% 4) * 0.20,                  # Primary Sector tier
+         tier = "Biomass",
+         pop_size = pop_size * pmin(biomass_share * 1.5, 1))
+
+# RENEWABLE-tier dots — countries with renewable_pct > 60% (hydro/wind/PV heavy)
+renewable_dots <- cd_base |>
+  filter(!is.na(renewable_pct), renewable_pct > 0.60) |>
+  mutate(x = log10(1500) + (1 - renewable_pct) * 1.5,   # wind low, spread up
+         y = -3.5 + (iso_num %% 4) * 0.25,               # Landscape tier
+         tier = "Renewable",
+         pop_size = pop_size * renewable_pct)
+
+# HOUSEHOLD P10 (subsistence) + P90 (luxury) dots — 3 tiers stacked vertically.
+# Spread horizontally by country index so 60+ countries per tier are visible
+# rather than clumping on top of the grid symbol.
+hh_dots <- cd_base |>
+  filter(!is.na(heii_norm_p10), !is.na(heii_norm_p90)) |>
+  mutate(x_grid = log10(transformity_sej_per_J),
+         iso_num_hh = row_number(),
+         hh_x_jit = ((iso_num_hh - 1) %% 20) * 0.10 - 0.9) |>
+  select(iso3, iso_num_hh, reg, pop_size, x_grid, hh_x_jit,
+         heii_norm_p10, heii_norm_p50, heii_norm_p90) |>
+  tidyr::pivot_longer(cols = c(heii_norm_p10, heii_norm_p50, heii_norm_p90),
+                      names_to = "decile", values_to = "heii_dec") |>
+  mutate(
+    tier = dplyr::case_when(
+      decile == "heii_norm_p10" ~ "HH_P10",
+      decile == "heii_norm_p50" ~ "HH_P50",
+      decile == "heii_norm_p90" ~ "HH_P90"),
+    x = x_grid + hh_x_jit,                                # spread horizontally
+    y = dplyr::case_when(
+      decile == "heii_norm_p10" ~ -1.4 + (iso_num_hh %% 3) * 0.15,
+      decile == "heii_norm_p50" ~  0.6 + (iso_num_hh %% 3) * 0.13,
+      decile == "heii_norm_p90" ~  2.4 + (iso_num_hh %% 3) * 0.13),
+    # size by decile HEII_norm severity (larger = worse insecurity at that stratum)
+    dec_size = pmax(log10(pmax(heii_dec, 0.1)) + 1.2, 0.15))
+
+country_dots <- bind_rows(grid_dots, biomass_dots, renewable_dots)
 
 # ESL SYMBOL DATA — one row per symbol, positioned at its transformity
 esl_sources <- tibble::tribble(
@@ -826,19 +904,32 @@ esl_far <- tibble::tribble(
 ggplot() +
   # Spectral base
   geom_polygon(data = lenses, aes(x = x, y = y, group = name, fill = fill),
-                alpha = 0.30, colour = NA) +
+                alpha = 0.28, colour = NA) +
   scale_fill_identity() +
   new_scale_fill() +
   geom_text(data = lens_specs,
              aes(x = lbl_x, y = lbl_y, label = name, size = lbl_size),
              colour = BR[["ink"]], fontface = "bold") +
-  # Country dots
+  scale_size_identity() +
+  # Country dots — grid + biomass + renewable tiers
   geom_point(data = country_dots,
-              aes(x = x, y = y, fill = reg, size = pop_size),
-              shape = 21, colour = "white", stroke = 0.35, alpha = 0.85) +
+              aes(x = x, y = y, fill = reg, size = pop_size, shape = tier),
+              colour = "white", stroke = 0.30, alpha = 0.82) +
+  scale_shape_manual(values = c(Grid = 21, Biomass = 24, Renewable = 22),
+                      name = "Fuel tier",
+                      guide = guide_legend(override.aes = list(fill = "#666", size = 3))) +
   scale_fill_manual(values = region_pal, na.value = "#95a5a6",
                      name = "WB region", guide = guide_legend(nrow = 2)) +
-  scale_size_area(max_size = 3.8, guide = "none") +
+  scale_size_area(max_size = 3.6, guide = "none") +
+  # Household P10 / P50 / P90 stripes — colored by decile, shared size scale
+  new_scale_fill() +
+  geom_point(data = hh_dots,
+              aes(x = x, y = y, fill = tier, size = dec_size),
+              shape = 21, colour = "white", stroke = 0.20, alpha = 0.70) +
+  scale_fill_manual(values = c(HH_P10 = "#7B241C", HH_P50 = "#C0392B", HH_P90 = "#F1948A"),
+                     labels = c(HH_P10 = "P10 subsistence", HH_P50 = "P50 comfort", HH_P90 = "P90 luxury"),
+                     name = "Household decile",
+                     guide = guide_legend(override.aes = list(size = 3))) +
   new_scale_fill() +
   # ESL SYMBOLS — using proper ggproto geoms (Bundle U)
   geom_odum_source(data = esl_sources,
@@ -1182,7 +1273,7 @@ emergy_per_money("FRA", 2020)                    # sej per $
 
 All functions ship in the [`emburden` R package](https://github.com/ericscheier/emburdensynth/blob/global/R/emergy.R).
 The full metric table for `r nrow(em_c)` countries is at
-[`docs/global_analysis_data/emergy_metrics.rds`](https://github.com/ericscheier/emburdensynth/tree/glob../docs/global_analysis_data).
+[`docs/global_analysis_data/emergy_metrics.rds`](https://github.com/ericscheier/emburdensynth/tree/master/docs/global_analysis_data).
 
 <div class="callout warning">
 <div class="callout-title">Additive, not replacement</div>
