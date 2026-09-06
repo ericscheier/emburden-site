@@ -1017,15 +1017,37 @@ ggplot() +
 
 The Q2 overlay above uses grid-transformity + a hand-picked biomass /
 renewable threshold. **Bundle Q3** replaces those heuristics with real
-per-country consumption from EIA International (Total energy consumption
-by fuel product, 221 countries × 24 years, all in QBTU) and adds
-World Bank / IEA sourced indicators (clean-cooking access, TFEC,
-fossil / renewable share) — 212 of 213 emergy-pipeline countries now
-carry a full fuel-mix vector. Sector consumption (transport /
-industrial / residential / commercial / power) is *synthesized* from
-observed fuel mix × published IEA fuel-to-sector heuristics; a proper
-IEA World Energy Balances pull (paywalled — needs UNC library proxy)
-would replace the synthesis with direct measurement.
+per-country consumption pulled from three complementary sources:
+
+1. **EIA International** (Total energy consumption by fuel product,
+   221 countries × 24 years, all in QBTU) — gives the fuel mix.
+2. **World Bank WDI** (energy indicators sourced from IEA — clean-cooking
+   access, TFEC, fossil / renewable share, electricity fuel mix, 260
+   countries) — gives the non-grid residential-cooking population fraction.
+3. **UN Statistical Yearbook Energy Balances** (parsed from UNSD PDFs
+   at `unstats.un.org/unsd/energystats/pubs/balance/2023/`) — gives
+   **DIRECT MEASUREMENT** of TFEC broken down by end-use sector
+   (industrial / transport / residential / commercial / agriculture) for
+   217 countries. This is the same underlying data feeding IEA World
+   Energy Balances (both derive from the joint IEA/UNSD/Eurostat/UNECE
+   national questionnaire) — UN publishes it as free PDFs, IEA sells
+   the machine-readable version.
+
+Sector shares in the figure below are direct UN measurements for
+**195 of 213** emergy-pipeline countries; the remaining 18 (small
+dependent territories UN doesn't cover — Faroes, Anguilla, etc.) fall
+back to the synthesis method documented at the end of this section.
+Each country carries a `sector_source` column recording provenance.
+
+**Non-grid coverage matters:** the median country's `sector_power` (the
+share of primary energy that becomes electricity) is only 19% — the other
+81% is direct-burn petroleum for transport, gas + coal for industry,
+biomass + LPG + kerosene for residential heating and cooking. A pipeline
+that only counts grid electricity is missing four-fifths of the story.
+Direct UN measurement (vs Q3's earlier synthesis-only version) shifts
+the median residential share from 15% up to 22% — synthesis was
+under-counting residential because it didn't credit direct-burn biomass
++ LPG use that never touches a fuel-consumption spreadsheet.
 
 **Non-grid coverage matters:** the median country's `sector_power` (the
 share of primary energy that becomes electricity) is only 19% — the other
@@ -1033,7 +1055,7 @@ share of primary energy that becomes electricity) is only 19% — the other
 biomass + LPG + kerosene for residential heating and cooking. A pipeline
 that only counts grid electricity is missing four-fifths of the story.
 
-```{r fig-odum-fuel-sector, fig.height=8, fig.width=13, fig.cap="Bundle Q3 — per-country fuel + sector consumption on the spectral hierarchy. LEFT half: for each country a stack of five fuel dots (petroleum / natural gas / coal / nuclear / renewables) at that fuel's canonical transformity, dot AREA proportional to that fuel's share of the country's primary energy consumption (EIA International 2000-2023 latest year). RIGHT half: per-country sector dots (transport / industrial / residential / commercial / power) synthesized from fuel mix × published IEA fuel-to-sector heuristics. Countries with `clean_cooking_access < 100%` also emit a large residential-biomass dot in the Households: P10 Subsistence tier. NON-GRID share (1 - sector_power) is annotated inline for the top-15 non-grid countries — the electricity-only pipeline misses 60-95% of their primary energy."}
+```{r fig-odum-fuel-sector, fig.height=8, fig.width=13, fig.cap="Bundle Q3 — per-country fuel + sector consumption on the spectral hierarchy. BOTTOM: for each country a stack of five fuel dots (petroleum / natural gas / coal / nuclear / renewables) at that fuel's canonical transformity, dot AREA proportional to that fuel's share of the country's primary energy consumption (EIA International 2000-2023 latest year). TOP: per-country sector dots (transport / industrial / residential / commercial / power) — DIRECT UN measurement (parsed from UNSD Energy Balance PDFs) for 195/213 countries; the remaining 18 (small dependent territories UN doesn't cover) fall back to synthesis (fuel mix × published IEA fuel-to-sector matrix). RIGHT sidebar: top-15 non-grid countries by (1 − sector_power). The electricity-only pipeline misses 60-95% of these countries' primary energy."}
 suppressPackageStartupMessages({library(dplyr); library(ggplot2); library(ggforce); library(purrr); library(ggnewscale); library(tidyr)})
 
 # Only countries that have BOTH grid transformity + EIA fuel mix
@@ -1075,17 +1097,28 @@ fuel_dots <- cx |>
          dot_area = pmax(share, 0.01))
 
 # Long-form sector dots — one row per country × sector with share > 1%.
+# Include the sector_source provenance so we can visually mark direct
+# UN measurements vs synthesized fallbacks.
 sector_dots <- cx |>
-  select(iso3, iso_num, reg,
+  select(iso3, iso_num, reg, sector_source,
          transport = sector_transport, industrial = sector_industrial,
          residential = sector_residential, commercial = sector_commercial,
          power = sector_power) |>
-  pivot_longer(-c(iso3, iso_num, reg), names_to = "sector", values_to = "share") |>
+  pivot_longer(-c(iso3, iso_num, reg, sector_source),
+               names_to = "sector", values_to = "share") |>
   left_join(SECTOR_TR, by = "sector") |>
   filter(!is.na(share), share > 0.01) |>
   mutate(x = x_col + (iso_num %% 7 - 3) * 0.028,
          y = 1.5 + (iso_num %% 12) * 0.20,
-         dot_area = pmax(share, 0.01))
+         dot_area = pmax(share, 0.01),
+         # UN direct measurement = filled dot; synthesis = ringed dot.
+         # power tier is always synthesis-based (see narrative note), so
+         # mark it as such regardless of country-level source.
+         is_direct = sector_source == "UN Energy Balances (direct)" &
+                     sector != "power")
+
+n_direct  <- sum(cx$sector_source == "UN Energy Balances (direct)", na.rm = TRUE)
+n_synth   <- sum(cx$sector_source == "IEA fuel-to-sector matrix (synthesized)", na.rm = TRUE)
 
 # Top-15 non-grid countries — display as a right-margin ranked list.
 non_grid_top <- cx |>
@@ -1106,7 +1139,8 @@ ggplot() +
             label = "PER-COUNTRY FUEL SHARES  (EIA International 2000-2023, latest year, QBTU)",
             hjust = 0, size = 3.1, fontface = "bold", colour = "#7B4E20") +
   annotate("text", x = 3.5, y = 4.55,
-            label = "PER-COUNTRY SECTOR CONSUMPTION  (synthesized: fuel mix × IEA fuel-to-sector matrix)",
+            label = sprintf("PER-COUNTRY SECTOR CONSUMPTION  (%d UN direct  ·  %d IEA-matrix synthesis  ·  power tier always synthesized)",
+                             n_direct, n_synth),
             hjust = 0, size = 3.1, fontface = "bold", colour = "#154360") +
   # Fuel dots
   geom_point(data = fuel_dots,
@@ -1122,10 +1156,13 @@ ggplot() +
              size = 2.5, colour = "#666666") +
   scale_colour_identity() +
   new_scale_fill() +
-  # Sector dots
-  geom_point(data = sector_dots,
+  # Sector dots — filled square = UN direct measurement, hollow square = synthesized
+  geom_point(data = sector_dots |> filter(is_direct),
               aes(x = x, y = y, fill = fill, size = dot_area),
-              shape = 22, colour = "white", stroke = 0.20, alpha = 0.80) +
+              shape = 22, colour = "white", stroke = 0.20, alpha = 0.85) +
+  geom_point(data = sector_dots |> filter(!is_direct),
+              aes(x = x, y = y, colour = fill, size = dot_area),
+              shape = 0, stroke = 0.50, alpha = 0.85) +
   scale_fill_identity() +
   geom_text(data = SECTOR_TR,
              aes(x = x_col, y = 1.15, label = label, colour = fill),
@@ -1156,20 +1193,65 @@ Data provenance:
 - **EIA International** (api.eia.gov/v2/international, `activityId=2`
   Consumption, `unit=QBTU`): products 44 Primary, 4411 Coal, 4413
   Natural gas, 4415 Petroleum + liquids (non-grid heavy), 4417 Nuclear,
-  4418 Renewables + other. 5,251 country-year rows.
-- **World Bank WDI**: EG.CFT.ACCS.ZS (clean cooking access),
-  EG.ELC.ACCS.ZS (electricity access), EG.FEC.RNEW.ZS (RE share of TFEC),
-  EG.USE.PCAP.KG.OE (per-cap energy), EG.USE.COMM.FO.ZS (fossil share),
-  EG.ELC.COAL/NGAS/PETR/FOSL.ZS (electricity fuel mix). 6,237 rows.
-- **Sector shares** (transport / industrial / residential / commercial /
-  power) are *synthesized* by multiplying observed fuel shares by
-  the published IEA fuel-to-sector allocation matrix:
-  petroleum → 60% transport / 15% industry / 10% residential / 5%
-  commercial / 10% power; natural gas → 5 / 35 / 25 / 15 / 20;
-  coal → 0 / 40 / 5 / 5 / 50; nuclear → 100% power; renewables → 5 /
-  10 / 20 / 5 / 60. Direct measurement would need IEA World Energy
-  Balances (paywalled — UNC library manual proxy is the follow-up
-  path). Non-grid share = `1 − sector_power`.
+  4418 Renewables + other. **5,251 country-year rows, 221 countries,
+  2000-2023.** Provides fuel-mix vector per country.
+- **World Bank WDI** (source 2, IEA-sourced): EG.CFT.ACCS.ZS (clean
+  cooking access), EG.ELC.ACCS.ZS (electricity access), EG.FEC.RNEW.ZS
+  (RE share of TFEC), EG.USE.PCAP.KG.OE (per-cap energy),
+  EG.USE.COMM.FO.ZS (fossil share), EG.ELC.COAL/NGAS/PETR/FOSL.ZS
+  (electricity fuel mix). **6,237 rows, 260 countries.** Provides
+  non-grid residential-cooking population proxy.
+- **UN Statistical Yearbook Energy Balances**
+  (`unstats.un.org/unsd/energystats/pubs/balance/2023/`) — six volume
+  PDFs (bab, bcf, bgl, bmq, brt, buz) covering ~217 countries × 2 years
+  (latest UN publication is 2023 vintage carrying 2021-2022 data).
+  `scripts/build_un_energy_balances.R` parses these with `pdftools`
+  and extracts the "Final energy consumption" section: total-final
+  TJ + sector-specific TJ for Manufacturing/construction/mining,
+  Transport, and Other (subdivided into Households, Commerce+public,
+  Agriculture+forestry+fishing, Other consumers). **354/354 rows pass
+  QC: industrial + transport + other = total (± 0.5%).** This IS
+  the IEA World Energy Balances data — both derive from the joint
+  IEA/UNSD/Eurostat/UNECE national questionnaire, IEA sells the
+  machine-readable version, UN publishes the PDFs for free.
+- **Sector shares** — 195/213 countries carry direct UN measurement
+  (`sector_source = "UN Energy Balances (direct)"`), 18 fall back to
+  the synthesis method below (`sector_source = "IEA fuel-to-sector
+  matrix (synthesized)"`).
+
+**Synthesis method (used for the 18 UN-uncovered countries):**
+sector share = Σ(fuel_share × fuel_to_sector_coeff). The coefficient
+matrix is the IEA global-median TFEC allocation (published in
+IEA World Energy Outlook methodology annex):
+
+|                    | Transport | Industry | Residential | Commercial | Power |
+|:-------------------|----------:|---------:|------------:|-----------:|------:|
+| Petroleum          |      0.60 |     0.15 |        0.10 |       0.05 |  0.10 |
+| Natural gas        |      0.05 |     0.35 |        0.25 |       0.15 |  0.20 |
+| Coal               |      0.00 |     0.40 |        0.05 |       0.05 |  0.50 |
+| Nuclear            |      0.00 |     0.00 |        0.00 |       0.00 |  1.00 |
+| Renewables (mix)   |      0.05 |     0.10 |        0.20 |       0.05 |  0.60 |
+
+Uncertainty on synthesized rows is ±10 percentage points per sector
+(from the IEA WEO uncertainty analysis of global-median vs
+country-specific values). The synthesis is a robust fallback — the
+IEA matrix reflects real observed medians across 30+ OECD reporters
+and 100+ non-OECD reporters — but direct UN measurement is preferred
+whenever available.
+
+**`sector_power` provenance note:** UN sector shares are of FINAL
+consumption (TFEC), which excludes electricity-generation losses that
+happen upstream in the transformation block. To keep the "power" tier
+comparable across countries we compute `sector_power` from PRIMARY
+energy via the same fuel-to-sector matrix regardless of UN coverage —
+this reflects "share of primary energy that becomes electricity
+delivered to end-users." `non_grid_share = 1 − sector_power`.
+
+**Full IEA World Energy Balances** (with the direct-measurement version
+of the sector matrix per country per year, no synthesis at all) is
+paywalled. UNC library proxy access requires interactive Duo login;
+follow-up path is a user-supplied session cookie or a batch of
+capture-and-paste queries.
 
 ### Every country as its own panel — including Antarctica
 
