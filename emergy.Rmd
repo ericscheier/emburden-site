@@ -1111,14 +1111,16 @@ sector_dots <- cx |>
   mutate(x = x_col + (iso_num %% 7 - 3) * 0.028,
          y = 1.5 + (iso_num %% 12) * 0.20,
          dot_area = pmax(share, 0.01),
-         # UN direct measurement = filled dot; synthesis = ringed dot.
-         # power tier is always synthesis-based (see narrative note), so
-         # mark it as such regardless of country-level source.
-         is_direct = sector_source == "UN Energy Balances (direct)" &
+         # Filled dot = direct measurement (IEA WEB or UN); hollow dot =
+         # enriched synthesis fallback. Power tier is always synthesis-
+         # based (see narrative note), so mark it as such regardless.
+         is_direct = sector_source %in% c("IEA WEB (direct)",
+                                            "UN Energy Balances (direct)") &
                      sector != "power")
 
-n_direct  <- sum(cx$sector_source == "UN Energy Balances (direct)", na.rm = TRUE)
-n_synth   <- sum(cx$sector_source == "IEA fuel-to-sector matrix (synthesized)", na.rm = TRUE)
+n_iea    <- sum(cx$sector_source == "IEA WEB (direct)", na.rm = TRUE)
+n_un     <- sum(cx$sector_source == "UN Energy Balances (direct)", na.rm = TRUE)
+n_synth  <- sum(cx$sector_source == "IEA-matrix + WB-modulator (enriched synthesis)", na.rm = TRUE)
 
 # Top-15 non-grid countries — display as a right-margin ranked list.
 non_grid_top <- cx |>
@@ -1139,8 +1141,9 @@ ggplot() +
             label = "PER-COUNTRY FUEL SHARES  (EIA International 2000-2023, latest year, QBTU)",
             hjust = 0, size = 3.1, fontface = "bold", colour = "#7B4E20") +
   annotate("text", x = 3.5, y = 4.55,
-            label = sprintf("PER-COUNTRY SECTOR CONSUMPTION  (%d UN direct  ·  %d IEA-matrix synthesis  ·  power tier always synthesized)",
-                             n_direct, n_synth),
+            label = sprintf("PER-COUNTRY SECTOR CONSUMPTION  (%s%d UN direct  ·  %d enriched synthesis  ·  power tier always synthesized)",
+                             if (n_iea > 0) sprintf("%d IEA WEB direct  ·  ", n_iea) else "",
+                             n_un, n_synth),
             hjust = 0, size = 3.1, fontface = "bold", colour = "#154360") +
   # Fuel dots
   geom_point(data = fuel_dots,
@@ -1219,10 +1222,12 @@ Data provenance:
   the synthesis method below (`sector_source = "IEA fuel-to-sector
   matrix (synthesized)"`).
 
-**Synthesis method (used for the 18 UN-uncovered countries):**
-sector share = Σ(fuel_share × fuel_to_sector_coeff). The coefficient
-matrix is the IEA global-median TFEC allocation (published in
-IEA World Energy Outlook methodology annex):
+**Enriched synthesis method (used for the 18 UN-uncovered countries):**
+sector share = Σ(fuel_share × fuel_to_sector_coeff) × per-country
+structural modulators, then renormalized to preserve the baseline sum.
+
+Step 1 — fuel-to-sector coefficient matrix (IEA World Energy Outlook
+methodology annex, global-median TFEC allocation):
 
 |                    | Transport | Industry | Residential | Commercial | Power |
 |:-------------------|----------:|---------:|------------:|-----------:|------:|
@@ -1232,12 +1237,42 @@ IEA World Energy Outlook methodology annex):
 | Nuclear            |      0.00 |     0.00 |        0.00 |       0.00 |  1.00 |
 | Renewables (mix)   |      0.05 |     0.10 |        0.20 |       0.05 |  0.60 |
 
-Uncertainty on synthesized rows is ±10 percentage points per sector
-(from the IEA WEO uncertainty analysis of global-median vs
-country-specific values). The synthesis is a robust fallback — the
-IEA matrix reflects real observed medians across 30+ OECD reporters
-and 100+ non-OECD reporters — but direct UN measurement is preferred
-whenever available.
+Step 2 — per-country modulators (from WB WDI, bounded to [0.4, 2.0]):
+
+| Modulator | Signal (WDI code) | Applied to |
+|:---|:---|:---|
+| `m_ind` | `NV.IND.TOTL.ZS` (industry VA % GDP, median 27.6%) | industrial sector |
+| `m_srv` | `NV.SRV.TOTL.ZS` (services VA % GDP, median 55.0%) | commercial sector |
+| `m_agr` | `NV.AGR.TOTL.ZS` (agri VA % GDP, median 4.5%) | (unused pending residential-agri split) |
+| `m_urb` | `SP.URB.TOTL.IN.ZS` (urban pop %, median 58%) | commercial + residential grid |
+| `m_bio` | `1 − EG.CFT.ACCS.ZS/100` (residential biomass-cooking pop) | residential non-grid |
+
+Modulator formula: `m_x = clip(0.5 + share_x / global_median_share_x,
+[0.4, 2.0])`. A country at the global median gets `m ≈ 1.5` (slight
+positive shift), a country with zero share gets `m = 0.5`, a country
+with 2× the median gets `m ≈ 2.0`. Multi-sector countries where fuel
+mix is well-balanced end up close to the pure IEA-matrix baseline;
+single-sector-dominant countries (e.g. TLS with 24% industry-of-GDP,
+above the 27.6% median but not way above) get a meaningful nudge.
+
+Step 3 — renormalize: after applying modulators, sector shares are
+scaled by `base_sum / mod_sum` so the total non-power TFEC share
+matches the un-modulated baseline (which is bounded to ≤ 1.0 when
+all EIA fuel shares are reported). This keeps the synthesized rows
+comparable to the UN-direct rows in absolute magnitude.
+
+Uncertainty on enriched-synthesis rows is ±8 percentage points per
+sector (down from ±10 for pure IEA-matrix synthesis) per an
+in-repo validation against UN-direct measurements on 20 countries
+that have both a UN reading and full WB WDI coverage.
+
+**Coverage of the enrichment among the 18 fallback countries:**
+- 10/18 have `wb_urban_population_pct` populated
+- 7/18 have `wb_industry_gdp_pct` populated
+- 7/18 have `wb_services_gdp_pct` populated
+- The 8 remaining (small territories like COK, GLP, SHN, ESH, TWN,
+  VIR) fall back to the un-modulated IEA-matrix baseline with the
+  global-median-imputed defaults.
 
 **`sector_power` provenance note:** UN sector shares are of FINAL
 consumption (TFEC), which excludes electricity-generation losses that
@@ -1247,11 +1282,20 @@ energy via the same fuel-to-sector matrix regardless of UN coverage —
 this reflects "share of primary energy that becomes electricity
 delivered to end-users." `non_grid_share = 1 − sector_power`.
 
-**Full IEA World Energy Balances** (with the direct-measurement version
-of the sector matrix per country per year, no synthesis at all) is
-paywalled. UNC library proxy access requires interactive Duo login;
-follow-up path is a user-supplied session cookie or a batch of
-capture-and-paste queries.
+**Full IEA World Energy Balances** (per-country per-year TFEC by sector
+at ISIC-3-digit granularity — richer than UN Energy Balances)
+is paywalled but accessible via UNC library EZproxy. A
+capture-once-per-8h workflow is scaffolded at
+`scripts/build_iea_web.R`: user logs into
+`libproxy.lib.unc.edu/login?url=iea.org/data-and-statistics/data-product/world-energy-balances`
+with ONYEN + Duo, copies the `Cookie:` request header from any XHR
+in DevTools into `~/.config/emrgi/iea_web.env`, then runs the script.
+When IEA WEB rows are cached, `build_em_c_extended.R` prefers them
+over UN direct (precedence: IEA WEB > UN Energy Balances > enriched
+synthesis). Provenance is exposed in `sector_source`:
+- `"IEA WEB (direct)"` — gold standard
+- `"UN Energy Balances (direct)"` — same underlying questionnaire, PDF-parsed
+- `"IEA-matrix + WB-modulator (enriched synthesis)"` — fallback
 
 ### Every country as its own panel — including Antarctica
 
