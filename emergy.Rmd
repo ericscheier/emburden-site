@@ -1707,6 +1707,78 @@ pruning" means here**: the dominated list isn't hardcoded — it's a
 downstream product of the current outcome grid, updated in the same
 sweep as the alpha analysis.
 
+### Bundle Q3.12 — Testing classical Odum ecological principles
+
+The Q3.10/Q3.11 machinery makes it straightforward to test whether the
+classical Odum ecological "laws" hold up cross-sectionally in modern
+global data. `emburdenstats::test_all_ecological_principles()` runs
+four batteries in one call; the runner
+`scripts/test_ecological_hypotheses.R` produces this figure:
+
+```{r fig-q312-ecological, echo=FALSE, out.width="100%", fig.cap="Bundle Q3.12 — cross-country tests of classical Odum ecological principles. Each panel = one hypothesis, each bar = one outcome the hypothesis predicts. Bar length = ΔR² beyond `log(GDP/cap) + region_wb` baseline. Green = observed coefficient sign matches the classical prediction AND F-p < 0.05. Red = inconsistent."}
+knitr::include_graphics("figures/heii_q312_ecological_hypotheses.png")
+```
+
+**Summary of empirical results:**
+
+| Hypothesis | Candidate | Outcomes | Consistent | Pass rate |
+|:---|:---|---:|---:|---:|
+| **ESI predicts long-term outcomes** | `ESI` | 3 | 2 | **67%** |
+| ELR predicts environmental damage | `ELR` | 4 | 1 | 25% |
+| **Maximum Empower Principle** | `empower_pc_sej_per_yr` | 4 | 1 | 25% |
+| Transformity hierarchy | `transformity_sej_per_J` | 3 | 0 | **0%** |
+
+**What holds up empirically:**
+
+- **ESI (Odum's Emergy Sustainability Index)** — despite being flagged
+  as "dominated" in the Q3.10 general evaluation, it's the strongest
+  performer of the classical principles when tested against the
+  outcomes it was DESIGNED to predict: life expectancy (+0.010 ΔR²,
+  F-p 0.005, right sign) and adjusted particulate damage (−0.014 ΔR²,
+  F-p 0.000, right sign). Under-5 mortality shows the right sign but
+  doesn't reach significance. This is a good example of why
+  hypothesis-targeted testing complements the systematic grid.
+- **MEP scale-only prediction** — empower per capita DOES positively
+  predict total GDP (F-p 0.016, right sign). The most reductive form
+  of "more empower = bigger economy" survives.
+
+**What fails empirically:**
+
+- **Maximum Empower Principle's evolutionary claim (3/4 outcomes
+  fail)** — the most striking failure is **wrong sign on population
+  growth** (coef −2.40, F-p 0.034): higher-empower countries have
+  LOWER population growth, not higher. This is the demographic
+  transition — Odum's evolutionary-fitness proxy runs backward in
+  modern human societies. Exports-as-share-of-GDP null; life
+  expectancy right sign but not significant.
+- **Transformity hierarchy — total failure (0/3)** — grid transformity
+  shows the WRONG sign for all three outcomes tested (GDP per cap,
+  life expectancy, exports). Countries with higher grid transformity
+  are actually POORER after controlling for region — the opposite of
+  what the "transformity = position in hierarchy" claim predicts.
+  Consistent with the Q3.10 finding that transformity contributes
+  most to *poverty-vulnerability* outcomes, not "success" outcomes.
+- **ELR (Environmental Loading Ratio) — mostly nulls** — only PM
+  damage shows the predicted +sign at significance; GHG per cap,
+  energy depletion, and PM exposure are all null.
+
+**What this means for the emergy framework:**
+
+The systematic evaluation supports keeping ESI as a targeted
+sustainability indicator (its dominance in the general grid was
+because it was tested against outcomes it wasn't designed for),
+supports the sector-derived and biomass metrics from Q3, and
+identifies the **Maximum Empower Principle** and **transformity
+hierarchy** as classical claims that don't survive modern
+cross-country testing. The Odum tradition has enough surviving
+signal to be worth preserving, but the specific evolutionary-scale
+claims need re-framing.
+
+Runner + full REPORT.md + results.csv at
+[`emburdensynth/docs/ecological_hypotheses/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/ecological_hypotheses).
+Analytics module at
+[`emburdenstats::test_all_ecological_principles()`](https://github.com/ericscheier/emburdenstats/blob/main/R/ecological_principles.R).
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
