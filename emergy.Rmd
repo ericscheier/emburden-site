@@ -1963,6 +1963,72 @@ household energy insecurity.
 Runner + REPORT.md + 2 PNGs + CSVs at
 [`emburdensynth/docs/transformity_variants/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/transformity_variants).
 
+### Bundle Q3.16 — Global scale-out + panel-year alpha
+
+Two extensions built on the Q3.9-Q3.14 infrastructure.
+
+#### Q3.16-E1 — Global counterparts to US asthma + outage analyses
+
+The US-only asthma-analysis and outage-homicide-analysis branches ran
+county-year intersection regressions on health outcomes against energy
+burden. `scripts/global_scaleout_analogs.R` fits the closest global
+counterparts against the 185-country panel from
+`emburdenhealth::build_health_panel_country()` (Q3.9-L5):
+
+```{r fig-q316-asthma, echo=FALSE, out.width="95%", fig.cap="Q3.16-E1a — asthma-analog: log-log predicted vs observed household air-pollution deaths per 100k. Model = biomass_share × sector_industrial + clean_cooking_access + log(GDP/cap) + region. n=63 countries, adj-R² = 0.68. Biomass-heavy countries (red) cluster in the upper-right high-mortality region regardless of income adjustment."}
+knitr::include_graphics("figures/heii_q316_e1_asthma_analog.png")
+```
+
+```{r fig-q316-outage, echo=FALSE, out.width="95%", fig.cap="Q3.16-E1b — outage-analog: predicted vs observed under-5 mortality per 1000 live births. Model = rural_no_electricity × non_grid_share + log(GDP/cap) + region. n=178 countries, adj-R² = 0.83. Log(GDP/cap) does the heavy lifting (coef -0.44, p<1e-27); infrastructure indicators contribute marginally."}
+knitr::include_graphics("figures/heii_q316_e1_outage_analog.png")
+```
+
+Full analog REPORT.md + CSVs at
+[`emburdensynth/docs/global_scaleout/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/global_scaleout).
+
+#### Q3.16-E2 — Panel-year temporal alpha
+
+The Q3.9-Q3.14 alpha analyses were cross-sectional snapshots. WHO GHO,
+WB WDI, EIA International all cover 2000-2023. `fit_alpha_panel()`
+(new in `emburdenstats`) fits a two-way fixed-effects panel model
+`outcome ~ candidate + log(GDP/cap) | iso3 + year` with country-
+clustered SEs, isolating **within-country temporal variation** after
+absorbing country structure and global year shocks.
+
+```{r fig-q316-temporal, echo=FALSE, out.width="100%", fig.cap="Q3.16-E2 — panel-FE coefficients across 4 fuel-share candidates × 5 outcomes with 95% CI whiskers. Two-way FE (iso3 + year absorbed). n_obs ≈ 3,400-3,500 per cell over 165-167 countries. Blue = p<0.05; grey = null. wb_airpol_mortality_per100k is null for all candidates because it's only reported in a single year."}
+knitr::include_graphics("figures/heii_q316_e2_temporal_alpha.png")
+```
+
+Strongest within-country findings — signals that survive stripping out
+country structure AND year shocks:
+
+| Candidate | Outcome | Coef | Within-R² | p |
+|:---|:---|---:|---:|---:|
+| **coal_share** | wb_ghg_co2_pc | **+2.52** | **0.285** | **<1e-19** |
+| **renewables_share** | wb_ghg_co2_pc | **−2.51** | **0.141** | **<1e-5** |
+| renewables_share | wb_pm25_pop_wt_ugm3 | −0.63 | 0.050 | 3.5e-4 |
+| renewables_share | wb_life_expectancy_years | −0.17 | 0.044 | 1.2e-3 |
+
+**Coal→CO2 within-country coupling is nearly tautological but the
+magnitude and precision are worth noting**: doubling a country's coal
+share of primary energy over its own history raises per-capita CO2 by
+$e^{2.52 \cdot 0.5} - 1 \approx 250\%$ (interpreting coef ≈ 2.52
+against a Δ of 0.5 in coal_share). Symmetric for renewables cutting
+CO2. Panel-year strength of the cleanest causal-adjacent chain in
+the emergy framework.
+
+**The renewables ↔ life-expectancy NEGATIVE panel finding is counter-
+intuitive** and probably confounded (aging populations in renewable-
+adopting European economies; opioid/COVID US life-expectancy dips).
+Panel FE absorbs global year shocks but not country-specific temporal
+trends. Worth flagging as a puzzle to investigate before over-
+interpreting; may motivate a country-specific-trend correction.
+
+Runner + REPORT.md + CSV at
+[`emburdensynth/docs/temporal_alpha/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/temporal_alpha).
+Module at
+[`emburdenstats::fit_alpha_panel()`](https://github.com/ericscheier/emburdenstats/blob/main/R/alpha_panel.R).
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
