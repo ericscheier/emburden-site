@@ -14,11 +14,16 @@ BR <- c(g = "#228b22", gd = "#176b17", gdd = "#0f4d0f", gold = "#b5791b",
         ink = "#1d2a1d", mut = "#566656", line = "#d6e4d6", bg = "#f3f8f3",
         charge = "#c0392b", warn = "#8a5a16")
 source("R/counts.R")
-# Prefer the extended metrics file (adds EIA fuel-mix + WB SE4ALL + synthesized
-# sector shares); fall back to the base file if the extended build hasn't run.
-.ext_rds  <- file.path(DATA_DIR, "emergy_metrics_extended.rds")
-.base_rds <- file.path(DATA_DIR, "emergy_metrics.rds")
-em <- readRDS(if (file.exists(.ext_rds)) .ext_rds else .base_rds)
+# Prefer the PRUNED extended metrics file (Q3.11 — drops emergy candidates
+# whose max mean ΔR² across every outcome domain is < 0.02, saving degrees
+# of freedom without losing signal). Fall back to full extended, then to
+# the base rds if neither exists.
+.pruned_rds <- file.path(DATA_DIR, "emergy_metrics_extended_pruned.rds")
+.ext_rds    <- file.path(DATA_DIR, "emergy_metrics_extended.rds")
+.base_rds   <- file.path(DATA_DIR, "emergy_metrics.rds")
+em <- readRDS(if (file.exists(.pruned_rds)) .pruned_rds
+              else if (file.exists(.ext_rds)) .ext_rds
+              else .base_rds)
 em_c <- em$country
 em_cell <- em$cell
 world <- tryCatch(readRDS(file.path(DATA_DIR, "world_sf.rds")), error=function(e) NULL)
@@ -1655,6 +1660,52 @@ Full grid CSV + per-domain leaderboards + REPORT.md at
 The runner is `scripts/systematic_emergy_evaluation.R`; the analytics
 module lives in
 [`emburdenstats::evaluate_metric_grid()`](https://github.com/ericscheier/emburdenstats/blob/main/R/delta_r2.R).
+
+### Bundle Q3.11 — Dynamic pruning of dominated metrics
+
+The Q3.10 leaderboard identifies 14 emergy candidates whose max mean
+ΔR² across every outcome domain is below 0.02 — they add essentially
+no information beyond `log(GDP/cap) + region_wb` anywhere. Carrying
+them in downstream analytical stacks costs degrees of freedom without
+buying signal. Q3.11 automates the pruning:
+
+- `emburdenstats::identify_dominated_metrics(rank_or_grid, threshold)`
+  reads the current systematic-evaluation leaderboard and returns the
+  dominated set with a `max_mean_delta_r2` attribute per metric.
+- `scripts/build_em_c_extended.R` calls it after the merge and emits a
+  parallel **pruned** rds at
+  `docs/global_analysis_data/emergy_metrics_extended_pruned.rds` (14
+  columns dropped, 137 kept) alongside the full 151-col version. Pruned
+  file carries a `pruned_metrics` attribute recording what was dropped,
+  a `pruned_at` timestamp, and the threshold used.
+- **This setup chunk now prefers the pruned rds** — every figure and
+  analysis in this document reads the pruned version automatically. Full
+  version stays available for provenance / historical comparison.
+
+Dominated metrics currently pruned (2026-09 vintage):
+
+- **Odum classics that HEII subsumes**: `ESI`, `EYR`, `R_pct`, `NR_pct`,
+  `renewable_pct`, `heii_esi`.
+- **Grid-only HEII variants**: `heii_sej_grid_only`, `heii_norm_grid_only`
+  (stripping non-grid share removes the alpha).
+- **Wealth-side HEII quantiles**: `heii_norm_p50`, `heii_norm_p90`,
+  `heii_norm_p90_flat` (P10 versions carry the useful inequality signal).
+- **Other**: `economic_gap_sej`, `heii_ratio_p10_p90_flat`,
+  `heii_norm_p10`.
+
+**Protected from pruning** regardless of ΔR² score (used in figures
+or as inputs to other computations):
+`transformity_sej_per_J`, `empower_pc_sej_per_yr`, `hh_empower_sej_per_yr`,
+`hh_fuel_empower`, `sector_transport`, `sector_industrial`,
+`sector_residential`, `sector_commercial`, `sector_power`, `non_grid_share`,
+`heii_norm`, `biomass_share`.
+
+Rerun `scripts/systematic_emergy_evaluation.R` after adding new
+outcomes or new metrics, then rerun `scripts/build_em_c_extended.R`,
+and the pruned set updates automatically. **This is what "dynamic
+pruning" means here**: the dominated list isn't hardcoded — it's a
+downstream product of the current outcome grid, updated in the same
+sweep as the alpha analysis.
 
 ### Every country as its own panel — including Antarctica
 
