@@ -2029,6 +2029,73 @@ Runner + REPORT.md + CSV at
 Module at
 [`emburdenstats::fit_alpha_panel()`](https://github.com/ericscheier/emburdenstats/blob/main/R/alpha_panel.R).
 
+### Bundle Q3.17 — Net Energy Return × MEP × macro-to-micro bridge
+
+Q3.15 left five open puzzles the ΔR² frame couldn't unify. This
+bundle tests whether societal Net Energy Return (EROI at the
+country-year scale) is the missing rung between Odum's Maximum
+Empower Principle (macro-scale selection) and the Household Emergy
+Insecurity Index (micro-scale distributional failure). Household EROI
+already exists as `net_energy_equity/R/energy_ratios.R:eroi_func`
+with the tested identity **EROI = NER + 1 = 1/EB**; Q3.17 derives
+the missing country-year rung from UN Energy Balance 2022-2023 raw
+transformation, energy-industry own-use, and losses rows:
+
+```
+energy_invested_tj      = |EIOU| + |Losses| + |Transformation net|
+net_energy_delivered_tj = Final energy consumption (TFC)
+eroi_country            = net_energy_delivered_tj / energy_invested_tj
+ner_country             = eroi_country - 1
+```
+
+Available for **203 of 213 countries**. Distribution: p10 = 1.34,
+p50 = 2.61, p90 = 7.31, r(log GDP, EROI) = −0.24. Bottom-EROI
+countries are fossil-fuel exporters (BRN 0.42, ISL 0.53, TTO 0.63,
+QAT 0.69); top-EROI are import-heavy low-processing countries
+(NPL 79.8, LSO 61.4, CAF 46.1). This is *domestic delivery* EROI,
+not full societal EROI (trade-adjustment deferred).
+
+**Bridge test grid** — 9 outcomes × 4 EROI candidates (log_eroi,
+eroi_country, ner_country, energy_invested_tj), ΔR² beyond
+log(GDP) + region baseline:
+
+| Outcome | Best candidate | ΔR² | p | N |
+|:---|:---|---:|---:|---:|
+| **wb_pm25_pop_wt_ugm3** | ner_country | **0.042** | **3.6e-4** | 185 |
+| **wb_ghg_co2_pc** | energy_invested_tj | **0.069** | **<1e-4** | 190 |
+| wb_airpol_mortality_per100k | energy_invested_tj | 0.014 | 1.3e-3 | 178 |
+| wb_life_expectancy_years | energy_invested_tj | 0.011 | 2.2e-3 | 193 |
+| wb_under5_mortality_per1000 | eroi_country | 0.012 | 6.8e-3 | 183 |
+| heii_norm_p90 | eroi_country | 0.020 | 0.20 | 63 |
+| heii_norm | energy_invested_tj | 0.009 | 0.40 | 63 |
+
+**Bridge partially holds.** NER predicts PM2.5 exposure cleanly at
+n=185 (ΔR²=0.042, p<1e-3, coef −0.47 — higher-NER countries have
+lower PM2.5 at every income level). The macro damage/emissions rung
+lands. **The HEII micro rungs do NOT survive n=63** (all p > 0.19)
+— either the bridge is real but underpowered at the household-data
+sample, or HEII is driven by within-country distribution mechanisms
+that country-scale NER averages out.
+
+**Renewables puzzle NOT resolved by adding EROI.** Cross-sectionally,
+adding log(EROI) to `life_exp ~ renewables + log(gdp) + region` shifts
+the renewables coefficient from +2.81 (p=0.21) to +4.09 (p=0.075) —
+a 46% *increase* in magnitude, not the attenuation the transition-
+cost hypothesis predicted. The panel-year puzzle (coef −0.17,
+p=1.2e-3 within-country) requires panel EROI, which requires
+backfilling UN Balance volumes to 2000-2021 — deferred.
+
+**Transformity ↔ EROI**: r=−0.03 for renewable-adjusted variant,
+r=−0.22 for canonical Odum. The LCA-adjustment removed whatever
+structural EROI-tracking the fuel-chain canonical variant carried.
+The two metrics measure different quantities (per-unit specific
+transformity vs. system-level throughput ratio).
+
+Runner + REPORT.md + 3 figures at
+[`emburdensynth/docs/eroi_bridge/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/eroi_bridge).
+Paper Section 4.9 + Discussion 5.5 in
+[`global_emergy_alpha.Rmd`](https://github.com/ericscheier/emburdensynth/blob/global/docs/paper/global_emergy_alpha.Rmd).
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country

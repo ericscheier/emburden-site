@@ -10,11 +10,14 @@ pagetitle: "emburden.org — Papers"
 <div class="card">
 <div class="kicker">Ecological Economics — Research Article</div>
 <h3>Where does emergy accounting give new information? A systematic cross-country evaluation of 36 emergy-native metrics against 40 mainstream outcomes</h3>
-<p><b>Status</b>: **Internal review complete + Q3.16 findings integrated**
-(v2 draft, ~6500 words, PDF re-rendered). Adds panel-year within-country
-alpha (Section 4.7), global asthma+outage scale-out analogs (Section 4.8),
-and a full Limitations + Uncertainty subsection to the Discussion. Ready
-for external co-author review or submission target selection.</p>
+<p><b>Status</b>: **Q3.17 macro-to-micro bridge integrated** (v3 draft,
+~7,300 words, PDF re-rendered). Adds Section 4.9 introducing societal
+Net Energy Return as the missing rung between MEP (macro) and HEII
+(micro), with the derivation `EROI = TFC/(|EIOU|+|Losses|+|Transformation|)`
+from UN Energy Balance and the four-test result grid (bridge holds on
+PM2.5 exposure, ΔR²=0.042, p<1e-3, n=185; fails at HEII n=63; renewables
+puzzle not resolved cross-sectionally). Discussion 5.5 "MEP under
+transition" reframes the five open puzzles through the NER lens.</p>
 <p><b>Headlines</b>: HEII_norm captures ~80% of its variance orthogonal
 to standard indicators (log GDP + region); sector_industrial dominates
 damage + emissions alpha; ESI holds up empirically (67% consistent)
