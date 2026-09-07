@@ -834,8 +834,17 @@ cd_base <- em_c |>
          iso_num = as.integer(as.factor(iso3)))
 
 # GRID transformity dots — sit in Secondary Sector tier (base representation)
+# Q3.14: use renewable-adjusted transformity for cross-country positioning
+# (fuel-mix reconstruction with full-chain LCA-emergy for renewables).
+# Falls back to pipeline transformity if the renewable-adjusted variant
+# isn't in this rds (older builds).
+.tr_display_col <- {
+  if ("transformity_renewable_adjusted_sej_per_J" %in% names(cd_base))
+    "transformity_renewable_adjusted_sej_per_J"
+  else "transformity_sej_per_J"
+}
 grid_dots <- cd_base |>
-  mutate(x = log10(transformity_sej_per_J),
+  mutate(x = log10(.data[[.tr_display_col]]),
          y = -1.6 + (iso_num %% 8) * 0.30,
          tier = "Grid")
 
@@ -860,7 +869,7 @@ renewable_dots <- cd_base |>
 # rather than clumping on top of the grid symbol.
 hh_dots <- cd_base |>
   filter(!is.na(heii_norm_p10), !is.na(heii_norm_p90)) |>
-  mutate(x_grid = log10(transformity_sej_per_J),
+  mutate(x_grid = log10(.data[[.tr_display_col]]),
          iso_num_hh = row_number(),
          hh_x_jit = ((iso_num_hh - 1) %% 20) * 0.10 - 0.9) |>
   select(iso3, iso_num_hh, reg, pop_size, x_grid, hh_x_jit,
@@ -2001,9 +2010,14 @@ production, households, cultural information). Larger transformity =
 more accumulated solar-emergy per joule = higher in the hierarchy.
 We can render the same figure with our real HEII data.
 
-```{r fig-odum-spectral, fig.height=6.8, fig.width=11, fig.cap="Odum spectral hierarchy for the HEII framework — after Abel 2023 fig 21 (Int J General Systems). X = log10 transformity (sej/J). Nested progressively-right-shifted lenses show the biosphere hierarchy from atmosphere/ecosystems (leftmost, most territory) to cultural information (rightmost, highest concentration per joule). Our HEII framework's grid transformities (10^4-10^5 sej/J range across 213 countries) sit inside the Economic Production + Households Hierarchy lenses."}
+```{r fig-odum-spectral, fig.height=6.8, fig.width=11, fig.cap="Odum spectral hierarchy for the HEII framework — after Abel 2023 fig 21 (Int J General Systems). X = log10 transformity (sej/J). Country positions use the Q3.14 renewable-adjusted transformity (fuel-mix reconstruction with full-chain LCA-emergy for renewables), not the pipeline's efficiency-corrected metric — the classical hierarchy is directionally correct on this measure. Nested progressively-right-shifted lenses show the biosphere hierarchy from atmosphere/ecosystems (leftmost, most territory) to cultural information (rightmost, highest concentration per joule)."}
 suppressPackageStartupMessages({library(ggforce); library(purrr)})
-tr_country <- em_c$transformity_sej_per_J
+# Q3.14: prefer renewable-adjusted transformity for cross-country display
+tr_country <- {
+  if ("transformity_renewable_adjusted_sej_per_J" %in% names(em_c))
+    em_c$transformity_renewable_adjusted_sej_per_J
+  else em_c$transformity_sej_per_J
+}
 tr_country <- tr_country[is.finite(tr_country) & tr_country > 0]
 
 # Nested progressively-right-shifted lenses (Abel-style hierarchy).
