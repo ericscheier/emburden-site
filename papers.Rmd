@@ -8,6 +8,25 @@ pagetitle: "emburden.org — Papers"
 <div class="card-grid">
 
 <div class="card">
+<div class="kicker">Ecological Economics — Research Article</div>
+<h3>Where does emergy accounting give new information? A systematic cross-country evaluation of 36 emergy-native metrics against 40 mainstream outcomes</h3>
+<p><b>Status</b>: **Working paper draft complete** (12 pages, ~5000 words,
+PDF rendered). Q3.7–Q3.14 findings woven into a single narrative
+around the nested-ΔR² framework.</p>
+<p><b>Headlines</b>: HEII_norm captures ~80% of its variance orthogonal
+to standard indicators (log GDP + region); sector_industrial dominates
+damage + emissions alpha; ESI holds up empirically (67% consistent)
+when targeted; MEP fails on population growth (wrong sign, demographic
+transition); transformity hierarchy directionally correct only under
+fuel-mix reconstruction with LCA-emergy renewable adjustment.</p>
+<p>
+<a href="https://github.com/ericscheier/emburdensynth/blob/global/docs/paper/global_emergy_alpha.pdf">Read the PDF →</a>
+&nbsp;·&nbsp;
+<a href="https://github.com/ericscheier/emburdensynth/blob/global/docs/paper/global_emergy_alpha.Rmd">Source Rmd →</a>
+</p>
+</div>
+
+<div class="card">
 <div class="kicker">Science — Policy Forum</div>
 <h3>The climate-justice mismatch: quantifying who pays for whose emissions</h3>
 <p><b>Status</b>: draft complete (1,183 words, target 1,500). Cover
