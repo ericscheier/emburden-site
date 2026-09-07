@@ -1779,6 +1779,95 @@ Runner + full REPORT.md + results.csv at
 Analytics module at
 [`emburdenstats::test_all_ecological_principles()`](https://github.com/ericscheier/emburdenstats/blob/main/R/ecological_principles.R).
 
+### Bundle Q3.13 — Why did they fail? Diagnostic investigations
+
+Four counter-intuitive Q3 results and the mechanisms behind each.
+
+#### P1 — Transformity hierarchy: fuel mix drives transformity, not GDP
+
+```{r fig-q313-p1, echo=FALSE, out.width="100%", fig.cap="P1 diagnostic — GDP per capita (log y) vs grid transformity (x) across 196 countries, colored by renewable share. The scatter cloud has no diagonal pattern (r=-0.05). Rich, renewable-heavy economies (DNK, LUX, DEU, IRL) sit at LOW transformity; petroleum-only island territories (COM, GMB, GNB, TLS) sit at HIGH transformity. France's nuclear grid drives it to the right at mid-GDP. The Odum hierarchy claim breaks in the renewable era."}
+knitr::include_graphics("figures/heii_q313_P1_transformity_fuel_mix.png")
+```
+
+Pearson r(transformity, log GDP/cap) = **−0.05** across 196 countries.
+Pearson r(transformity, renewable_pct) = **−0.74** — grid transformity
+is essentially "how fossil-locked your grid is." Rich modern economies
+are actively pushing toward the LOW end of the transformity axis.
+Odum's canonical transformities (oil ≈ 54k, coal ≈ 40k, nuclear ≈
+200k, wind/hydro/solar ≈ 1.5-8k sej/J) were formulated in a fossil +
+nuclear era; **the renewable transition inverts the mapping** from
+"economic sophistication → high transformity" that the 1970s-90s Odum
+literature implicitly assumed.
+
+Suggests re-framing (a renewable-adjusted transformity that accounts
+for the sophistication of RE infrastructure per unit output would
+restore the hierarchy signal) rather than discarding the concept.
+
+#### P2 — MEP inverted by the demographic transition
+
+```{r fig-q313-p2, echo=FALSE, out.width="100%", fig.cap="P2 diagnostic — annual population growth vs per-capita empower (log x), colored by WB region. Negative slope. Rich, high-empower populations don't grow (below replacement); poor, low-empower populations do. Preston-curve territory."}
+knitr::include_graphics("figures/heii_q313_P2_mep_demographic_transition.png")
+```
+
+Pearson r(log empower per cap, annual pop growth %) = **−0.53** —
+strongly negative. Odum's MEP predicts positive; modern human data
+inverts the sign. This is the demographic transition (Preston curves
+1975+): as societies industrialize and reach high per-cap resource
+use, fertility drops below replacement.
+
+MEP survives only in the reductive scale-only sense: total national
+empower correlates positively with total GDP (Q3.12: F-p 0.016, coef
++, ΔR² +0.025). That reduces to "bigger systems consume more
+energy" — essentially tautological.
+
+#### P3 — sector_industrial has OPPOSITE effects on different mortality types
+
+```{r fig-q313-p3, echo=FALSE, out.width="100%", fig.cap="P3 diagnostic — sector_industrial coefficient across mortality outcomes, only F-p<0.05 shown. Red = more industry → more of that outcome. Positive on PM2.5 exposure tiers; NEGATIVE on total-deaths from air pollution (industrialized societies have modern health systems that reduce total mortality even at higher exposure)."}
+knitr::include_graphics("figures/heii_q313_P3_sector_industrial_mortality_flip.png")
+```
+
+Industrialization pushes two directions simultaneously: **positive on
+PM2.5 exposure tiers** (industrial share → more population above WHO
+thresholds), **negative on total attributable deaths + DALYs**
+(industrialized societies have modern health systems that keep total
+air-pollution deaths lower than lower-industry regions with the same
+baseline). The same emergy metric captures opposing mechanisms
+depending on whether the outcome is *exposure* or *attributable
+mortality*. Averaging into a single ΔR² hides the underlying
+structure — motivates splitting composite outcomes upstream.
+
+#### P4 — HEII_norm variance is orthogonal to almost every standard control
+
+```{r fig-q313-p4, echo=FALSE, out.width="100%", fig.cap="P4 diagnostic — unique R² contribution of each candidate control to explaining HEII_norm, computed as R²_full − R²_dropping-that-control. Only gdp_pc_usd (+0.053) has meaningful unique signal. Every other control has NEGATIVE unique contribution — dropping them improves adjusted R² because they're collinear with GDP and eat degrees of freedom."}
+knitr::include_graphics("figures/heii_q313_P4_heii_variance_decomposition.png")
+```
+
+Variance-decomposition of HEII_norm across the 9 candidate controls:
+**only `gdp_pc_usd` contributes uniquely** (+0.053 R²). Every other
+control (poverty Gini, PM2.5, CO2 per cap, energy intensity,
+electricity access, clean cooking, WHO household + ambient deaths)
+has NEGATIVE unique contribution — dropping them from the full model
+IMPROVES adjusted R² because they're all collinear with GDP and
+waste degrees of freedom.
+
+Which means: **the ~80% of HEII_norm variance orthogonal to standard
+indicators is orthogonal to log(GDP/cap) specifically** — not to some
+elusive combination of controls. Every mainstream candidate for
+"predicting household energy insecurity" reduces to GDP after
+adjustment. HEII captures a signal none of them do.
+
+#### Bottom line
+
+| Puzzle | Mechanism | Suggestion |
+|:---|:---|:---|
+| P1 Transformity | Odum's canonical transformities were fossil-era; renewables invert the mapping | Re-frame — renewable-adjusted transformity |
+| P2 MEP | Demographic transition reverses the "empower → reproduction" chain | Keep only the total-scale claim; drop evolutionary framing |
+| P3 sector_industrial | Two mechanisms (exposure vs attributable mortality) with opposite signs | Split composite outcomes before aggregating |
+| P4 HEII | GDP alone captures every standard control's contribution; HEII's alpha is really "beyond GDP" | Simplify future baseline models to just log(GDP) + region |
+
+Runner + REPORT.md + all four diagnostic PNGs at
+[`emburdensynth/docs/puzzle_investigations/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/puzzle_investigations).
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
