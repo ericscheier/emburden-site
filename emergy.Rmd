@@ -1579,6 +1579,83 @@ Full leaderboard CSV, matrix stats, and REPORT.md at
 The runner is `scripts/report_emergy_alpha.R`; the analytics module
 lives in [`emburdenstats::fit_alpha_regression()`](https://github.com/ericscheier/emburdenstats/blob/main/R/emergy_alpha.R).
 
+### Bundle Q3.10 — Systematic ΔR² evaluation of every emergy metric
+
+Q3.9 fit the emergy-alpha framework to one metric at a time. Q3.10
+scales it to **every emergy-native metric × every outcome of importance
+in em_c_extended** — **1,260 nested-model tests** answering one
+question per cell:
+
+> Does adding this emergy metric to a `log(GDP/cap) + region_wb`
+> baseline improve prediction of this outcome, and by how much?
+
+For each cell we report ΔR² = R²(baseline + candidate) − R²(baseline),
+the F-test p-value on the improvement, sign + significance of the
+candidate coefficient after adjustment, and a bootstrap 95% CI on
+ΔR² (100 replicates per cell). Grid runs in ~4 minutes via
+`emburdenstats::evaluate_metric_grid()`.
+
+```{r fig-q310-heatmap, echo=FALSE, out.width="100%", fig.cap="Bundle Q3.10 — ΔR² heatmap across 36 emergy candidates (x) × 35 outcomes (y). Diverging blue/red fill: darker red = larger positive ΔR² beyond the log(GDP/cap) + region baseline. Both axes sorted by mean ΔR² so the strongest columns/rows cluster to the upper-left. Sector-derived metrics (sector_industrial, non_grid_share, sector_power, sector_residential) dominate damage + emissions rows. Right half of the x-axis (ELR, EYR, ESI, R_pct, most heii quantile variants) shows the 15 dominated metrics — they add essentially no information beyond income + region for ANY outcome."}
+knitr::include_graphics("figures/heii_q310_metric_grid.png")
+```
+
+**Top-5 emergy metric per outcome domain** (mean ΔR² beyond baseline):
+
+| Domain | 1st | 2nd | 3rd | 4th | 5th |
+|:---|:---|:---|:---|:---|:---|
+| Damage (energy depletion + PM damage) | `sector_industrial` +0.149 | `sector_residential` +0.081 | `non_grid_share` +0.077 | `sector_power` +0.077 | `retail_price` +0.053 |
+| Emissions (CO2 total + sectoral) | `sector_industrial` +0.150 | `non_grid_share` +0.067 | `sector_power` +0.067 | `em_per_usd` +0.035 | `sector_residential` +0.029 |
+| Mortality (WHO + WB airpol) | `sector_industrial` +0.046 | `heii_norm` +0.039 | `hh_fuel_empower` +0.030 | `biomass_share` +0.030 | `sector_transport` +0.028 |
+| Poverty + vulnerability | `transformity_sej_per_J` +0.028 | `retail_price` +0.027 | `heii_norm_p10_flat` +0.024 | `empower_pc_sej_per_yr` +0.019 | `NR_pct` +0.018 |
+
+```{r fig-q310-leaderboard, echo=FALSE, out.width="100%", fig.cap="Bundle Q3.10 — leaderboard of top-10 emergy metrics per outcome domain. Bar length = mean ΔR² beyond baseline; shade = fraction of outcomes in the domain where F-p<0.05."}
+knitr::include_graphics("figures/heii_q310_leaderboard.png")
+```
+
+**Dominated emergy metrics** — 15 of 36 have max mean ΔR² across
+every domain below 0.02, meaning they add essentially no independent
+information over `log(GDP/cap) + region`. These are candidates for
+pruning from downstream analytical stacks:
+
+- **Odum classics that HEII subsumes**: `ESI` (Odum's Emergy
+  Sustainability Index — the household-specific `heii_esi` also
+  dominated), `EYR` (Emergy Yield Ratio), `R_pct`, `NR_pct`,
+  `renewable_pct`. These national aggregates are essentially
+  reparameterizations of the fuel mix that log(GDP)+region already
+  captures.
+- **Grid-only HEII variants** (`heii_sej_grid_only`,
+  `heii_norm_grid_only`): the direct-burn / non-grid share is what
+  makes HEII informative; stripping it eliminates the alpha.
+- **P50 / P90 HEIIs**: `heii_norm_p50`, `heii_norm_p90`,
+  `heii_norm_p90_flat` — the P10 versions carry the useful
+  household-inequality signal.
+- **hh_empower_sej_per_yr** and **economic_gap_sej** — dominated
+  once income + region are controlled for.
+
+**Sign-flip candidates** — 12 metric×domain pairs where positive AND
+negative significant coefficients coexist within the same domain
+(same metric predicts opposite directions across different outcomes
+in that domain). Worth investigating, not pruning: `sector_industrial`
+in mortality (+8 significant positive, −1 negative),
+`non_grid_share` in damage (+1, −3), `sector_power` in damage (+3,
+−1), `transformity_sej_per_J` in damage (+1, −3), `em_per_usd` in
+emissions (+3, −1).
+
+**What this establishes.** The sector-derived metrics from Q3
+(especially `sector_industrial`, `non_grid_share`, `sector_power`)
+are the single most information-rich emergy contributions across
+mainstream outcome data. HEII_norm and biomass_share remain
+meaningful specifically for mortality. And — importantly —
+**a big chunk of the classical emergy-metric vocabulary is
+dominated by simpler indicators**: preserving them in analytical
+stacks costs degrees of freedom without buying signal.
+
+Full grid CSV + per-domain leaderboards + REPORT.md at
+[`emburdensynth/docs/emergy_evaluation/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/emergy_evaluation).
+The runner is `scripts/systematic_emergy_evaluation.R`; the analytics
+module lives in
+[`emburdenstats::evaluate_metric_grid()`](https://github.com/ericscheier/emburdenstats/blob/main/R/delta_r2.R).
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
