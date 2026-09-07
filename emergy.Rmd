@@ -1868,6 +1868,92 @@ adjustment. HEII captures a signal none of them do.
 Runner + REPORT.md + all four diagnostic PNGs at
 [`emburdensynth/docs/puzzle_investigations/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/puzzle_investigations).
 
+### Bundle Q3.14 — Re-framing transformity with renewable adjustment
+
+Q3.13 P1 suggested re-framing transformity with a renewable-adjusted
+variant to see if the hierarchy signal comes back. Q3.14 constructs
+and tests two alternatives:
+
+- `transformity_canonical_odum_sej_per_J` — fuel-mix weighted average
+  using Odum 1996 fuel-chain transformities (renewables at ~5,000
+  sej/J, unadjusted for infrastructure).
+- `transformity_renewable_adjusted_sej_per_J` — fuel-mix weighted
+  average using published FULL-CHAIN LCA-emergy transformities
+  (renewables at ~60,000 sej/J including panel/turbine/dam
+  infrastructure emergy).
+
+Both computed from per-country EIA International primary-consumption
+fuel shares. Fossil + nuclear values unchanged (petroleum 54k, gas
+48k, coal 40k, nuclear 200k sej/J).
+
+```{r fig-q314-comparison, echo=FALSE, out.width="100%", fig.cap="Q3.14 — signed ΔR² comparison across the three transformity variants against 5 classical hierarchy outcomes. Bar direction = sign of the observed coefficient after adjustment for region_wb. Left panel (pipeline transformity): all bars red (wrong sign) — the efficiency-correction inflates fossil transformities and puts petro-only islands at the top of the ranking. Middle + right panels (fuel-mix reconstructions): all bars orange (right sign, not significant) — the classical hierarchy prediction holds directionally but nothing reaches F-p < 0.05."}
+knitr::include_graphics("figures/heii_q314_plot_variants_comparison.png")
+```
+
+```{r fig-q314-scatter, echo=FALSE, out.width="100%", fig.cap="Q3.14 — the three transformity variants each plotted against GDP per capita. Pipeline transformity is essentially decorrelated with GDP (r ≈ -0.05, per Q3.13 P1). Both fuel-mix reconstructions restore a weak-but-positive relationship (r ≈ +0.23 and +0.24)."}
+knitr::include_graphics("figures/heii_q314_plot_variants_scatter.png")
+```
+
+**Pass rates against the classical prediction** (positive for
+GDP/cap + GDP total + life expectancy + exports; negative for
+under-5 mortality):
+
+| Variant | Consistent | % | Right-sign frac | Mean ΔR² |
+|:---|---:|---:|---:|---:|
+| pipeline (efficiency-corrected) | 0/5 | 0% | **0%** | +0.020 |
+| canonical Odum reconstruction | 0/5 | 0% | **100%** | +0.002 |
+| renewable-adjusted | 0/5 | 0% | **100%** | +0.003 |
+
+**Findings:**
+
+1. **The pipeline transformity has WRONG SIGN for every classical
+   outcome.** `transformity_sej_per_J` in the pipeline is
+   electricity-basis (fuel transformity ÷ electric conversion
+   efficiency). Coal at 35% efficiency becomes ~114,000 sej/J of
+   electricity; oil at 38% becomes ~142,000. This inflates transformity
+   for inefficient fossil grids, putting petroleum-only island
+   territories at the top of the transformity ranking — precisely
+   the countries with the SMALLEST economies. Result: negative
+   correlation with every 'success' outcome. The pipeline's ΔR²
+   is the highest of the three variants (+0.020) but that's negative
+   predictive value: it reliably predicts the wrong direction.
+
+2. **Both fuel-mix reconstructions flip the sign to positive** for
+   every classical outcome (100% right-sign frac). Odum's transformity
+   hierarchy claim is directionally consistent — but weak. Neither
+   variant reaches F-p < 0.05 on any outcome (best p = 0.119 for
+   life expectancy under renewable-adjusted). The signal exists in
+   the right direction, it just doesn't add enough R² beyond
+   region_wb baseline to be significant.
+
+3. **The renewable-adjusted variant beats canonical Odum modestly**
+   (mean ΔR² +0.003 vs +0.002). The infrastructure-emergy correction
+   moves the metric in the right direction — but the effect is small
+   at national scale because most countries have a mix of fuels, and
+   the additional 55k sej/J credit on renewables partially cancels
+   out against the reduction in fossil weight.
+
+**Bottom line — the transformity hierarchy is DIRECTIONALLY correct,
+just very weak.** Odum was right in the sense that country-level fuel
+mix does modestly correlate with GDP per cap in the direction of the
+classical claim. He was wrong to expect that grid transformity would
+be a strong or definitive hierarchy indicator on its own — it accounts
+for less than 1 percentage point of R² beyond region alone. And the
+pipeline's efficiency-corrected variant actively OBSCURES the
+hierarchy claim by inflating fossil-inefficient grids into artificial
+"high transformity" ranks.
+
+**Actionable outcome**: use the fuel-mix reconstructions
+(`transformity_canonical_odum_sej_per_J` or the renewable-adjusted
+variant) when testing hierarchy claims. Reserve
+`transformity_sej_per_J` (electricity-basis) for HEII computation
+where the efficiency-correction is what you actually want — solar
+emergy per J of DELIVERED electricity is the right currency for
+household energy insecurity.
+
+Runner + REPORT.md + 2 PNGs + CSVs at
+[`emburdensynth/docs/transformity_variants/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/transformity_variants).
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
