@@ -1,5 +1,32 @@
 # Build + deploy
 
+## Site architecture (Q3.20)
+
+Two GitHub Pages sites, one domain each:
+
+- **emburden.org** — ecosystem site (this repo, `emburden-site`). Home,
+  Emergy, Access + QoS, The Atlas, Methods, Data, Papers, Code. Deployed
+  via `.github/workflows/deploy-prod.yml`.
+- **pkg.emburden.org** — pkgdown R-package site (built from
+  `net_energy_equity/`, deployed to `gh-pages` branch of
+  `ericscheier/emburden`). CRAN-submission-ready. Config in
+  `net_energy_equity/_pkgdown.yml` (`url: https://pkg.emburden.org`),
+  CNAME in `net_energy_equity/docs/CNAME`.
+
+### DNS + GH Pages actions (one-time, done by owner)
+
+1. Add a DNS CNAME record: `pkg.emburden.org CNAME ericscheier.github.io`
+   (or point to the same GH Pages target as emburden.org's registrar
+   config).
+2. In GH Pages settings for `ericscheier/emburden`: set custom domain
+   to `pkg.emburden.org`. This releases the emburden.org CNAME so
+   `emburden-site`'s prod deploy actually wins the root domain.
+3. In GH Pages settings for `ericscheier/emburden-site`: verify custom
+   domain is `emburden.org` and "Enforce HTTPS" is on.
+4. Wait for DNS propagation (5-30 min), then visit both to confirm.
+
+
+
 ## Local render
 
 The site's R Markdown sources reference figures + data from the

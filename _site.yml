@@ -21,8 +21,8 @@ navbar:
     - text: "Code"
       href: "code.html"
   right:
-    - text: "R package"
-      href: "reference/index.html"
+    - text: "emburden R package"
+      href: "https://pkg.emburden.org"
     - text: "GitHub"
       href: "https://github.com/ericscheier"
     - text: "Full report (PDF)"
