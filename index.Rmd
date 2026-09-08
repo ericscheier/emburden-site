@@ -85,7 +85,7 @@ Odum's framework separates <em>quality</em> from <em>quantity</em>.</p>
 <div class="kicker">Finding 2 — Access + QoS</div>
 <h3>"Connected" isn't "served"</h3>
 <p>Global access to electricity is 91%; global access to clean cooking
-fuel is 74%. Ontop of that, quality of service varies enormously —
+fuel is 74%. On top of that, quality of service varies enormously —
 outage frequency, voltage sag, tariff affordability. Households in
 low-QoS grids are functionally under-served regardless of the binary
 access statistic.</p>
@@ -154,7 +154,7 @@ umbrella, JOSS Wave 1, Scientific Data descriptor.</p>
 <div class="card">
 <div class="kicker">Code</div>
 <h3>The emburden ecosystem</h3>
-<p>13 R packages + 2 Python packages, all MIT. Includes
+<p>13 R packages, all MIT-licensed. Includes
 <code>emburden::neb_func</code> (Net Energy Return),
 <code>emburdensynth::grid_transformity</code> (Odum emergy),
 <code>emburdensynth::run_global_pipeline</code>.</p>

@@ -16,9 +16,9 @@ world <- tryCatch(readRDS(file.path(DATA_DIR, "world_sf.rds")), error=function(e
 
 # The global household energy burden atlas
 
-Every figure below is generated at page-render time from the open-source
-`emburdensynth` pipeline's parquet outputs. All raw code + data at
-[github.com/ericscheier/emburdensynth](https://github.com/ericscheier/emburdensynth).
+Every figure below is generated from the open-source `emburdensynth`
+pipeline's parquet outputs at site-render time. All raw code + data
+at [github.com/ericscheier/emburdensynth](https://github.com/ericscheier/emburdensynth).
 
 ## Canonical burden — every country in the release
 
@@ -34,7 +34,7 @@ if (!is.null(world) && "burden_canonical" %in% names(world)) {
     levels = c("gcd_2010","eurostat_hbs","knn_gdp_region","region_mean"))
   ggplot(world) +
     geom_sf(aes(fill = burden_canonical * 100, color = burden_source_ord),
-             size = 0.35) +
+             linewidth = 0.35) +
     scale_fill_viridis_c(option = "plasma", direction = -1,
                           na.value = "grey85",
                           name = "burden (%)",
@@ -103,7 +103,7 @@ The full 80-page technical report has 39 figures covering:
 <p>PCA biplot, hierarchical correlation matrix, k-means archetype map, elastic-net regression.</p>
 </div>
 <div class="card">
-<div class="kicker">Deep history</h3>
+<div class="kicker">Deep history</div>
 <h3>1750 to present</h3>
 <p>NASA GISTEMP temperature anomalies, OWID CO<sub>2</sub> per fuel, WB WDI 1960, UNDP HDI 1990, Ember decarbonization.</p>
 </div>
@@ -115,9 +115,9 @@ The full 80-page technical report has 39 figures covering:
 </div>
 
 <p style="text-align:center; margin-top:2em;">
-<a class="btn btn-primary" style="background:var(--gd); border:none; padding:0.8em 1.6em; color:white; text-decoration:none; border-radius:4px; font-family:Montserrat;" href="global_analysis.pdf">Download the full 80-page report (PDF, 7.2 MB) →</a>
+<a class="cta" href="global_analysis.pdf">Download the full 80-page report (PDF, 7.2 MB) →</a>
 </p>
 
 <footer>
-<p>Data + code: <a href="https://github.com/ericscheier/emburdensynth">github.com/ericscheier/emburdensynth</a></p>
+<p>Data + code: <a href="https://github.com/ericscheier/emburdensynth">github.com/ericscheier/emburdensynth</a> · <a href="/">home</a> · <a href="methods.html">methods</a></p>
 </footer>

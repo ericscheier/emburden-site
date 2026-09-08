@@ -80,7 +80,8 @@ We have three partial signals:
 - **EAGLE-I outages** (US Oak Ridge) — SAIDI/SAIFI-equivalent
   per-county × per-15-minute outage records. US only.
 - **ESMAP Multi-Tier Framework** — 6 QoS dimensions, 0-5 tiers.
-  ~26 countries with data. Cache pull pending (`scripts/build_esmap_mtf_tiers.R`).
+  ~26 countries with data. Manifest cached via `esmap_mtf.rds`;
+  per-country tier workbooks still manual (see `scripts/build_esmap_mtf_tiers.R`).
 
 ## The intersectional problem
 
@@ -111,7 +112,8 @@ with:
 
 ## Toward a unified QoS index
 
-Once the ESMAP MTF pull lands, we'll combine:
+The ESMAP MTF manifest is already cached; once per-country tier
+workbooks are ingested we'll combine:
 - ESMAP tier × 6 dimensions (0-5 each, 26 countries)
 - WB electricity access % (189 countries)
 - WHO clean-fuel access % (189 countries)
