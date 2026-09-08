@@ -17,30 +17,39 @@ GitHub namespace remains `ericscheier/` until a permanent hosting
 decision is made. When it moves (org transfer or hand-off), update
 `github_owner` in both files and re-render everything.
 
-## Site architecture (Q3.20)
+## Site architecture (current — Q3.21b)
 
-Two GitHub Pages sites, one domain each:
+**One domain (emburden.org), served by the pkgdown site**
+(`net_energy_equity/docs/` → gh-pages of `ericscheier/emburden`).
+The pkgdown site landing (`index.html`) IS the R-package page;
+`reference/`, `articles/`, `news/` sit under it. Config in
+`net_energy_equity/_pkgdown.yml` (`url: https://emburden.org`),
+CNAME in `net_energy_equity/docs/CNAME`.
 
-- **emburden.org** — ecosystem site (this repo, `emburden-site`). Home,
-  Emergy, Access + QoS, The Atlas, Methods, Data, Papers, Code. Deployed
-  via `.github/workflows/deploy-prod.yml`.
-- **pkg.emburden.org** — pkgdown R-package site (built from
-  `net_energy_equity/`, deployed to `gh-pages` branch of
-  `ericscheier/emburden`). CRAN-submission-ready. Config in
-  `net_energy_equity/_pkgdown.yml` (`url: https://pkg.emburden.org`),
-  CNAME in `net_energy_equity/docs/CNAME`.
+**staging.emburden.org** serves `emburden-site` (this repo) via
+`.github/workflows/deploy-staging.yml`. That's where the multi-page
+ecosystem draft lives — Home / Emergy / Access + QoS / Atlas /
+Methods / Data / Papers / Code. It is a rehearsal of the eventual
+subdomain split, not a shipped surface.
 
-### DNS + GH Pages actions (one-time, done by owner)
+### Deferred redesign: pkg.emburden.org subdomain (Q3.20 target)
 
-1. Add a DNS CNAME record: `pkg.emburden.org CNAME ericscheier.github.io`
-   (or point to the same GH Pages target as emburden.org's registrar
-   config).
-2. In GH Pages settings for `ericscheier/emburden`: set custom domain
-   to `pkg.emburden.org`. This releases the emburden.org CNAME so
-   `emburden-site`'s prod deploy actually wins the root domain.
-3. In GH Pages settings for `ericscheier/emburden-site`: verify custom
-   domain is `emburden.org` and "Enforce HTTPS" is on.
-4. Wait for DNS propagation (5-30 min), then visit both to confirm.
+The intent was to split so `emburden.org` = ecosystem site and
+`pkg.emburden.org` = pkgdown. That change is reverted for now because
+it requires GH-UI custom-domain reconfiguration on both repos, and
+without that step `emburden.org` returns a 404. To complete it when
+ready:
+
+1. Add DNS `pkg.emburden.org CNAME ericscheier.github.io`.
+2. GH Pages settings on `ericscheier/emburden`: custom domain →
+   `pkg.emburden.org`.
+3. GH Pages settings on `ericscheier/emburden-site`: custom domain →
+   `emburden.org` + Enforce HTTPS.
+4. Change `net_energy_equity/_pkgdown.yml` `url:` back to
+   `https://pkg.emburden.org`, `docs/CNAME` to `pkg.emburden.org`.
+5. Change `emburden-site/_site.yml` right-nav href back to
+   `https://pkg.emburden.org`.
+6. Push both repos.
 
 
 
