@@ -2096,6 +2096,64 @@ Runner + REPORT.md + 3 figures at
 Paper Section 4.9 + Discussion 5.5 in
 [`global_emergy_alpha.Rmd`](https://github.com/ericscheier/emburdensynth/blob/global/docs/paper/global_emergy_alpha.Rmd).
 
+### Bundle Q3.18 — Trade-adjusted EROI + Energy Adequacy framing
+
+Reframing per the [MES poster](https://github.com/ericscheier/net_energy_equity/blob/main/manuscript/paper1_data_uncertainty/mes_poster.pdf)
+(Scheier 2023, "Measuring Household Energy Adequacy over Time and
+Space"): **energy adequacy** is the invariant threaded through every
+scale of the framework — did the system get enough energy given what
+it took to deliver it?
+
+| Scale | Adequacy measure | Reference |
+|:---|:---|:---|
+| **Household** | EROI = NER + 1 = 1/EB (Bednar & Reames 2020; Hernández 2016) | `net_energy_equity` |
+| **Community/state** | HEII quantile spread (P90-P10 rationing gap) | `emburden::heii_norm_p*` |
+| **National** | Societal EROI (Hall/Lambert cliff) + trade-adjusted variants | `em_c_extended$eroi_*` |
+| **Global** | MEP-conditioned surplus (Odum), NER dynamics | Paper 5.5 |
+
+Q3.18 also fixes the Q3.17 fossil-exporter confound in domestic-
+delivery EROI. Four trade-adjusted variants derived from newly-parsed
+Primary Production, Imports, and Exports rows in the UN Balance:
+
+```
+eroi_supply         = TES / energy_invested       # supply-side; TES already nets exports
+eroi_trade_adjusted = TFC / (energy_invested + max(0, net_imports) × 0.20)
+                                                  # Aramendia-2024: net imports carry
+                                                  # embodied cost = inverse world EROI (~5)
+net_trade_share     = (imports + exports) / TES   # net trade dependence (>0 = importer)
+production_self_suff= primary_production / TES    # self-sufficiency (>=1 = net exporter)
+```
+
+Correlation with log(GDP/cap) strengthens from **r = −0.24** (raw) to
+**r = −0.32** (trade-adjusted) — rich importers now bear their
+embodied cost.
+
+**Q3.18 findings (new alpha the raw domestic-delivery EROI missed):**
+
+| Outcome | Best trade-adjusted candidate | ΔR² | p | N |
+|:---|:---|---:|---:|---:|
+| **wb_pm25_pop_wt_ugm3** | `production_self_suff` | **0.080** | **5.2e-7** | 185 |
+| **wb_ghg_co2_pc** | `production_self_suff` | 0.057 | 4.7e-4 | 188 |
+| **wb_pm25_pop_wt_ugm3** | `net_trade_share` | 0.046 | 5.4e-4 | 158 |
+| **wb_ghg_co2_pc** | `net_trade_share` | 0.045 | 1.8e-8 | 156 |
+| **heii_norm_p90** | `eroi_supply` | 0.040 | 0.06 | 63 |
+| wb_life_expectancy_years | `net_trade_share` | 0.017 | 1.3e-4 | 159 |
+| wb_under5_mortality_per1000 | `eroi_trade_adjusted` | 0.016 | 1.9e-3 | 158 |
+
+`production_self_suff` displaces raw `energy_invested_tj` as the top
+PM2.5 predictor — self-sufficient countries burn their own fuel and
+inherit its combustion physics; importers export the physics with the
+fuel. **`eroi_supply` finds the HEII_p90 rung** the domestic-delivery
+variant missed at n=63 (borderline p=0.06 but the ceiling is the
+household-data sample size, not the metric). `net_trade_share` and
+`eroi_trade_adjusted` both predict mortality outcomes after log(GDP)
++ region controls (n=158-159, p<0.005).
+
+The renewables → life-expectancy puzzle is not resolved by adding
+either raw or trade-adjusted EROI cross-sectionally. The proper test
+is the panel-year variant (needs UN Balance backfill to 2000-2021),
+which is deferred.
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country

@@ -10,14 +10,18 @@ pagetitle: "emburden.org — Papers"
 <div class="card">
 <div class="kicker">Ecological Economics — Research Article</div>
 <h3>Where does emergy accounting give new information? A systematic cross-country evaluation of 36 emergy-native metrics against 40 mainstream outcomes</h3>
-<p><b>Status</b>: **Q3.17 macro-to-micro bridge integrated** (v3 draft,
-~7,300 words, PDF re-rendered). Adds Section 4.9 introducing societal
-Net Energy Return as the missing rung between MEP (macro) and HEII
-(micro), with the derivation `EROI = TFC/(|EIOU|+|Losses|+|Transformation|)`
-from UN Energy Balance and the four-test result grid (bridge holds on
-PM2.5 exposure, ΔR²=0.042, p<1e-3, n=185; fails at HEII n=63; renewables
-puzzle not resolved cross-sectionally). Discussion 5.5 "MEP under
-transition" reframes the five open puzzles through the NER lens.</p>
+<p><b>Status</b>: **Q3.18 Energy Adequacy framing + trade-adjusted
+EROI** (v4 draft, ~8,000 words, PDF re-rendered). Section 4.9 renamed
+"Energy Adequacy: a unified measure across scales" per the MES poster
+(Scheier 2023) — adequacy is the invariant threaded through household
+EROI, HEII quantile spread, societal NER, and MEP. Trade-adjusted
+variants (`eroi_supply`, `eroi_trade_adjusted`, `net_trade_share`,
+`production_self_suff`) resolve the fossil-exporter confound in the
+raw domestic-delivery EROI. New signals: `production_self_suff` is now
+the top PM2.5 predictor (ΔR²=0.080, p=5e-7); `eroi_supply` finds a
+borderline signal at HEII_p90 (ΔR²=0.040, p=0.06); `net_trade_share`
+and `eroi_trade_adjusted` predict WB life-expectancy and under-5
+mortality (p<0.005).</p>
 <p><b>Headlines</b>: HEII_norm captures ~80% of its variance orthogonal
 to standard indicators (log GDP + region); sector_industrial dominates
 damage + emissions alpha; ESI holds up empirically (67% consistent)
