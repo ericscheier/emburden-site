@@ -100,7 +100,7 @@ reproducible fixtures.</p>
 - **Bug reports + feature requests**: GitHub Issues on the relevant
   package repository
 - **Pull requests**: welcome; please open an Issue first to discuss
-- **Ecosystem-wide questions**: [hello@emrgi.com](mailto:hello@emrgi.com)
+- **Ecosystem-wide questions**: [info@emburden.org](mailto:info@emburden.org)
 
 <footer>
 <p><a href="/">← back to home</a> · <a href="papers.html">papers</a> · <a href="atlas.html">atlas</a></p>

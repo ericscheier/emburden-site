@@ -1,0 +1,67 @@
+# Central config for the emburden ecosystem.
+# Change any of these once and everything downstream updates on the next
+# render. Used by: site/*.Rmd, docs/global_analysis.Rmd, manuscript/*,
+# scripts/build_references_bib.R, README templates.
+#
+# Read from R with:
+#   cfg <- yaml::read_yaml(here::here("config.yml"))
+#   github_url <- sprintf("https://github.com/%s", cfg$github_owner)
+#   pkg_url    <- sprintf("%s/%s", github_url, cfg$packages$emburdensynth)
+
+# ─── Repository ownership ─────────────────────────────────────────────
+github_owner: "ericscheier"          # was "ScheierVentures"; change here to move
+github_url: "https://github.com/ericscheier"
+pypi_owner: "ericscheier"            # PyPI username if we dual-publish
+zenodo_community: "emburden"         # placeholder — request community creation
+
+# ─── Package names (base per language) ────────────────────────────────
+packages:
+  # R packages — one per repo, name = repo name
+  emburden: "emburden"
+  emburdengeo: "emburdengeo"
+  emburdendata: "emburdendata"
+  emburdenstats: "emburdenstats"
+  emburdenutil: "emburdenutil"
+  emburdenweather: "emburdenweather"
+  emburdener: "emburdener"
+  emburdenhealth: "emburdenhealth"
+  emburdenvis: "emburdenvis"
+  emburdenpub: "emburdenpub"
+  emburdentest: "emburdentest"
+  emburdenplus: "emburdenplus"
+  emburdensynth: "emburdensynth"
+python_packages:
+  # Python meta-package (planned; single reticulate shim) — see docs/python_scope.md
+  emburden: "emburden"                # PyPI name
+
+# ─── Contact + branding ───────────────────────────────────────────────
+maintainer:
+  name: "Eric Scheier"
+  email: "info@emburden.org"          # canonical project email
+  organization: "Emrgi"
+  organization_url: "https://emrgi.com"
+  orcid: ""                           # add before submissions
+
+# Q3.21 branding — single source of truth. Downstream files should
+# either yaml::read_yaml("config.yml") this or copy verbatim.
+brand:
+  bg_hex: "#f3f8f3"                   # ecosystem page + chart background
+  ink_hex: "#1d2a1d"
+  primary_hex: "#228b22"
+  primary_dark_hex: "#176b17"
+  accent_hex: "#b5791b"
+
+site:
+  base_url: "https://emburden.org"
+  title: "emburden.org"
+  tagline: "Global household energy burden — open data, open code"
+
+# ─── License ──────────────────────────────────────────────────────────
+license: "MIT"
+license_url: "https://opensource.org/license/mit"
+
+# ─── Ecosystem metadata ───────────────────────────────────────────────
+ecosystem:
+  name: "emburden ecosystem"
+  n_packages: 13
+  flagship_trio: ["emburden", "emburdendata", "emburdensynth"]

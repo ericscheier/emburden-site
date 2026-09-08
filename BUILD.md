@@ -1,5 +1,22 @@
 # Build + deploy
 
+## Identity (Q3.21)
+
+`identity.yml` at repo root is the single source of truth for the
+project's public-facing identity: maintainer name, email
+(`info@emburden.org`), organisation, canonical URLs, brand colours,
+and the ecosystem palette (`bg_hex: "#f3f8f3"` — the page background
+used across the site AND the paper PDF for a unified canvas).
+
+It is a verbatim copy of `emburdensynth/config.yml`; keep them in
+sync (both files, not just one) when changing any identity or brand
+value. When either changes, re-render the affected pages so the
+changes propagate.
+
+GitHub namespace remains `ericscheier/` until a permanent hosting
+decision is made. When it moves (org transfer or hand-off), update
+`github_owner` in both files and re-render everything.
+
 ## Site architecture (Q3.20)
 
 Two GitHub Pages sites, one domain each:

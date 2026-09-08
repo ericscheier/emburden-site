@@ -176,7 +176,7 @@ technical report</a>.</p>
 <footer>
 <p>emburden.org — an open project by <a href="https://emrgi.com">Emrgi</a>.
 Data + code at <a href="https://github.com/ericscheier">github.com/ericscheier</a>.
-Report bugs, ask questions, or contribute: <a href="mailto:hello@emrgi.com">hello@emrgi.com</a>.</p>
+Report bugs, ask questions, or contribute: <a href="mailto:info@emburden.org">info@emburden.org</a>.</p>
 <p><small>Last updated: `r format(Sys.Date(), "%B %d, %Y")` &nbsp;·&nbsp;
 Rendered dynamically from RDS caches at
 <a href="https://github.com/ericscheier/emburden-site">github.com/ericscheier/emburden-site</a></small></p>
