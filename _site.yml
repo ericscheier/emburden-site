@@ -22,7 +22,7 @@ navbar:
       href: "code.html"
   right:
     - text: "emburden R package"
-      href: "https://emburden.org/reference/index.html"
+      href: "https://pkg.emburden.org"
     - text: "GitHub"
       href: "https://github.com/ericscheier"
     - text: "Full report (PDF)"

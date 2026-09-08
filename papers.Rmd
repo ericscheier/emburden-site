@@ -1,32 +1,31 @@
 ---
-title: "Papers in flight"
-pagetitle: "emburden.org — Papers"
+title: "Publications in flight"
+pagetitle: "emburden.org — Publications"
 ---
 
-# Papers in flight
+# Publications in flight
+
+An honest running audit — where each piece actually sits, what's
+blocking it, what's next. Anything with "ready" means analytically
+complete and awaiting a specific action, not an aspirational timeline.
 
 <div class="card-grid">
 
 <div class="card">
 <div class="kicker">Ecological Economics — Research Article</div>
 <h3>Where does emergy accounting give new information? A systematic cross-country evaluation of 36 emergy-native metrics against 40 mainstream outcomes</h3>
-<p><b>Status</b>: **Q3.19 panel-year EROI integrated** (v5 draft,
-~8,500 words, PDF re-rendered). Backfilled UN Balance publications
-2015-2023 → 2,083 country-year rows across 2014-2023 (10 data years,
-222 countries). Definitive renewables-puzzle test: 168-country
-two-way FE panel shows the puzzle is TIME-WINDOW-SPECIFIC — coef
-−1.91 (p=0.40, null) in 2014-2023 vs coef −0.17 (p=1.2e-3) in
-Q3.16-E2's 2000-2023 window. Pre-2014 drives the original signal
-(Fukushima reshuffle, 2008 crisis, demographic transition candidates).
-Neither EROI variant attenuates the coefficient. Section 4.9 also
-carries the Energy Adequacy framing (Scheier 2023 MES poster) with
-the trade-adjusted findings from Q3.18.</p>
-<p><b>Headlines</b>: HEII_norm captures ~80% of its variance orthogonal
-to standard indicators (log GDP + region); sector_industrial dominates
-damage + emissions alpha; ESI holds up empirically (67% consistent)
-when targeted; MEP fails on population growth (wrong sign, demographic
-transition); transformity hierarchy directionally correct only under
-fuel-mix reconstruction with LCA-emergy renewable adjustment.</p>
+<p><b>Status</b>: **v7 draft, ~9,000 words, PDF re-rendered
+(146 KB)**. Systematic ΔR² evaluation across a 1,520-cell grid;
+Odum-tradition claims tested against modern data; **Energy Adequacy**
+framing threaded through household EROI ↔ HEII quantile spread ↔
+societal NER ↔ MEP (Q3.18). Panel-year EROI backfill (2014-2023,
+2,083 rows, Q3.19) plus two event-studies (Fukushima Q3.22 and
+2008 crisis Q3.23) diagnose the pre-2014 renewables-panel puzzle
+and rule out two of three candidate mechanisms.</p>
+<p><b>Reproduction</b>: 12 scripts wired into a documented pipeline;
+every figure and table is regeneratable from the tagged commit.</p>
+<p><b>Next</b>: external co-author read + finalise which corresponding-
+author byline lands. No analytical blockers.</p>
 <p>
 <a href="https://github.com/ericscheier/emburdensynth/blob/global/docs/paper/global_emergy_alpha.pdf">Read the PDF →</a>
 &nbsp;·&nbsp;
@@ -35,65 +34,85 @@ fuel-mix reconstruction with LCA-emergy renewable adjustment.</p>
 </div>
 
 <div class="card">
-<div class="kicker">Science — Policy Forum</div>
-<h3>The climate-justice mismatch: quantifying who pays for whose emissions</h3>
-<p><b>Status</b>: draft complete (1,183 words, target 1,500). Cover
-letter drafted. Awaiting ORCID + graphical figure at 300 dpi.</p>
-<p><b>Headline</b>: 67-fold per-capita cumulative CO~2~ disparity
-between 20 least-electrified countries and 20 largest historical
-emitters.</p>
-<p><a href="https://github.com/ericscheier/emburdensynth/tree/global/manuscript/science_policy_forum">See the draft →</a></p>
-</div>
-
-<div class="card">
 <div class="kicker">Joule — Research Article</div>
 <h3>Global synthesis of household energy burden via open spatial microsimulation</h3>
-<p><b>Status</b>: draft rendered with 5 embedded figures (7 pages, Cell
-Press Highlights + reviewer line numbers). Cover letter drafted with
-suggested reviewers.</p>
-<p><b>Contribution</b>: 129 countries × 17,000 cells synthesis; Nh
-aggregation correction; cross-signal PCA + archetype clustering;
-67× mismatch quantification.</p>
+<p><b>Status</b>: draft rendered with 5 embedded figures, 7 pages,
+Cell Press Highlights + reviewer line numbers. Cover letter drafted
+with suggested reviewers named.</p>
+<p><b>Contribution</b>: 129 countries × 17,028 cells synthesis;
+Nh aggregation correction; cross-signal PCA + archetype clustering
+across the household-energy landscape; 67× per-capita mismatch
+quantification.</p>
+<p><b>Next</b>: internal re-read against the current data (Q3.7-Q3.23
+enrichments), then external co-author read.</p>
 <p><a href="https://github.com/ericscheier/emburdensynth/tree/global/manuscript/joule_submission">See the draft →</a></p>
 </div>
 
 <div class="card">
-<div class="kicker">Nature Energy — Research Article</div>
-<h3>DERs × natural hazards × health outcomes (in scoping)</h3>
-<p><b>Status</b>: 10-section scoping document. Timeline 12 months.
-Requires EM-DAT + GDELT + IHME GBD pulls before analysis can start.</p>
-<p><b>Anticipated headline</b>: distributed energy resources reduce
-excess mortality during heat waves in high-burden populations by
-~2 deaths/100k per 10% DER penetration.</p>
-<p><a href="https://github.com/ericscheier/emburdensynth/tree/global/manuscript/nature_energy_scope">See the scope →</a></p>
+<div class="kicker">Science — Policy Forum</div>
+<h3>The climate-justice mismatch: quantifying who pays for whose emissions</h3>
+<p><b>Status</b>: draft at 1,183 words (target 1,500). Cover letter
+drafted. Headline result is the same 67-fold per-capita cumulative
+CO~2~ disparity that anchors the Joule Contribution — condensed to
+a policy-actionable claim.</p>
+<p><b>Blockers</b>: ORCID for corresponding-author byline;
+graphical figure at 300 dpi (one map, one bar chart).</p>
+<p><a href="https://github.com/ericscheier/emburdensynth/tree/global/manuscript/science_policy_forum">See the draft →</a></p>
+</div>
+
+<div class="card">
+<div class="kicker">JOSS — Package Papers (Wave 1)</div>
+<h3>emburden, emburdendata, emburdensynth</h3>
+<p><b>Status</b>: all three JOSS-READY (internal QA score ≥ 75).
+Cover letters templated; JOSS metadata YAML drafted for each.</p>
+<p><b>Blockers</b>: ORCID (JOSS submission form requires it).</p>
+<p><b>Wave 2 queue</b> (READY after vignette additions):
+`emburdenweather`, `emburdenhealth`, `emburdengeo`.
+<b>Wave 3</b>: `emburdenstats`, `emburdenutil`, `emburdener`,
+`emburdenvis`, `emburdenpub`, `emburdentest`, `emburdenplus`.</p>
 </div>
 
 <div class="card">
 <div class="kicker">JSS — Software Paper</div>
 <h3>The emburden ecosystem</h3>
-<p><b>Status</b>: 9-section skeleton drafted. Target 8,000–10,000
-words. Covers all 13 packages with architecture, design principles,
-and worked global-synthesis application.</p>
-<p><b>Model papers</b>: tidyverse (JOSS 2019), scikit-learn (JMLR 2011),
-sf (R Journal 2018).</p>
+<p><b>Status</b>: 9-section skeleton drafted. Target 8,000-10,000
+words. Covers all 13 R packages plus emburdensynth's synthetic
+microdata pipeline, with a worked global-synthesis application in
+the last section.</p>
+<p><b>Model papers</b>: tidyverse (JOSS 2019), scikit-learn (JMLR
+2011), sf (R Journal 2018), fixest (R Journal 2019).</p>
+<p><b>Next</b>: writing time. No data or credential blockers.</p>
 <p><a href="https://github.com/ericscheier/emburdensynth/tree/global/manuscript/ecosystem_umbrella">See the skeleton →</a></p>
-</div>
-
-<div class="card">
-<div class="kicker">JOSS — Package Papers</div>
-<h3>Wave 1: emburden + emburdendata + emburdensynth</h3>
-<p><b>Status</b>: all three JOSS-READY (score ≥75). Submission-ready
-this month once ORCID lands.</p>
-<p><b>Then</b>: emburdenweather, emburdenhealth, emburdengeo (also
-READY). Then medium-score packages after vignette additions.</p>
 </div>
 
 <div class="card">
 <div class="kicker">Scientific Data — Data Descriptor</div>
 <h3>The emburdensynth global cell-level parquet</h3>
-<p><b>Status</b>: not yet drafted. Planned as the data-only companion
-to the Joule methods paper. Would document the 17,028-cell × 50-field
-parquet as a citable dataset.</p>
+<p><b>Status</b>: not yet drafted. Queued behind Joule (the Joule
+methods paper is the natural citation anchor; drafting the descriptor
+first would leave it referring to a not-yet-published methods paper).</p>
+<p><b>Once written</b>: documents the 17,028-cell × 50-field parquet
+as a citable dataset with a Zenodo DOI, so downstream users can cite
+the *data* independently of the methods paper.</p>
+<p><b>Blockers</b>: Joule submission ≥ under-review, plus a Zenodo
+record upload (still open — see `emburdensynth/R/global_data_download.R`
+for the empty `record_id` fields).</p>
+</div>
+
+<div class="card">
+<div class="kicker">Nature Energy — Research Article (scoping)</div>
+<h3>DERs × natural hazards × health outcomes</h3>
+<p><b>Status</b>: 10-section scoping document only. Analysis cannot
+begin without upstream data.</p>
+<p><b>Data blockers</b>: EM-DAT (natural hazards catalog), GDELT
+(event-level media coverage), IHME GBD (health outcomes at fine
+geography). Each needs credentials or an institutional agreement.</p>
+<p><b>Anticipated headline once unblocked</b>: distributed energy
+resources reduce excess mortality during heat waves in high-burden
+populations by ~2 deaths/100k per 10% DER penetration. This is a
+prediction based on US-branch (asthma-analysis, outage-analysis) work
+that Q3.16-E1 lifted to global grain at n=63 and n=178.</p>
+<p><a href="https://github.com/ericscheier/emburdensynth/tree/global/manuscript/nature_energy_scope">See the scope →</a></p>
 </div>
 
 </div>
@@ -101,20 +120,34 @@ parquet as a citable dataset.</p>
 ## Publication strategy
 
 <blockquote>
-Each paper answers a different question. Reviewers at each stage can't
-reject on grounds already peer-reviewed upstream.
+Each paper answers a different question at a different scale, so a
+single methodological debate can't unravel the whole stack. Reviewers
+at each stage inherit peer-reviewed context from the layer below.
 </blockquote>
 
-- **JSS umbrella** establishes tool validity → downstream papers cite it
-- **JOSS individual papers** establish package-level DOIs
-- **Scientific Data** establishes dataset validity as a citable object
-- **Joule** applies the validated tool + data to a global synthesis
-- **Science Policy Forum** condenses the finding into a policy claim
-- **Nature Energy** builds a causal argument on the validated dataset
+- **JOSS package papers** — package-level DOIs for every dependency
+- **JSS umbrella** — architectural rationale; downstream papers cite it
+- **Scientific Data** — dataset itself as a citable object
+- **Joule** — validated tool + data applied to a global synthesis
+- **Science Policy Forum** — 1,500-word policy-actionable condensation
+- **Ecological Economics** — the emergy methodological question, isolated
+- **Nature Energy** — causal-identification argument built on the validated dataset
 
-Timeline: JSS + JOSS Wave 1 submissions this month; Joule + Science
-draft-review this month, submission next; Nature Energy in ~12 months
-after EM-DAT + GDELT pulls complete.
+## What's actually blocking what
+
+- **ORCID** blocks four items: Ecological Economics byline, Science
+  Policy Forum submission, JOSS Wave 1 metadata, JSS authorship.
+  Registration is free and takes ~15 minutes at
+  [orcid.org/register](https://orcid.org/register). This is the single
+  cheapest unlock in the queue.
+- **EM-DAT / GDELT / IHME GBD credentials** block Nature Energy.
+  Each is a separate access request; expect 2-4 weeks per institution.
+- **Zenodo record upload** blocks Scientific Data (and populates
+  `emburdensynth/R/global_data_download.R:20-24`).
+- **External co-author read** is the last-mile blocker on Ecological
+  Economics and Joule — analytically complete, waiting on eyes.
+
+Everything else is writing time.
 
 <footer>
 <p><a href="/">← back to home</a> · <a href="code.html">code</a></p>
