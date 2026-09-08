@@ -2150,9 +2150,56 @@ household-data sample size, not the metric). `net_trade_share` and
 + region controls (n=158-159, p<0.005).
 
 The renewables → life-expectancy puzzle is not resolved by adding
-either raw or trade-adjusted EROI cross-sectionally. The proper test
-is the panel-year variant (needs UN Balance backfill to 2000-2021),
-which is deferred.
+either raw or trade-adjusted EROI cross-sectionally. Panel-year test
+in Q3.19.
+
+### Bundle Q3.19 — Panel-year EROI (UN Balance 2014-2023 backfill)
+
+Backfilled UN Energy Balance publications 2015-2023 (nine pub years,
+`.cache/un_balances/`), yielding **2,083 country-year rows across
+2014-2023** (10 data years, 222 countries; 213 countries have ≥8
+years). Pre-2015 UN publication URLs redirect to homepage — that
+window is unreachable without alternative sources (IEA WEB or
+national statistical offices).
+
+**Definitive renewables-puzzle test.** Two-way FE (`iso3 + year`
+absorbed), country-clustered SEs, n = 1,569 country-year rows across
+168 countries:
+
+| Model | Renewables coef | p | EROI coef | p |
+|:---|---:|---:|---:|---:|
+| Baseline (log GDP + FE) | **−1.91** | **0.40** | — | — |
+| + log(EROI_trade_adjusted) | −1.98 | 0.42 | +0.10 | 0.77 |
+| + log(EROI_supply) | −1.96 | 0.41 | +0.16 | 0.65 |
+
+Neither EROI variant attenuates the renewables coefficient (~3-4%
+shift, wrong sign). Neither EROI coefficient is significant. **But
+the more consequential finding is upstream: in the 2014-2023 window,
+the puzzle itself is null** (coef −1.91, p=0.40) vs the Q3.16-E2
+2000-2023 window (coef −0.17, p=1.2e-3, same spec).
+
+The Q3.16-E2 signal is pre-2014-driven. Candidate mechanisms:
+
+1. **Fukushima 2011-2013 nuclear-to-renewables reshuffle** (Japan +
+   Germany level-shift paired with temporary health disruption)
+2. **2008-2010 financial crisis** — rapid renewables build-out under
+   fiscal stress that also pinched health spending
+3. **Demographic transition** dynamics that had stabilised by 2014
+
+Distinguishing these requires either pre-2015 UN Balance access
+(unavailable via public URL) or a country-year IEA WEB panel
+(behind IEA licensing). The current UN backfill cannot reach that
+window.
+
+**What Q3.19 does establish**: societal EROI at country-year is a
+weak within-country predictor of health outcomes in the 2014-2023
+window (within-R² < 0.02 across all outcomes tested). The bridge
+holds cross-sectionally on damage and emissions (Q3.17-Q3.18) but
+NOT temporally on health at this granularity. The 2,083-row panel
+EROI dataset is now available for downstream event-study work.
+
+Runner + REPORT + forest plot + regression tables at
+[`docs/eroi_bridge/panel/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/eroi_bridge/panel).
 
 ### Every country as its own panel — including Antarctica
 

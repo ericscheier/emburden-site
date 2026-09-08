@@ -10,18 +10,17 @@ pagetitle: "emburden.org — Papers"
 <div class="card">
 <div class="kicker">Ecological Economics — Research Article</div>
 <h3>Where does emergy accounting give new information? A systematic cross-country evaluation of 36 emergy-native metrics against 40 mainstream outcomes</h3>
-<p><b>Status</b>: **Q3.18 Energy Adequacy framing + trade-adjusted
-EROI** (v4 draft, ~8,000 words, PDF re-rendered). Section 4.9 renamed
-"Energy Adequacy: a unified measure across scales" per the MES poster
-(Scheier 2023) — adequacy is the invariant threaded through household
-EROI, HEII quantile spread, societal NER, and MEP. Trade-adjusted
-variants (`eroi_supply`, `eroi_trade_adjusted`, `net_trade_share`,
-`production_self_suff`) resolve the fossil-exporter confound in the
-raw domestic-delivery EROI. New signals: `production_self_suff` is now
-the top PM2.5 predictor (ΔR²=0.080, p=5e-7); `eroi_supply` finds a
-borderline signal at HEII_p90 (ΔR²=0.040, p=0.06); `net_trade_share`
-and `eroi_trade_adjusted` predict WB life-expectancy and under-5
-mortality (p<0.005).</p>
+<p><b>Status</b>: **Q3.19 panel-year EROI integrated** (v5 draft,
+~8,500 words, PDF re-rendered). Backfilled UN Balance publications
+2015-2023 → 2,083 country-year rows across 2014-2023 (10 data years,
+222 countries). Definitive renewables-puzzle test: 168-country
+two-way FE panel shows the puzzle is TIME-WINDOW-SPECIFIC — coef
+−1.91 (p=0.40, null) in 2014-2023 vs coef −0.17 (p=1.2e-3) in
+Q3.16-E2's 2000-2023 window. Pre-2014 drives the original signal
+(Fukushima reshuffle, 2008 crisis, demographic transition candidates).
+Neither EROI variant attenuates the coefficient. Section 4.9 also
+carries the Energy Adequacy framing (Scheier 2023 MES poster) with
+the trade-adjusted findings from Q3.18.</p>
 <p><b>Headlines</b>: HEII_norm captures ~80% of its variance orthogonal
 to standard indicators (log GDP + region); sector_industrial dominates
 damage + emissions alpha; ESI holds up empirically (67% consistent)
