@@ -39,10 +39,12 @@ if (!is.null(world) && "burden_canonical" %in% names(world)) {
                           na.value = "grey85",
                           name = "burden (%)",
                           labels = function(x) sprintf("%.0f%%", x),
-                          limits = c(0, 20)) +
+                          # Cap at 25 so plasma tail stays distinguishable;
+                          # >25% countries render at the ceiling (bright yellow).
+                          limits = c(0, 25), oob = scales::squish) +
     scale_color_manual(values = tier_colors, na.value = "grey60",
                         name = "source tier") +
-    coord_sf(crs = "+proj=robin", expand = FALSE) +
+    coord_sf(crs = sf::st_crs("ESRI:54030"), expand = FALSE) +
     theme_void(base_size = 11) +
     theme(legend.position = "bottom",
           plot.title = element_text(size = 15, face = "bold", colour = BR[["gd"]]),
