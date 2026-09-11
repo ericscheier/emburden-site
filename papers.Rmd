@@ -14,14 +14,17 @@ complete and awaiting a specific action, not an aspirational timeline.
 <div class="card">
 <div class="kicker">Ecological Economics — Research Article</div>
 <h3>Where does emergy accounting give new information? A systematic cross-country evaluation of 36 emergy-native metrics against 40 mainstream outcomes</h3>
-<p><b>Status</b>: **v7 draft, ~9,000 words, PDF re-rendered
-(146 KB)**. Systematic ΔR² evaluation across a 1,520-cell grid;
+<p><b>Status</b>: **v8 draft, ~9,500 words, PDF re-rendered
+(148 KB)**. Systematic ΔR² evaluation across a 1,520-cell grid;
 Odum-tradition claims tested against modern data; **Energy Adequacy**
 framing threaded through household EROI ↔ HEII quantile spread ↔
-societal NER ↔ MEP (Q3.18). Panel-year EROI backfill (2014-2023,
-2,083 rows, Q3.19) plus two event-studies (Fukushima Q3.22 and
-2008 crisis Q3.23) diagnose the pre-2014 renewables-panel puzzle
-and rule out two of three candidate mechanisms.</p>
+societal NER ↔ MEP (Q3.18). Six falsification steps run on the
+Q3.16-E2 renewables → life-expectancy puzzle; **Q3.24 closes it**:
+adding elderly-share as a time-varying control attenuates the
+renewables coefficient by 45% AND drops it out of significance
+(−0.52 years per pp elderly share, p=2.2×10⁻⁹). The panel signal
+was a demographic-transition trajectory correlation, not a causal
+claim about renewables.</p>
 <p><b>Reproduction</b>: 12 scripts wired into a documented pipeline;
 every figure and table is regeneratable from the tagged commit.</p>
 <p><b>Next</b>: external co-author read + finalise which corresponding-

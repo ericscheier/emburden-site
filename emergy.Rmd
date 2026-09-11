@@ -2201,6 +2201,51 @@ EROI dataset is now available for downstream event-study work.
 Runner + REPORT + forest plot + regression tables at
 [`docs/eroi_bridge/panel/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/eroi_bridge/panel).
 
+### Bundle Q3.22-Q3.24 — Closing the renewables → life-expectancy puzzle
+
+Q3.16-E2 found renewables_share → life-expectancy coef −0.17,
+p=1.2e-3 within-country. Six falsification steps followed:
+
+| Test | Renewables coef | Attenuation |
+|:---|---:|---:|
+| Q3.16-E2 baseline (2000-2023 panel) | −0.17 (p=1.2e-3) | — |
+| Q3.17-Q3.18 cross-sectional EROI (raw + trade-adj) | (no shift) | 0% |
+| Q3.19 panel EROI 2014-2023 subset | −1.91 (p=0.40, null) | signal absent |
+| Q3.22 Fukushima drop + treat×post | −5.27 (p=0.039) | 3% |
+| Q3.23 2008 crisis drop + EU×crisis | −5.45 (p=0.034) | 0% |
+| **Q3.24 + pop_65_plus_pct** | **−3.00 (p=0.186)** | **45%** |
+
+**Q3.24 closes the puzzle.** Adding WB `SP.POP.65UP.TO.ZS` (elderly
+population share) as a time-varying control attenuates the renewables
+coefficient by 45% AND drops it out of significance. The 65+ share
+coefficient itself is huge and highly significant:
+**−0.52 years of life expectancy per percentage-point of elderly
+share, p = 2.16 × 10⁻⁹**.
+
+Reading: the Q3.16-E2 panel signal was a **trajectory correlation**,
+not a causal claim about renewables. Countries that were rapidly
+aging (Japan, Germany, Italy, Spain, S. Korea) were also rapidly
+adopting renewables in 2000-2013 in response to Fukushima and EU
+policy — their life-expectancy plateaus were the demographic-
+transition signature, and the panel picked up the trajectory
+correlation. Controlling for the aging trajectory dissolves it.
+
+Age-dependency ratio alone gives only 10% attenuation (it mixes
+young + old dependents); when both are in the model pop_65+
+dominates and age-dependency drops to null. The 65+ share is the
+causally-relevant piece.
+
+**Productive null.** The cross-sectional bridge findings (Q3.17-Q3.18:
+NER → PM2.5, `production_self_suff` → PM2.5, `eroi_supply` → HEII_p90)
+are unchanged. Q3.24 clarifies that the panel-year framework is
+sensitive to co-moving trajectories in a way that requires demographic
+controls whenever the outcome is life expectancy on a 2000-2023
+European + East Asian sample.
+
+Runner + REPORT + forest plot at
+[`docs/demographic_transition/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/demographic_transition).
+Paper Section 4.9 gains a Q3.24 subsection.
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
