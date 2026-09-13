@@ -17,11 +17,11 @@ max_bias_iso <- nd$iso3[which.max(nd$rel_bias_pct)]
 # How the pipeline works
 
 The `emburdensynth` pipeline turns open data into cell-level household
-energy expenditure estimates in five phases. Each phase is implemented
-as a single exported function; each can be run independently for
-debugging.
+energy expenditure estimates in five phases plus a post-processing
+step. Each stage is implemented as a single exported function; each
+can be run independently for debugging.
 
-## The five phases
+## The five phases plus post-processing
 
 <div class="card-grid">
 <div class="card">
@@ -68,12 +68,12 @@ the pipeline's estimated consumption. Flags cells where estimated &lt;
 </div>
 </div>
 
-## <a name="aggregation"></a>Net Energy Return aggregation
+## <a name="aggregation"></a>Net Energy Burden aggregation
 
 Aggregating household-level burden to country-level requires a
 well-formed weighted mean. The naive choice —
 <code>weighted.mean(spending/income, weights)</code> — is biased. The
-mathematically correct formulation, derived from the Net-Energy-Return
+mathematically correct formulation, derived from the Net-Energy-Burden
 framework in the `emburden` package, computes `Nh = (G-S)/Se` per cell
 (where `Se` is energy spending), takes the weighted mean of `Nh`, and
 inverts as:
@@ -123,9 +123,10 @@ k-means archetype analysis:
 - WB WDI 1960–2024 (7 indicators including electricity access)
 - Ember 2000–2025 (aggregate + 9-fuel generation mix)
 - OWID Energy 1900–2025 (per-capita electricity + primary energy)
-- OWID CO~2~ 1750–2024 (per-capita + cumulative + by-fuel)
+- OWID CO~2~ 1750–2025 (per-capita + cumulative + by-fuel)
 - EIA International 1980–2023 (222 countries)
-- WHO PM~2.5~ + WB clean-fuel access
+- WHO PM~2.5~ ambient air quality (population-weighted)
+- WB clean-fuel cooking access
 - FAOSTAT undernourishment 2000–2023
 - UNDP HDI 1990–2022
 - NASA GISTEMP 1880–2025

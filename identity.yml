@@ -9,7 +9,7 @@
 #   pkg_url    <- sprintf("%s/%s", github_url, cfg$packages$emburdensynth)
 
 # ─── Repository ownership ─────────────────────────────────────────────
-github_owner: "ericscheier"          # was "ScheierVentures"; change here to move
+github_owner: "ericscheier"
 github_url: "https://github.com/ericscheier"
 pypi_owner: "ericscheier"            # PyPI username if we dual-publish
 zenodo_community: "emburden"         # placeholder — request community creation
@@ -40,7 +40,7 @@ maintainer:
   email: "info@emburden.org"          # canonical project email
   organization: "Emrgi"
   organization_url: "https://emrgi.com"
-  orcid: ""                           # add before submissions
+  orcid: "0000-0002-6628-1389"        # canonical author ORCID
 
 # Q3.21 branding — single source of truth. Downstream files should
 # either yaml::read_yaml("config.yml") this or copy verbatim.
@@ -65,3 +65,14 @@ ecosystem:
   name: "emburden ecosystem"
   n_packages: 13
   flagship_trio: ["emburden", "emburdendata", "emburdensynth"]
+
+# ─── Prose house style (Q3.38 lint pass) ──────────────────────────────
+# Enforced by the site linter; downstream Rmd should follow these.
+style:
+  spelling: "US"                      # color, linewidth, organization
+  doughnut: "Doughnut"                # Raworth's spelling in prose
+  emdash: "—"                         # unicode em-dash, never "--"
+  endash_range: "–"                   # numeric ranges: "+0.27–0.29"
+  co2: "CO₂"                          # unicode subscript; not CO~2~ / CO2
+  p_value_convention: "p = X.Xe-N below 0.001; p = 0.045 above"
+  delta_r2_convention: "ΔR² = 0.045, p = 4e-3"

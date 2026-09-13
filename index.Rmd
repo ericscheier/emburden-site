@@ -145,9 +145,10 @@ Every number traceable to a script + cache.</p>
 
 <div class="card">
 <div class="kicker">Papers</div>
-<h3>Six papers in flight</h3>
-<p>Science Policy Forum, Joule, Nature Energy scope, JSS ecosystem
-umbrella, JOSS Wave 1, Scientific Data descriptor.</p>
+<h3>Seven papers in flight</h3>
+<p>Ecological Economics, Science Policy Forum, Joule, Nature
+Energy scope, JSS ecosystem umbrella, JOSS Wave 1, Scientific
+Data descriptor.</p>
 <p><a href="papers.html">See the papers →</a></p>
 </div>
 

@@ -45,23 +45,16 @@ with the live site in search results.
 Cloudflare. Records are edited in **Namecheap → Domain List → Manage →
 Advanced DNS**.
 
-Current state (as of 2026-09-04):
+Current state (as of 2026-09-13):
 
 - `emburden.org` (apex) → 4 GitHub Pages A records
   (`185.199.108.153` `.109.153` `.110.153` `.111.153`) — resolves the
   pkgdown site served from `ericscheier/emburden`'s `gh-pages` branch.
 - `www.emburden.org` → `CNAME ericscheier.github.io.`
-- `staging.emburden.org` → does not exist yet
-
-**To bring staging up**, add one CNAME record in Namecheap Advanced DNS:
-
-| Type   | Host      | Value                        | TTL       |
-|--------|-----------|------------------------------|-----------|
-| CNAME  | `staging` | `ericscheier.github.io.`     | Automatic |
-
-Then in Pages settings on **ericscheier/emburden-site-staging**,
-under Custom domain, enter `staging.emburden.org` and let GitHub
-issue the ACME certificate (typically 30-60s).
+- `staging.emburden.org` → **live**, `CNAME ericscheier.github.io.`,
+  served from `ericscheier/emburden-site-staging` via the
+  `deploy-staging.yml` Actions workflow on every push to the
+  `staging` branch of this repo.
 
 **To flip production to this ecosystem site** (deliberate cutover
 after staging looks good):

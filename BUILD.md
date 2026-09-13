@@ -58,26 +58,23 @@ ready:
 The site's R Markdown sources reference figures + data from the
 `emburdensynth` R repo (parent directory). To render, either:
 
-**Option A — symlink emburdensynth paths in** (recommended, matches the
-prior local build):
+**Option A — symlink emburdensynth in as a sibling** (recommended):
 
 ```bash
 cd ~/Documents/apps/emburden-site
-ln -sfn ../emburdensynth/R _ln_R
+ln -sfn ../emburdensynth/R    _ln_R
 ln -sfn ../emburdensynth/docs _ln_docs
-# Adjust paths in .Rmd chunks:
-sed -i 's|../docs/global_analysis_data|_ln_docs/global_analysis_data|g; s|../R/brand_palette.R|_ln_R/brand_palette.R|g' *.Rmd
+# The .Rmd setup chunks source R/counts.R which resolves
+# ../docs/global_analysis_data via a fallback list — the symlink
+# just makes ../docs point at the right place. No path rewriting.
 Rscript -e 'rmarkdown::render_site()'
-# Restore paths:
-sed -i 's|_ln_docs/global_analysis_data|../docs/global_analysis_data|g; s|_ln_R/brand_palette.R|../R/brand_palette.R|g' *.Rmd
-rm _ln_R _ln_docs
 ```
 
 **Option B — checkout emburdensynth alongside**:
 
 ```bash
 cd ~/Documents/apps
-git clone git@github.com:ericscheier/emburdensynth.git  # or ScheierVentures/
+git clone git@github.com:ericscheier/emburdensynth.git
 cd emburden-site
 Rscript -e 'rmarkdown::render_site()'   # picks up ../emburdensynth/*
 ```
@@ -98,10 +95,11 @@ CI just uploads the pre-built `_build/`; no R runs on the server.
 The alternative — installing R + all emburden ecosystem packages on
 every CI run — was tried first and abandoned. Root causes:
 
-1. The R packages are private (`ScheierVentures/`), needing GH tokens
-2. The site's Rmds read cached data files (17k cells, GB-scale) that
+1. The site's Rmds read cached data files (17k cells, GB-scale) that
    would need to be re-generated on every CI run
-3. Every 5-minute CI build for a 5-second content edit is a bad tradeoff
+2. Every 5-minute CI build for a 5-second content edit is a bad tradeoff
+3. Some ecosystem packages are still moving between GitHub owners; CI
+   auth on top of that is unnecessary churn
 
 Committing the pre-built HTML makes deploys instant, and content
 authors run the render locally at their own cadence.

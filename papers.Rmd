@@ -14,29 +14,31 @@ complete and awaiting a specific action, not an aspirational timeline.
 <div class="card">
 <div class="kicker">Ecological Economics — Research Article</div>
 <h3>Where does emergy accounting give new information? A systematic cross-country evaluation of 36 emergy-native metrics against 40 mainstream outcomes</h3>
-<p><b>Status</b>: **v9 draft, ~11,000 words, PDF re-rendered
-(152 KB+)**. Systematic ΔR² evaluation across a 1,520-cell grid;
+<p><b>Status</b>: **v9 draft, ~11,000 words, PDF re-rendered.**
+Systematic ΔR² evaluation across a 1,520-cell grid;
 Odum-tradition claims tested against modern data; **Energy Adequacy**
 framing threaded through household EROI ↔ HEII quantile spread ↔
 societal NER ↔ MEP (Q3.18). Six falsification steps run on the
 Q3.16-E2 renewables → life-expectancy puzzle; **Q3.24 closes it**
 (demographic transition, −0.52 years per pp elderly share,
-p=2.2×10⁻⁹). Q3.34 extends the demographic control across the full
+p = 2.2e-9). Q3.34 extends the demographic control across the full
 918-cell grid: 288/309 significant findings (93%) survive robust.
 **Q3.33 Kigali F-gas amendment + Q3.35A oil-price shocks** form
 the paper's natural-experiment pair (external policy shock × external
 price shock). Q3.35B projects the alpha grid onto native UN SDG
-indicators; Q3.35C projects onto a Doughnut-Economics country
-snapshot (213 countries, 10 SF + 7 EC dimensions).
-**Q3.36 extends the framework outward into finance and closes
-the donut**: (a) capital-market alpha — sovereign debt levels are
-predicted by `sector_industrial` (ΔR²=+0.219, p=3×10⁻⁸) and by
-`heii_norm_p10` on debt-service burden (ΔR²=+0.177, p=8×10⁻⁴);
-equity outcomes show weaker alpha (boundary claim: emergy captures
-physical-provisioning that debt finances, not forward growth
-options); (b) full 21D donut with 12 SF + 9 EC dimensions; (c)
-cross-benchmark validation of the Q3.35A oil-shock finding across
-Brent, Dubai, WTI, average (all +0.27-0.29 coefs, p<0.005).</p>
+indicators; Q3.35C projected onto a Doughnut-Economics country
+snapshot (initial 17-dimension construction, since superseded).
+**Q3.36 + Q3.37 extend the framework outward into finance and
+close the Doughnut**: (a) capital-market alpha — sovereign debt
+levels are predicted by `sector_industrial`
+(ΔR² = 0.219, p = 3e-8) and by `heii_norm_p10` on debt-service
+burden (ΔR² = 0.177, p = 8e-4); equity outcomes show weaker alpha
+(boundary claim: emergy captures physical-provisioning that debt
+finances, not forward growth options); (b) the full 21-dimension
+Doughnut (12 social-floor + 9 ecological-ceiling) with continuous
+signed distance-from-boundary; (c) cross-benchmark validation of
+the Q3.35A oil-shock finding across Brent, Dubai, WTI, average
+(all +0.27 to +0.29 coefficients, p < 5e-3).</p>
 <p><b>Reproduction</b>: 12 scripts wired into a documented pipeline;
 every figure and table is regeneratable from the tagged commit.</p>
 <p><b>Next</b>: external co-author read + finalise which corresponding-
@@ -81,10 +83,10 @@ graphical figure at 300 dpi (one map, one bar chart).</p>
 <p><b>Status</b>: all three JOSS-READY (internal QA score ≥ 75).
 Cover letters templated; JOSS metadata YAML drafted for each.</p>
 <p><b>Blockers</b>: ORCID (JOSS submission form requires it).</p>
-<p><b>Wave 2 queue</b> (READY after vignette additions):
-`emburdenweather`, `emburdenhealth`, `emburdengeo`.
-<b>Wave 3</b>: `emburdenstats`, `emburdenutil`, `emburdener`,
-`emburdenvis`, `emburdenpub`, `emburdentest`, `emburdenplus`.</p>
+<p><b>Wave 2</b> (READY): `emburdenweather`, `emburdenhealth`,
+`emburdengeo`. Submit after Wave 1 lands. <b>Wave 3</b>:
+`emburdenstats`, `emburdenutil`, `emburdener`, `emburdenvis`,
+`emburdenpub`, `emburdentest`, `emburdenplus`.</p>
 </div>
 
 <div class="card">
@@ -109,7 +111,7 @@ first would leave it referring to a not-yet-published methods paper).</p>
 <p><b>Once written</b>: documents the 17,028-cell × 50-field parquet
 as a citable dataset with a Zenodo DOI, so downstream users can cite
 the *data* independently of the methods paper.</p>
-<p><b>Blockers</b>: Joule submission ≥ under-review, plus a Zenodo
+<p><b>Blockers</b>: Joule submission at least under-review, plus a Zenodo
 record upload (still open — see `emburdensynth/R/global_data_download.R`
 for the empty `record_id` fields).</p>
 </div>

@@ -81,7 +81,7 @@ ggplot(cj, aes(x=cum_co2, y=burden_canonical*100, colour=region_wb, size=pop)) +
   scale_y_continuous(labels=function(x) sprintf("%.0f%%", x)) +
   scale_size(range=c(1.5, 9), labels=scales::comma_format(), name="Population") +
   scale_color_manual(values=emburden_emrgi_categorical(7), name="WB region") +
-  labs(x="Cumulative CO2 since 1750 (Mt, log)",
+  labs(x="Cumulative CO₂ since 1750 (Mt, log)",
         y="2020 household energy burden (%)",
         title=sprintf("Climate justice: %d countries", nrow(cj)),
         subtitle="Dashed = medians. Upper-left = low historical responsibility, high current burden.") +
