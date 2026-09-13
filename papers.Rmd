@@ -14,17 +14,20 @@ complete and awaiting a specific action, not an aspirational timeline.
 <div class="card">
 <div class="kicker">Ecological Economics — Research Article</div>
 <h3>Where does emergy accounting give new information? A systematic cross-country evaluation of 36 emergy-native metrics against 40 mainstream outcomes</h3>
-<p><b>Status</b>: **v8 draft, ~9,500 words, PDF re-rendered
-(148 KB)**. Systematic ΔR² evaluation across a 1,520-cell grid;
+<p><b>Status</b>: **v9 draft, ~11,000 words, PDF re-rendered
+(152 KB+)**. Systematic ΔR² evaluation across a 1,520-cell grid;
 Odum-tradition claims tested against modern data; **Energy Adequacy**
 framing threaded through household EROI ↔ HEII quantile spread ↔
 societal NER ↔ MEP (Q3.18). Six falsification steps run on the
-Q3.16-E2 renewables → life-expectancy puzzle; **Q3.24 closes it**:
-adding elderly-share as a time-varying control attenuates the
-renewables coefficient by 45% AND drops it out of significance
-(−0.52 years per pp elderly share, p=2.2×10⁻⁹). The panel signal
-was a demographic-transition trajectory correlation, not a causal
-claim about renewables.</p>
+Q3.16-E2 renewables → life-expectancy puzzle; **Q3.24 closes it**
+(demographic transition, −0.52 years per pp elderly share,
+p=2.2×10⁻⁹). Q3.34 extends the demographic control across the full
+918-cell grid: 288/309 significant findings (93%) survive robust.
+**Q3.33 Kigali F-gas amendment + Q3.35A oil-price shocks** form
+the paper's natural-experiment pair (external policy shock × external
+price shock). Q3.35B projects the alpha grid onto native UN SDG
+indicators; Q3.35C projects onto a Doughnut-Economics country
+snapshot (213 countries, 10 SF + 7 EC dimensions).</p>
 <p><b>Reproduction</b>: 12 scripts wired into a documented pipeline;
 every figure and table is regeneratable from the tagged commit.</p>
 <p><b>Next</b>: external co-author read + finalise which corresponding-

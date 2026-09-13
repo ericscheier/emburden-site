@@ -2248,6 +2248,78 @@ Runner + REPORT + forest plot at
 [`docs/demographic_transition/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/demographic_transition).
 Paper Section 4.9 gains a Q3.24 subsection.
 
+### Bundle Q3.32-Q3.34 — Robustness atlas across the ΔR² grid
+
+Q3.32 extended Q3.24 to four headline panel-year cells and Q3.34
+extended it across the whole 918-cell cross-sectional grid. 288 of
+309 significant cells (93%) survive the demographic control; the
+21 that dissolve cluster on air-pollution-mortality outcomes.
+
+### Bundle Q3.33 — Kigali F-gas amendment natural experiment
+
+Kigali (adopted 2016, entered force 2019) split parties into Group
+I (early 2019 freeze) and Group II (2024 freeze). An event-study
+DiD on EDGAR F-gas per-capita emissions shows a crystal-clean
+Group I ↓ / Group II → treatment split with p ≪ 10⁻¹⁰ across all
+post-freeze years. This is the paper's first natural-experiment
+identification result.
+
+### Bundle Q3.35 — Commodity shocks, SDG-native alpha, Doughnut projection
+
+Three-phase extension of the ΔR² framework into economic +
+development framings:
+
+**Q3.35A — commodity price shocks as a natural experiment.**
+WB Pink Sheet WTI crude, expressed as %-deviation from 3-year
+rolling mean, interacted with country oil-import share. Two robust
+findings survive Q3.24 demographic controls:
+
+- Under-5 mortality: coef = +0.38 baseline (p = 1.5×10⁻³), +0.31
+  with demog control (p = 2.2×10⁻³). A country importing 50% of
+  merchandise as fuel loses ~0.19 extra U5 deaths per 1,000 live
+  births per 10% oil-shock above its 3-year mean.
+- Electricity access: coef = −0.18 baseline (p = 1.6×10⁻³),
+  −0.15 with demog (p = 1.0×10⁻²). High-oil-import countries see
+  access expansion slow during shocks — the shock cannibalises
+  the marginal expansion budget.
+
+Q3.35A + Q3.33 Kigali together form the paper's natural-experiment
+pair — one external policy shock varying by treatment status, one
+external price shock varying by exposure. Details at
+[`docs/q3_35a_commodity_shocks/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/q3_35a_commodity_shocks).
+
+**Q3.35B — Emergy alpha on native UN SDG outcomes.** Pulled 14
+focused SDG series (SDG 1 poverty, 3 health, 6 water, 7 energy,
+11 cities, 13 climate, 15 biodiv). 9 series usable. Two survive
+the n ≥ 25 threshold after emergy joins: forest area (15.1) and
+age-standardised air-pollution mortality (3.9.1). Trade-adjusted
+EROI carries the alpha on both — consistent with Q3.18's finding
+that trade adjustment matters more than gross national EROI.
+`docs/sdg_tagging.csv` maps every em_c_extended column onto its
+SDG target(s). Details at
+[`docs/q3_35b_sdg_alpha/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/q3_35b_sdg_alpha).
+
+**Q3.35C — Doughnut-Economics projection.** Constructed a
+donut-adjacent country snapshot from em_c_extended primary sources
+(10 social-floor + 7 ecological-ceiling dimensions × 213 countries).
+Quadrant snapshot:
+
+| Quadrant | N |
+|:---|---:|
+| Safe & just (inside the donut) | 131 |
+| Overshoot / socially ok | 8 |
+| Social shortfall / ecologically ok | 53 |
+| Double shortfall + overshoot | 21 |
+
+The 21-country worst-quadrant cluster (Afghanistan + Sub-Saharan
+Africa) is the same cluster HEII P10 isolates in Q3.7-Q3.8 — the
+framework recovers the same geography from a different indicator
+set. Social shortfall is dominated by GDP+region (85% R²); no
+emergy alpha to add. Ecological overshoot has real emergy signal:
+`sector_industrial` (ΔR²=+0.071, p=1e-5), `non_grid_share`
+(+0.030, p=0.004), `sector_transport` (+0.028, p=0.005). Details at
+[`docs/q3_35c_donut/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/q3_35c_donut).
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
