@@ -2018,11 +2018,13 @@ CO2. Panel-year strength of the cleanest causal-adjacent chain in
 the emergy framework.
 
 **The renewables ↔ life-expectancy NEGATIVE panel finding is counter-
-intuitive** and probably confounded (aging populations in renewable-
-adopting European economies; opioid/COVID US life-expectancy dips).
-Panel FE absorbs global year shocks but not country-specific temporal
-trends. Worth flagging as a puzzle to investigate before over-
-interpreting; may motivate a country-specific-trend correction.
+intuitive** — hypothesised to reflect aging populations in
+renewable-adopting European + East Asian economies. Six falsification
+steps in Q3.17–Q3.24 test the hypothesis; the puzzle is closed by
+Q3.24 (`pop_65_plus_pct` control attenuates the coefficient by 45%
+and drops significance; elderly-share itself has a −0.52 yr-per-pp
+coefficient at p = 2 × 10⁻⁹). Details in the Q3.22-Q3.24 bundle
+below.
 
 Runner + REPORT.md + CSV at
 [`emburdensynth/docs/temporal_alpha/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/temporal_alpha).
