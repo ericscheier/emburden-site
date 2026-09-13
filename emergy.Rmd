@@ -2378,6 +2378,64 @@ the new `emburdendata::download_un_sdg_series_batch()` parallel
 loader; results land as a follow-up subsection when the batch
 completes.
 
+### Bundle Q3.37 — A proper Raworth-donut × SDG-wheel × emergy overlay
+
+Until now, our "donut" visualisation was a horizontal-bar forest of
+ΔR² values, projected onto donut framing but rendered as a coefficient
+plot. Q3.37 delivers the **actual Raworth ring** — a per-country
+figure showing 12 social-floor spokes inside a green safe-and-just
+band, 9 ecological-ceiling spokes outside, with the 17-goal UN SDG
+palette wrapping the whole thing, and emergy candidates layered on
+as yellow dots at their SDG-tagged angular positions.
+
+New `emburdenvis` primitives (all `@export`'d):
+
+- `donut_ring()` / `plot_country_doughnut()` — the Raworth ring itself.
+- `sdg_ring()` — 17-segment outer ring, canonical UN colours.
+- `emergy_wedge_overlay()` — SDG-tagged emergy candidate dots.
+- `emergy_trajectory_overlay()` — panel-year trajectory dots.
+- `donut_long()` — melts the Q3.36B wide snapshot into long form.
+- `sdg_official_colors()` — UN 17-goal palette added to the brand.
+
+The 21D snapshot builder (`build_donut_country_snapshot.R`) now
+persists **continuous signed distance-from-boundary** alongside the
+binary breach flags, so each spoke's length encodes the *magnitude*
+of the shortfall or overshoot rather than a yes/no.
+
+**Twelve exemplar countries** (4 quadrants × 3 exemplars each) as
+small multiples:
+
+![Donut small multiples 12 countries](figures/donut_wheels/plot_country_donuts_smallmults.png)
+
+**Trajectory overlay** — for 6 emergy metrics (transformity,
+renewable share, ELR, EYR, ESI, empower per capita) plotted as
+year-coloured dots on their radial axes across 2000-2025. Watch
+USA's ESI drift, DEU's renewable share climb, AFG's biomass burden
+persist.
+
+![Donut trajectory grid 6 countries](figures/donut_wheels/plot_country_donut_trajectories_grid.png)
+
+**How to read one panel** (e.g. `AFG` above):
+
+- **Inner ring** = 12 social-floor dimensions. Deep-red spokes point
+  inward from the safe boundary — the wedge length is the magnitude
+  of the shortfall. AFG has 8/9 measured SF spokes breached.
+- **Green band between the dashed circles** = safe & just doughnut
+  interior.
+- **Outer ring** = 9 ecological-ceiling dimensions. Deep-red spokes
+  overshoot outward. AFG has 6/9 measured — F-gas intensive is the
+  extreme (this reflects Q3.33's Kigali finding that AFG is a
+  Group II high-growth F-gas country).
+- **Coloured outer band** = 17-segment SDG official palette.
+- **Yellow dots on the dotted circle** = the SDG-tagged emergy
+  candidates (from `docs/sdg_tagging.csv`) at their z-scored country
+  values.
+
+Details at
+[`docs/donut_wheels/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/donut_wheels).
+Underlying helpers at
+[`emburdenvis/R/donut_wheel.R`](https://github.com/ericscheier/emburdenvis/blob/main/R/donut_wheel.R).
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
