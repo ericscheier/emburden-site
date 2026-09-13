@@ -2320,6 +2320,64 @@ emergy alpha to add. Ecological overshoot has real emergy signal:
 (+0.030, p=0.004), `sector_transport` (+0.028, p=0.005). Details at
 [`docs/q3_35c_donut/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/q3_35c_donut).
 
+### Bundle Q3.36 — Finance alpha, full 21D donut, cross-benchmark validation
+
+**Q3.36A — Emergy alpha on capital-market outcomes.** Pulled 17 WB
+finance indicators (7 sovereign debt + 7 equity + 4 fiscal/monetary)
+and refit the ΔR² grid. **Sovereign debt shows real emergy alpha**;
+equity outcomes show much weaker signals. Top hits:
+
+- `ppg_debt_usd ← sector_industrial`: ΔR²=+0.219, p=3×10⁻⁸ —
+  industrial-sector energy share predicts PPG debt levels beyond
+  GDP+region. Industrialisation is debt-financed at scale visible
+  cross-sectionally.
+- `debt_service_pct_gni ← heii_norm_p10`: ΔR²=+0.177, p=8×10⁻⁴ —
+  the P10 rung of household energy burden (worst-burdened decile
+  in each country) predicts national debt-service burden. A
+  household-scale distributional signal moves a macro-fiscal
+  outcome.
+- `sector_transport` and `non_grid_share` show *negative* coefs on
+  PPG debt (ΔR²≈+0.11, p≈1e-4) — transport-heavy / off-grid
+  countries carry LESS debt (they haven't built the industrial base
+  that requires it).
+
+Boundary claim: emergy accounting captures physical-provisioning
+variance, which debt finances. Equity markets price forward growth
+options that emergy cannot reflect. Details at
+[`docs/q3_36a_finance/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/q3_36a_finance).
+
+**Q3.36B — Full 21D Doughnut projection.** Closed O'Neill 2018's
+21D framing by adding 6 gap-closer WB indicators (water/sanitation,
+women in parliament, freshwater withdrawal, forest area). Result:
+12 SF + 9 EC = 21D. Pattern from Q3.35C sharpens: `heii_norm`
+newly surfaces as a significant hit on ecological overshoot
+(ΔR²=+0.045, p=0.040) alongside `sector_industrial` (+0.017,
+p=0.014) and `sector_transport` (+0.010, p=0.043). Social shortfall
+stays baseline-saturated. Details at
+[`docs/q3_36b_donut/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/q3_36b_donut).
+
+**Q3.36D — Cross-benchmark validation of the Q3.35A oil-shock
+finding.** Repeated the shock × fuel-import-share interaction
+across all 10 fuel commodities in Pink Sheet. **All four crude-
+oil benchmarks show the same +0.27-0.29 coefficient on under-5
+mortality with p<0.005**:
+
+| Benchmark | Coef | p |
+|:---|---:|---:|
+| Brent | +0.289 | 0.002 |
+| Dubai | +0.270 | 0.005 |
+| WTI | +0.285 | 0.005 |
+| Average | +0.284 | 0.003 |
+
+Not an artefact of one price index. Natural gas shocks show mild
+signals on PM2.5 and clean-cooking access. Details at
+[`docs/q3_36d_commodity_grid/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/q3_36d_commodity_grid).
+
+**Q3.36C — Full ~230-series SDG panel** is under active build via
+the new `emburdendata::download_un_sdg_series_batch()` parallel
+loader; results land as a follow-up subsection when the batch
+completes.
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
