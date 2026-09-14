@@ -18,9 +18,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ASANA_TOKEN:           ${{ secrets.ASANA_TOKEN }}
-      ASANA_WORKSPACE_GID:   "1337952238460"
-      ASANA_PROJECT_GID:     "1213974477039300"
-      ASANA_ASSIGNEE_GID:    "1337952238455"
+      ASANA_WORKSPACE_GID:   ${{ vars.ASANA_WORKSPACE_GID }}
+      ASANA_PROJECT_GID:     ${{ vars.ASANA_PROJECT_GID }}
+      ASANA_ASSIGNEE_GID:    ${{ vars.ASANA_ASSIGNEE_GID }}
       STAGING_URL:           "https://staging.emburden.org"
       SITE_KEY:              "emburden-site-staging-review"
       REPO_SLUG:             ${{ github.repository }}
