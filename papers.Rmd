@@ -38,7 +38,23 @@ finances, not forward growth options); (b) the full 21-dimension
 Doughnut (12 social-floor + 9 ecological-ceiling) with continuous
 signed distance-from-boundary; (c) cross-benchmark validation of
 the Q3.35A oil-shock finding across Brent, Dubai, WTI, average
-(all +0.27 to +0.29 coefficients, p < 5e-3).</p>
+(all +0.27 to +0.29 coefficients, p < 5e-3).
+**Q3.43 names the mechanism**: UPBEAT (World Bank / ESMAP) +
+LAC-UB + ESMAP RISE + AfDB ERI harmonised into one 39,000-row
+country-year utility + regulatory panel, z-normalised within
+(source, indicator). `heii_norm_p90` predicts utility Collection
+Rate at ΔR² = +0.73 (p = 7e-12, N = 52) — utility financial stress
+is the intermediate mechanism the Q3.36A sovereign-debt result
+pointed at. **Q3.44B** confirms the direction: within-country
+fixed-effect panel with 2-year cross-lag shows HEII_norm at t-2
+forward-predicts Collection Rate at t (p = 0.036, N = 361, 52
+countries), while the reverse lag is null (p = 0.81). **Q3.44C**
+extends to Afrobarometer R9+R10 microdata (39 countries × 9 items,
+all publicly downloadable): HEII_norm_p90 carries alpha *only* on
+`lived_no_electricity` (ΔR² = +0.23, p = 0.012), not on the four
+other lived-poverty items nor the perception items — HEII is a
+specifically-electricity signal, mediation is mechanical not
+cultural.</p>
 <p><b>Reproduction</b>: 12 scripts wired into a documented pipeline;
 every figure and table is regeneratable from the tagged commit.</p>
 <p><b>Next</b>: external co-author read + finalise which corresponding-
