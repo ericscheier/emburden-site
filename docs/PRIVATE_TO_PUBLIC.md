@@ -1,153 +1,157 @@
-# Private-to-public transition plan for the emburden ecosystem
+# Ecosystem publication workflow
 
-This is the ecosystem-wide plan for moving 14+ repos from personal
-`ericscheier/*` hosting to `emburden` organisation hosting, and for
-managing repos that have been developed privately with AI-assisted
-tooling before public release. It applies to any current or future
-`emburden`-branded repo.
+The emburden ecosystem uses a **three-tier hosting model** across
+GitHub orgs: private working repo → public WIP mirror → foundation-
+stewarded release. This document is the single source of truth for
+which repo lives where and how a change flows from a working branch
+to a public release.
 
-## Current state
+## Three-tier hosting
 
-- **Hosting**: 14 public repos under `github.com/ericscheier/*` (main
-  package tree: `emburden`, `emburdendata`, `emburdengeo`,
-  `emburdenstats`, `emburdenutil`, `emburdenweather`, `emburdender`,
-  `emburdenhealth`, `emburdenvis`, `emburdenpub`, `emburdentest`,
-  `emburdenplus`, `emburdensynth`, `energese`, plus companion sites
-  `emburden-site`, `emburden-site-staging`).
-- **Mirror**: private mirror of most repos under
-  `github.com/ScheierVentures/*` for backup and access-control
-  flexibility.
-- **License**: AGPL-3.0-or-later across the ecosystem.
-- **Contact**: `info@emburden.org`.
-- **Author identity in commits**: Eric Scheier (`eric@scheier.org`).
-  Move to `info@emburden.org` is planned but not yet executed - see
-  §3 below.
-- **AI-collaboration**: previously tagged in commit messages via
-  `Co-Authored-By: Claude ...` and `Claude-Session: ...` lines
-  (~310 commits across the ecosystem). Going forward, project policy
-  omits these lines (see §4). The `AUTHORS.md` at each repo carries
-  the project-level AI-collaboration disclosure.
+| Tier | GitHub org | Visibility | Role |
+|:---|:---|:---|:---|
+| **Dev** | `ScheierVentures/*` | private | Working repo. All day-to-day commits land here first. History rewrites, force-pushes, WIP branches, credentials-in-transit all allowed. |
+| **Mirror** | `ericscheier/*` | public | Early-access public mirror. External collaborators watch this. Continuous mirror from Dev, main branches only. History is expected to be linear here; force-pushes are disruptive. |
+| **Release** | `emergi-foundation/*` | public | Foundation-stewarded canonical release. Tagged releases mirror here. This is the target for DOIs (Zenodo), CRAN, JOSS, and any external citation. |
 
-## 1. Org migration
+Rationale:
 
-The intent is to move all `ericscheier/emburden*` repos to an
-`emburden` GitHub organisation once the org is registered. Sequence:
+- **Dev at `ScheierVentures`** keeps in-progress work private during
+  the pre-release window. Contents include gated-data caches,
+  API-key-adjacent secrets in `.env` files, exploratory scratch, and
+  anything not yet ready to be public. AGPL-3.0-or-later still
+  applies inside — the license does not depend on visibility — but
+  no external clone happens until Mirror.
+- **Mirror at `ericscheier`** is the public collaboration surface.
+  External contributors (issue reporters, PR authors, external
+  reviewers) work against this. Because it mirrors continuously
+  from Dev, WIP is visible early — that's intentional. Manuel-tier
+  research collaborators sit here.
+- **Release at `emergi-foundation`** is the canonical citation
+  target. Only tagged, quality-gated releases land here. The
+  foundation already stewards adjacent energy work (`embit`,
+  `emjoule`, `Footprint`, `Efficiency`, `reporting`, `EmergiPlan`,
+  `DeepSolar`). Adding the `emburden*` package tree fits its scope
+  and makes the citation story clean — "cite the foundation as
+  publisher, cite the maintainer's ORCID as author".
 
-1. **Register the `emburden` GitHub org** with `info@emburden.org` as
-   the billing / notification contact.
-2. **Transfer each repo** via GitHub Settings → Danger Zone →
-   Transfer ownership. GitHub redirects old URLs
-   (`github.com/ericscheier/foo` → `github.com/emburden/foo`) for
-   ~1 year post-transfer with no config on our side, and `git clone`
-   of the old URL keeps working over that window.
-3. **Update pkgdown / CRAN references**:
-   - `_pkgdown.yml`: `url: https://pkg.emburden.org` (already set).
-   - Each package's `DESCRIPTION`: `URL` and `BugReports` fields
-     point at `github.com/emburden/<pkg>`.
-   - `CITATION.cff`: `repository-code` field.
-   - README badges (CI, coverage, CRAN status) — regenerate for the
-     new URL.
-4. **Update the paper**: `docs/paper/global_emergy_alpha.Rmd` and
-   `manuscript/*` cite `github.com/ericscheier/*` repos; global-replace
-   to `github.com/emburden/*` after org transfer.
-5. **Update `emburden-site` links**: `papers.Rmd`, README badges,
-   any `href` references.
-6. **CI secrets**: transfer or re-add tokens on the new org (GitHub
-   does *not* migrate Actions secrets on org transfer).
+## Adjacent orgs (not in the flow)
 
-**Do not** rename the branches, tags, or the git history on transfer.
-GitHub keeps them intact and the redirect handles the URL move.
-Forcing a rewrite of history would be destructive and disrupt any
-downstream clone.
+- `emrgi/` — personal energy-brand aggregation, mostly forks of
+  external tooling (pvlib, rdtools, PyPSA, PYPOWER). Kept separate;
+  not the emburden release target.
+- `altfund/`, `ominari-insights/` — finance and prediction-markets
+  lines respectively. Independent from the emburden ecosystem.
 
-## 2. Private-to-public repo release (individual repos)
+## Repo-to-tier map (as of 2026-09-19)
 
-For repos that live private for a period before public release (e.g.
-in-development manuscript branches, sensitive data explorers), the
-recommended release sequence is:
+The 14 packages in the emburden ecosystem plus companion sites:
 
-1. **Scrub named individuals** from documentation, comments, and code
-   using the pattern in `emburdensynth/docs/q3_47_scrub/` (search
-   for maintainer names, collaborator names, personal email addresses;
-   replace with role-based labels — "project maintainer", "external
-   reviewer", "external collaborator" — per the naming policy in each
-   repo's `CONTRIBUTING.md`).
-2. **Confirm the license file** is `AGPL-3.0-or-later` and matches the
-   ecosystem baseline.
-3. **Add** `CONTRIBUTING.md`, `AUTHORS.md`, `CITATION.cff`,
-   `CODE_OF_CONDUCT.md`. Template these from `emburdensynth/`.
-4. **Confirm gated data sources** (IEA WEB, DHS microdata,
-   Afrobarometer / Latinobarómetro merged rounds, LEAP, etc.) are
-   gitignored and covered by an env-var-based access gate (see
-   `emburdendata` for the pattern: `IEA_LICENCE_ACKNOWLEDGED=true`).
-   Every gated source is listed in the repo's README with its
-   licence status.
-5. **Squash internal-planning docs** that don't belong in public
-   history. Move to a private notes location; add the file pattern
-   to `.gitignore` so the same shape does not slip back in.
-6. **Sanity-scan `git log`** for surprising commit messages, embedded
-   tokens, or accidental large binaries. `git log -p | grep -iE
-   "secret|token|api_key|password"` catches most.
-7. **Flip visibility** via GitHub Settings → Danger Zone → Change
-   visibility to Public.
+| Package | Dev | Mirror | Release target |
+|:---|:---|:---|:---|
+| `emburden` (net_energy_equity) | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdendata` | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdengeo` | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdenstats` | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdenutil` | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdenweather` | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdender` | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdenhealth` | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdenvis` | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdenpub` | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdentest` | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdenplus` | ScheierVentures | ericscheier | emergi-foundation |
+| `emburdensynth` | ScheierVentures | ericscheier | emergi-foundation |
+| `energese` | ScheierVentures | ericscheier | emergi-foundation |
+| Site (`emburden-site`) | ericscheier | ericscheier | ericscheier |
+| Staging (`emburden-site-staging`) | ericscheier | ericscheier | (auto) |
 
-## 3. Author email transition
+`emburden-site` is the exception — it's a companion site not a
+package, and its deploy uses the ericscheier repo directly. Not
+retargeting.
 
-Current commits: `Author: ericscheier <eric@scheier.org>`.
-Target: `Author: ericscheier <info@emburden.org>`.
+## Publication workflow (per release)
 
-Do **not** rewrite historical author metadata - that is destructive
-history rewriting and disrupts downstream clones. Instead:
+The path from a Dev commit to a Release tag:
 
-- Set the git author email locally to `info@emburden.org` for future
-  commits: `git config --local user.email info@emburden.org` (or
-  `--global` if that's the intent across all machines).
-- Optionally add a `.mailmap` at repo root that maps the historical
-  `eric@scheier.org` commits to the canonical `info@emburden.org`
-  identity for display purposes in `git log`, `git shortlog`, and
-  GitHub's contributor list. `.mailmap` does not rewrite history; it
-  aliases display.
-- Sample `.mailmap` entry:
-  ```
-  emburden project <info@emburden.org> <eric@scheier.org>
-  ```
+1. **Dev branch**: work on ScheierVentures private mirror. Feature
+   branches, WIP, exploratory scripts. Commit and push freely.
+2. **Public sync to Mirror**: every push of `main` / `global` / `ssa`
+   also pushes to `ericscheier/<repo>` via the `public` remote (see
+   `git remote -v` — every ecosystem repo has both `scheier` and
+   `public` remotes configured, so `git push all main` fans out).
+3. **Pre-release scrub** (per repo, before tagging a release):
+   - Confirm no named individuals in code, docstrings, or docs
+     (per `CONTRIBUTING.md`'s naming policy). Grep with
+     `git grep -inE '<known-collaborator-names>'` from a private
+     wordlist.
+   - Confirm no secrets in code or history. `git log -p | grep -iE
+     'secret|token|api_key|password'`.
+   - Confirm gated-data caches are gitignored (IEA WEB, DHS
+     microdata, Afrobarometer merged rounds).
+   - Confirm `AUTHORS.md`, `CITATION.cff`, `CONTRIBUTING.md`,
+     `CODE_OF_CONDUCT.md`, `LICENSE` are current at repo root.
+   - `devtools::check()` (or `R CMD check`) clean for R packages.
+4. **Tag the release**: `git tag -a vX.Y.Z -m "release notes"`.
+5. **Mirror to Release org**:
+   - First time: create the repo on `emergi-foundation` with the
+     same name.
+   - Add a remote: `git remote add release git@github.com:emergi-foundation/<repo>.git`.
+   - `git push release main --tags` on the tagged release.
+   - Optional: enable GitHub Actions from Release; disable
+     issues/PRs on Release and route to Mirror to keep one canonical
+     issue tracker.
+6. **Update citation targets**: the release commit + tag are what
+   Zenodo, CRAN, and JOSS should reference. `CITATION.cff` should
+   list `repository-code: https://github.com/emergi-foundation/<repo>`.
+7. **Update the site**: `emburden-site` paper cards and package
+   pages point at `emergi-foundation/<repo>` from the release
+   forward.
 
-## 4. AI-collaboration attribution policy
+## Ongoing publication cadence
 
-- **Commits going forward** do not append `Co-Authored-By: Claude ...`
-  or `Claude-Session: ...` lines. This matches the project's
-  naming-scrubbing policy for public output.
-- **Historical commits** (~310 across the ecosystem) retain those
-  lines. Retroactively stripping them would require force-pushing
-  history to both remotes and would disrupt any downstream clone
-  (in particular an external collaborator who is already tracking
-  `emburdensynth/ssa`). The judgement recorded on 2026-09-19 is
-  that commit-log metadata visible only via `git log` is not worth
-  the disruption; the project-level AI-collaboration disclosure at
-  `AUTHORS.md` is the canonical statement.
-- **Paper text** and **site content** do not name AI collaborators,
-  the maintainer, or external collaborators in the rendered output.
-  `AUTHORS.md` carries the disclosure separately.
+- Dev → Mirror: continuous (every push).
+- Mirror → Release: per tagged version. Suggested cadence: monthly
+  for active packages during heavy development; quarterly or
+  per-milestone once the API stabilises. Releases are rendezvous
+  points — no in-between commits go to Release.
 
-## 5. Contributor-name policy
+## Authorship in this workflow
 
-Named individual attribution is opt-in. See §3 of each repo's
-`CONTRIBUTING.md`. `git log` remains the raw record; `AUTHORS.md` is
-the aggregated view. Contributors who prefer role-based attribution
-default to unnamed listing under the appropriate role.
+- Commit `Author:` line stays with the maintainer identity
+  (`eric@scheier.org`, transitioning to `info@emburden.org` via
+  `.mailmap` once activated).
+- `AUTHORS.md` at each repo lists the maintainer as "emburden
+  project" (role-based) with the maintainer ORCID.
+- `CITATION.cff` at each repo lists the same role-based author.
+- Zenodo release DOIs, when minted, cite the foundation as
+  publisher and the ORCID as author.
+- No named individuals appear in released code or docs by default;
+  external contributors opt into named credit via `AUTHORS.md`.
 
-## Timeline
+## Foundation onboarding TODOs (user-gated)
 
-Order of operations, roughly:
+None of these are automatable from a code session; they're org-
+admin tasks that need the user in the GitHub UI:
 
-1. Org registration + transfer (this doc's §1) — user-gated, no code
-   changes needed on our side.
-2. Author email transition (§3) — one `git config` change per repo,
-   `.mailmap` files added at repo root, no history rewrite.
-3. Paper / site link updates (§1 step 4-5) — mechanical global-replace
-   once the transfer lands.
-4. `.gitignore` + naming-scrub audit on each repo before any
-   remaining private-to-public flip (§2).
+- [ ] Create `emergi-foundation/<pkg>` empty repo (per package, at
+      first release).
+- [ ] Set `AGPL-3.0-or-later` license from the GitHub template on
+      each new repo (matches the source repo).
+- [ ] Turn off issues + wiki on Release repos; keep them on Mirror.
+      Add a README banner "issues live at
+      github.com/ericscheier/<pkg>/issues".
+- [ ] Optional: enable GitHub Pages on the Release repo for the
+      pkgdown site if we want per-package sites hosted at
+      `emergi-foundation.github.io/<pkg>/`. Currently pkgdown is
+      served from `pkg.emburden.org` via the ericscheier repo — that
+      can stay, or move to the foundation later.
+- [ ] Zenodo integration: enable Zenodo → GitHub webhook on the
+      Release org so tagged releases mint DOIs automatically.
 
-This document is the single source of truth for the ecosystem
-transition. Individual repo `CONTRIBUTING.md` files reference it.
+## Change log
+
+- 2026-09-19: initial version. Replaced a prior draft that assumed a
+  destination `emburden/*` org migration; the correct destination is
+  `emergi-foundation/*` per its role as the ecosystem's nonprofit
+  steward.
