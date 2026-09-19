@@ -29,7 +29,7 @@
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <meta name="description" content="emburden.org — open-source household energy-burden analytics from raw data pulls to global synthesis. 129 countries, 17,000 cells, 8.2 billion people.">
-<meta name="author" content="Emrgi">
+<meta name="author" content="Emergi Foundation">
 <meta property="og:title" content="emburden.org — global household energy burden">
 <meta property="og:description" content="The 67-fold climate justice mismatch, quantified with open data + open code.">
 <meta property="og:type" content="website">
@@ -529,7 +529,7 @@ and uses Namecheap’s DNS (<code>dns1.registrar-servers.com</code> /
 <code>dns2.registrar-servers.com</code>), not Cloudflare. Records are
 edited in <strong>Namecheap → Domain List → Manage → Advanced
 DNS</strong>.</p>
-<p>Current state (as of 2026-09-04):</p>
+<p>Current state (as of 2026-09-13):</p>
 <ul>
 <li><code>emburden.org</code> (apex) → 4 GitHub Pages A records
 (<code>185.199.108.153</code> <code>.109.153</code>
@@ -538,32 +538,12 @@ served from <code>ericscheier/emburden</code>’s <code>gh-pages</code>
 branch.</li>
 <li><code>www.emburden.org</code> →
 <code>CNAME ericscheier.github.io.</code></li>
-<li><code>staging.emburden.org</code> → does not exist yet</li>
+<li><code>staging.emburden.org</code> → <strong>live</strong>,
+<code>CNAME ericscheier.github.io.</code>, served from
+<code>ericscheier/emburden-site-staging</code> via the
+<code>deploy-staging.yml</code> Actions workflow on every push to the
+<code>staging</code> branch of this repo.</li>
 </ul>
-<p><strong>To bring staging up</strong>, add one CNAME record in
-Namecheap Advanced DNS:</p>
-<table>
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Host</th>
-<th>Value</th>
-<th>TTL</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>CNAME</td>
-<td><code>staging</code></td>
-<td><code>ericscheier.github.io.</code></td>
-<td>Automatic</td>
-</tr>
-</tbody>
-</table>
-<p>Then in Pages settings on
-<strong>ericscheier/emburden-site-staging</strong>, under Custom domain,
-enter <code>staging.emburden.org</code> and let GitHub issue the ACME
-certificate (typically 30-60s).</p>
 <p><strong>To flip production to this ecosystem site</strong>
 (deliberate cutover after staging looks good):</p>
 <ol style="list-style-type: decimal">
@@ -576,10 +556,10 @@ re-issues ACME cert).</li>
 <li>No DNS changes required — the apex A records already point at GitHub
 Pages IPs.</li>
 <li>Optionally: relocate the emburden pkgdown site to
-<code>emburden.org</code> by adding one more CNAME to
+<code>pkg.emburden.org</code> by adding one more CNAME to
 <code>ericscheier.github.io.</code> and reconfiguring
 <code>ericscheier/emburden</code>’s Pages custom domain to
-<code>emburden.org</code>. Update <code>_pkgdown.yml</code>
+<code>pkg.emburden.org</code>. Update <code>_pkgdown.yml</code>
 <code>url:</code> accordingly.</li>
 </ol>
 </div>

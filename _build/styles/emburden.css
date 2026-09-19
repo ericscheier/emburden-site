@@ -314,3 +314,23 @@ footer a { color: var(--gd); }
 .text-gold { color: var(--gold); }
 .mt-2 { margin-top: 1em; }
 .mt-4 { margin-top: 2em; }
+
+/* Primary call-to-action button */
+.cta {
+  display: inline-block;
+  padding: 0.7em 1.4em;
+  background: var(--g);
+  color: white !important;
+  text-decoration: none !important;
+  border-radius: 6px;
+  font-weight: 500;
+  border: none;
+  transition: background 0.15s ease;
+}
+.cta:hover { background: var(--gd); }
+.cta.secondary {
+  background: transparent;
+  color: var(--gd) !important;
+  border: 1px solid var(--line);
+}
+.cta.secondary:hover { background: var(--bg); }

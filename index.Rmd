@@ -175,8 +175,10 @@ technical report</a>.</p>
 </div>
 
 <footer>
-<p>emburden.org — an open project by <a href="https://emrgi.com">Emrgi</a>.
-Data + code at <a href="https://github.com/ericscheier">github.com/ericscheier</a>.
+<p>emburden.org — an open project stewarded by the
+<a href="https://emrgi.org">Emergi Foundation</a>.
+Releases at <a href="https://github.com/emergi-foundation">github.com/emergi-foundation</a>;
+working mirror at <a href="https://github.com/ericscheier">github.com/ericscheier</a>.
 Report bugs, ask questions, or contribute: <a href="mailto:info@emburden.org">info@emburden.org</a>.</p>
 <p><small>Last updated: `r format(Sys.Date(), "%B %d, %Y")` &nbsp;·&nbsp;
 Rendered dynamically from RDS caches at

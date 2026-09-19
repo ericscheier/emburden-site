@@ -1,0 +1,13 @@
+# Funding channels for Emergi Foundation projects.
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository
+
+# GitHub Sponsors — enabled once Foundation account is set up.
+# github: emergi-foundation
+
+# Open Collective — fiscal-sponsor route pending.
+# open_collective: emergi-foundation
+
+# Custom — Foundation direct + fiscal-sponsor pass-throughs.
+custom:
+  - https://emrgi.org/support
+  # - https://numfocus.org/donate-for-<project>  # add per-project once affiliated
