@@ -54,7 +54,19 @@ all publicly downloadable): HEII_norm_p90 carries alpha *only* on
 `lived_no_electricity` (ΔR² = +0.23, p = 0.012), not on the four
 other lived-poverty items nor the perception items — HEII is a
 specifically-electricity signal, mediation is mechanical not
-cultural.</p>
+cultural.
+**Q3.46B robustness**: swapping the GDP-per-capita baseline for
+household private consumption (WB `NE.CON.PRVT.PC.KD`) survives
+across 3,117 refitted cells — 235 findings survive or strengthen,
+73 weaken or become fragile, 46 new findings emerge under the
+cleaner baseline. The flagship `collection_rate ← heii_norm` cell
+nearly doubles (ΔR² = +0.37 → +0.71) under the consumption
+baseline; consumption is now the paper's preferred specification.
+**Q3.46C identification**: with a Gini-implied log-normal
+multiplier on the annual HEII panel, the P90 rung enters the
+cross-lag directly — forward p = 5×10⁻⁵ (N = 356, 51 countries),
+reverse null (p = 0.92). Direction of causality identified within
+country and over time.</p>
 <p><b>Reproduction</b>: 12 scripts wired into a documented pipeline;
 every figure and table is regeneratable from the tagged commit.</p>
 <p><b>Next</b>: external co-author read + finalise which corresponding-
