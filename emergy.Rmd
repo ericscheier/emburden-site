@@ -2434,6 +2434,132 @@ Details at
 Underlying helpers at
 [`emburdenvis/R/donut_wheel.R`](https://github.com/ericscheier/emburdenvis/blob/main/R/donut_wheel.R).
 
+### Bundle Q3.51 / Q3.52 — Electrotech Revolution, emergy-first
+
+In September 2026 Ember Futures published *The Electrotech Revolution*
+— a 112-page deck arguing that a coupled family of electric technologies
+(solar / wind + batteries + EVs / heat pumps + electrified industry
++ grid digitalisation) has become the dominant driver of energy-system
+change. Ember's operational definition of "electrotech" is
+carrier-based: electric-share-of-final-energy plus a checklist of
+electric machines. Q3.51 built an alternative emergy + information-
+energy definition; Q3.52 showed that the emergy definition is a
+strict umbrella over Ember's, and used the extra headroom to fill
+two nodes Ember leaves quantitatively empty: **energy services** and
+**prosperity**.
+
+**Umbrella containment.** For each end-use technology $t$ we score
+
+$$
+s(t) = \frac{E_j(t)\,\tau_e + B(t)\,\tau_i}
+              {E_j(t)\,\tau_e + B(t)\,\tau_i + T_j(t)\,\tau_f}
+$$
+
+where $E_j$ and $T_j$ are the electric- and thermal-Joules delivered
+per service-hour, $B$ is the bits of control-loop information
+circulated per service-hour, $\tau_e$ is the country grid transformity,
+$\tau_f$ is the combustion-fuel transformity, and $\tau_i \approx 10^{7}$
+seJ/bit is Odum's information transformity for microcontroller-scale
+control-loop bits. Setting $\tau_i \to 0$ and $\tau_e = \tau_f$
+collapses $s(t)$ to $E_j / (E_j + T_j)$, which is Ember's carrier
+share at the technology level. Aggregated over service-hours it
+becomes Ember's headline electric-share-of-final-energy. The emergy
+definition therefore contains Ember's; both agree on the supply-side
+carrier axis and diverge only where the information layer or the
+electron-carrier premium earn weight.
+
+**Two orthogonal transitions.** Ember conflates them; we separate.
+The **emergy transition** (Odum's original) is movement up the
+transformity ladder. The **information transition** is movement up
+the information-density ladder — the control layer story that Ember
+gestures at on slides 6, 21, 74, 87 but does not measure. Countries
+can climb one without the other. Ranking the 213 iso3s by
+carrier – emergy gap:
+
+| iso3 | Carrier share | Emergy share | Gap |
+|:---|---:|---:|---:|
+| USA | 1.000 | 0.333 | **+0.667** |
+| QAT | 1.000 | 0.330 | +0.670 |
+| SGP | 0.927 | 0.342 | +0.585 |
+| NOR | 1.000 | 0.529 | +0.471 |
+| DEU | 0.557 | 0.408 | +0.149 |
+| BRA | 0.322 | 0.107 | +0.215 |
+| RWA | 0.008 | 0.029 | −0.020 |
+
+Positive gaps = "wires without control": high electricity share of
+demand, tech-mix still dominated by ICE / gas boilers / blast-furnace
+steel. Negative gaps = control ahead of wires. The 16-technology
+reference table (`electrotech_transformity.csv` at
+[`emburdensynth/inst/extdata/`](https://github.com/ericscheier/emburdensynth/blob/global/inst/extdata/electrotech_transformity.csv))
+gives each end-use a canonical bits-per-service-hour, electric-J-per-
+service-hour, and thermal-J-per-service-hour, spanning transport
+(EV / ICE / DC-fast-charger), buildings (heat pump / gas boiler / LED
+/ incandescent / induction / gas cooker), and industry (EAF / BF-BOF
+steel / VSD / fixed-speed motor / **data center** / crypto ASIC).
+
+**Data centers as an electrotech technology.** Ember slide 87 lists
+data centres as their own line in the 2024–2030 electricity-demand-
+growth chart (IEA Energy & AI-sourced) rather than folding them into
+industry. Our 16-technology table gives them their own row: $4 \times
+10^{15}$ bits per service-hour (a 1 kW rack circulating $\approx 2^{40}$
+bits/sec of memory + interconnect traffic — Masanet 2020, Andrae 2020),
+$3.6 \times 10^{6}$ J electric, 0 thermal. Companion rows for
+`internet_gateway`, `ev_charger_dc_fast`, `crypto_asic`. All four score
+$s(t) \approx 1$ under the canonical $\tau_i$.
+
+**Q3.51a flagship.** Cross-sectional $\Delta R^{2}$ on
+`heii_norm_p90` (top-decile burden): electrotech carrier share,
+electrotech emergy share, and clean-power share tie at
+$\Delta R^{2} = 0.190$, $p = 9.6 \times 10^{-5}$, coefficient $-10.66$
+against the log-GDP + region baseline ($n = 63$). Higher electrotech
+adoption predicts lower top-decile burden. On population-mean burden
+the same three flip to $\Delta R^{2} = 0.031$, $p = 7.2 \times 10^{-3}$,
+coefficient $+0.006$ — an opposite-sign distributional signature.
+Cross-lag panel identification with iso3 fixed effects + lag-2 log-
+GDP does *not* confirm direction ($p \geq 0.19$ forward, $p \geq 0.73$
+reverse across all four candidates over $\approx 1240$ observations
+in 61 countries): the strong cross-section is a stable between-country
+pattern, not a within-country year-to-year effect.
+
+**Q3.52a prosperity dashboard — the direct critique of Prosperity = GDP.**
+Ember slides 45 and 46 draw the Primary → Final → Useful → Services
+→ Prosperity chain, but the last two nodes carry no numbers, and
+slide 46 quietly renames "Prosperity" as "GDP" in the same Sankey.
+We fill the last two nodes with a four-indicator prosperity dashboard,
+none of which reduces to GDP:
+
+| Prosperity indicator | r vs log(GDP per capita) |
+|:---|---:|
+| HDI (canonical composite) | +0.95 |
+| Doughnut social-floor score | +0.88 |
+| Empower per capita (log)  | +0.85 |
+| **HEII P90 prosperity (−P90)** | **+0.38** |
+
+HEII P90 is materially orthogonal to GDP — a distributional
+prosperity dimension GDP is blind to. This is the strongest
+methodological argument against Ember slide 46's substitution.
+Full leaderboard, rank-divergence tables, and outperformer /
+underperformer lists at
+[`docs/q3_52_prosperity/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/q3_52_prosperity).
+
+**Ember slide replications** (5 slides, info-dimension + prosperity
+subset) at [`docs/q3_52_prosperity/figures/`](https://github.com/ericscheier/emburdensynth/tree/global/docs/q3_52_prosperity/figures):
+21 (4-panel exponentials, data-center TWh substituting for the
+smart-meter panel Ember has behind IEA gate), 45 (chain with our
+prosperity endpoint), 46 (same chain relabelled "GDP" — the
+substitution made visible), 87 (data centers broken out of industry),
+97 (vintage IEA WEO 2010/2015/2020 solar forecasts vs actual — each
+undershot the S-curve).
+
+Underlying pipeline at
+[`emburdensynth/scripts/`](https://github.com/ericscheier/emburdensynth/tree/global/scripts):
+`build_electrotech_panel.R`, `build_service_hours_panel.R`,
+`build_iiasa_pfu.R`, `q3_51a_electrotech_alpha.R`,
+`q3_51b_electrotech_panel_p90.R`, `q3_52a_prosperity_alternatives.R`,
+`q3_52b_ember_replications.R`. Emergy + information-transformity
+module at
+[`emburdensynth/R/electrotech_emergy.R`](https://github.com/ericscheier/emburdensynth/blob/global/R/electrotech_emergy.R).
+
 ### Every country as its own panel — including Antarctica
 
 The same figure faceted per country makes the country-to-country
