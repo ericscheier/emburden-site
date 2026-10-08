@@ -5,3 +5,11 @@
 *.Rmd.bak
 _ln_R
 _ln_docs
+
+# Outreach boundary — these belong in crm/ not here
+# See OUTREACH_POLICY.md in net_energy_equity for the research-vs-outreach split.
+**/COMMITTEE_READBACK.md
+**/session_shape.md
+**/drafts/
+**/outreach/
+**/*_outreach.md
